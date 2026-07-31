@@ -20,5 +20,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // healthz stays outside the gate so the host's health check never sees a redirect
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|healthz).*)"],
 };
