@@ -5,13 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start -p ${PORT:-3000}",
+    "lint": "eslint",
+    "test": "tsx tests/rules.test.ts",
+    "reset-data": "rm -rf .data && echo \"Demo data cleared - it regenerates on the next page load.\""
   },
   "dependencies": {
+    "lucide-react": "^1.28.0",
     "next": "16.2.12",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +25,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

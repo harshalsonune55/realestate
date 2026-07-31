@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: al-manara-pms
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      # Front-door password for the whole site. Render generates one on first
+      # deploy — read it in Dashboard → Environment, then share it with staff.
+      - key: PMS_ACCESS_PASSWORD
+        generateValue: true
+
+      # ----------------------------------------------------------------------
+      # Free instances have no persistent disk, so anything an employee changes
+      # is lost when the service sleeps (~15 min idle) or redeploys. The seeded
+      # demo data regenerates identically, which is fine for a demo.
+      #
+      # To keep changes permanently, upgrade the plan above to "starter", then
+      # uncomment this env var and the disk block below.
+      # ----------------------------------------------------------------------
+      # - key: PMS_DATA_DIR
+      #   value: /var/data
+
+    # disk:
+    #   name: pms-data
+    #   mountPath: /var/data
+    #   sizeGB: 1

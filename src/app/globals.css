@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
+@theme {
+  --color-ink-950: #070c16;
+  --color-ink-900: #0b1220;
+  --color-ink-800: #111b2e;
+  --color-ink-700: #1b283f;
+  --color-ink-600: #2a3a56;
+
+  --color-brand-50: #eef8f5;
+  --color-brand-100: #d3ede5;
+  --color-brand-200: #a8dbcc;
+  --color-brand-400: #3aa88f;
+  --color-brand-500: #178a72;
+  --color-brand-600: #0f766e;
+  --color-brand-700: #0b5c56;
+  --color-brand-900: #063b38;
+
+  --color-gold-500: #b4884a;
+  --color-gold-100: #f6ecdc;
+
+  --color-canvas: #f5f6f8;
+  --color-line: #e3e6ec;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: #16202f;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04";
+}
+
+::selection {
+  background: var(--color-brand-200);
+}
+
+/* thin, unobtrusive scrollbars inside panels */
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #cdd3dc;
+  border-radius: 99px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* number columns should line up */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-up {
+  animation: fade-up 0.28s ease-out both;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 2s infinite;
 }
