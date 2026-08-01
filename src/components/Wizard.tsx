@@ -90,24 +90,24 @@ export default function Wizard<T>({
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600">
             Guided procedure
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">{title}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">{subtitle}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">{title}</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted">{subtitle}</p>
         </div>
         <Link
           href={exitHref}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-[13px] text-slate-600 transition hover:text-ink-900"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-fg-soft transition hover:text-fg"
         >
           <X size={14} />
           Cancel
         </Link>
       </div>
 
-      <div className="mb-5 rounded-xl border border-line bg-white p-3">
+      <div className="mb-5 rounded-xl border border-line bg-surface p-3">
         <div className="mb-2 flex items-center justify-between text-[12px]">
-          <span className="font-medium text-ink-900">
+          <span className="font-medium text-fg">
             Step {index + 1} of {steps.length} — {step.title}
           </span>
-          <span className="text-slate-500">
+          <span className="text-muted">
             {completedCount} of {steps.length} steps complete
           </span>
         </div>
@@ -121,7 +121,7 @@ export default function Wizard<T>({
                   ? "bg-brand-500"
                   : i === index
                   ? "bg-brand-200"
-                  : "bg-slate-200"
+                  : "bg-subtle-hover"
               )}
             />
           ))}
@@ -130,7 +130,7 @@ export default function Wizard<T>({
 
       <div className="grid gap-5 lg:grid-cols-[264px_1fr]">
         {/* --------------------------------------------------------- step rail */}
-        <ol className="hidden h-fit rounded-xl border border-line bg-white p-2 lg:sticky lg:top-24 lg:block">
+        <ol className="hidden h-fit rounded-xl border border-line bg-surface p-2 lg:sticky lg:top-24 lg:block">
           {steps.map((s, i) => {
             const done = allProblems[i].length === 0;
             const current = i === index;
@@ -147,17 +147,17 @@ export default function Wizard<T>({
                       ? "bg-brand-50 ring-1 ring-inset ring-brand-200"
                       : locked
                       ? "cursor-not-allowed opacity-45"
-                      : "hover:bg-slate-50"
+                      : "hover:bg-subtle"
                   )}
                 >
                   <span
                     className={cx(
                       "grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold transition",
                       done
-                        ? "bg-brand-600 text-white"
+                        ? "bg-brand-solid text-white"
                         : current
-                        ? "bg-ink-900 text-white"
-                        : "bg-slate-100 text-slate-500"
+                        ? "bg-inverse text-white"
+                        : "bg-subtle text-muted"
                     )}
                   >
                     {done ? <Check size={13} /> : locked ? <Lock size={10} /> : i + 1}
@@ -166,13 +166,13 @@ export default function Wizard<T>({
                     <span
                       className={cx(
                         "block text-[12.5px] leading-snug",
-                        current ? "font-semibold text-ink-900" : done ? "text-ink-900" : "text-slate-600"
+                        current ? "font-semibold text-fg" : done ? "text-fg" : "text-fg-soft"
                       )}
                     >
                       {s.title}
                     </span>
                     {current && (
-                      <span className="mt-0.5 block text-[11px] leading-snug text-slate-500">{s.hint}</span>
+                      <span className="mt-0.5 block text-[11px] leading-snug text-muted">{s.hint}</span>
                     )}
                   </span>
                 </button>
@@ -180,7 +180,7 @@ export default function Wizard<T>({
             );
           })}
           <li className="mt-2 border-t border-line px-2.5 pb-1 pt-3">
-            <p className="flex items-start gap-2 text-[11px] leading-snug text-slate-500">
+            <p className="flex items-start gap-2 text-[11px] leading-snug text-muted">
               <Lock size={11} className="mt-0.5 shrink-0" />
               Later steps stay locked until the current one is complete and valid.
             </p>
@@ -189,15 +189,15 @@ export default function Wizard<T>({
 
         {/* ------------------------------------------------------ step content */}
         <div>
-          <div className="rounded-xl border border-line bg-white">
+          <div className="rounded-xl border border-line bg-surface">
             <div className="border-b border-line px-5 py-4 lg:px-6">
               <div className="flex items-center gap-2">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-ink-900 text-[11px] font-semibold text-white lg:hidden">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-inverse text-[11px] font-semibold text-white lg:hidden">
                   {index + 1}
                 </span>
-                <h2 className="text-[16px] font-semibold text-ink-900">{step.title}</h2>
+                <h2 className="text-[16px] font-semibold text-fg">{step.title}</h2>
               </div>
-              <p className="mt-1 text-[13px] text-slate-500">{step.hint}</p>
+              <p className="mt-1 text-[13px] text-muted">{step.hint}</p>
             </div>
 
             <div key={step.id} className="fade-up space-y-5 px-5 py-5 lg:px-6">
@@ -259,7 +259,7 @@ export default function Wizard<T>({
               type="button"
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
               disabled={index === 0 || pending}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-medium text-ink-900 transition hover:bg-slate-50 disabled:opacity-40"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-sm font-medium text-fg transition hover:bg-subtle disabled:opacity-40"
             >
               <ArrowLeft size={15} />
               Back
@@ -270,12 +270,12 @@ export default function Wizard<T>({
               onClick={next}
               disabled={pending || (!clean && attempted[index])}
               className={cx(
-                "inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-medium text-white transition",
+                "inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-medium transition",
                 clean
                   ? isLast
-                    ? "bg-ink-900 hover:bg-ink-800"
-                    : "bg-brand-600 hover:bg-brand-700"
-                  : "bg-slate-300 cursor-not-allowed"
+                    ? "bg-inverse text-white shadow-xs hover:bg-inverse-2"
+                    : "bg-brand-solid text-white shadow-xs hover:bg-brand-solid-hover"
+                  : "cursor-not-allowed bg-subtle-hover text-faint"
               )}
             >
               {pending && <Loader2 size={15} className="animate-spin" />}
@@ -284,7 +284,7 @@ export default function Wizard<T>({
             </button>
 
             {isLast && submitNote && (
-              <p className="text-[12px] text-slate-500 sm:ml-2 sm:max-w-xs">{submitNote}</p>
+              <p className="text-[12px] text-muted sm:ml-2 sm:max-w-xs">{submitNote}</p>
             )}
           </div>
         </div>

@@ -119,8 +119,8 @@ export default async function TasksPage({
             className={cx(
               "rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
               filter === f.key
-                ? "border-ink-900 bg-ink-900 text-white"
-                : "border-line bg-white text-slate-600 hover:border-slate-300"
+                ? "border-inverse bg-inverse text-white"
+                : "border-line bg-surface text-fg-soft hover:border-line-strong"
             )}
           >
             {f.label}
@@ -132,7 +132,7 @@ export default async function TasksPage({
               href={linkFor({ scope: "mine" })}
               className={cx(
                 "rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
-                scope === "mine" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line bg-white text-slate-600"
+                scope === "mine" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line bg-surface text-fg-soft"
               )}
             >
               Mine
@@ -141,7 +141,7 @@ export default async function TasksPage({
               href={linkFor({ scope: "team" })}
               className={cx(
                 "rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
-                scope === "team" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line bg-white text-slate-600"
+                scope === "team" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line bg-surface text-fg-soft"
               )}
             >
               Whole team
@@ -180,8 +180,8 @@ export default async function TasksPage({
                 ["Approval rejected", "Rework task back to whoever raised it"],
               ].map(([a, b]) => (
                 <li key={a}>
-                  <p className="font-medium text-ink-900">{a}</p>
-                  <p className="text-slate-500">{b}</p>
+                  <p className="font-medium text-fg">{a}</p>
+                  <p className="text-muted">{b}</p>
                 </li>
               ))}
             </ul>
@@ -193,15 +193,15 @@ export default async function TasksPage({
               <ul className="space-y-2.5">
                 {workload.map((w) => (
                   <li key={w.user.id} className="flex items-center gap-3">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-subtle text-[11px] font-semibold text-fg-soft">
                       {w.user.name.split(" ").slice(0, 2).map((p) => p[0]).join("")}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[12.5px] font-medium text-ink-900">{w.user.name}</p>
-                      <p className="text-[11px] text-slate-500">{w.user.title}</p>
+                      <p className="truncate text-[12.5px] font-medium text-fg">{w.user.name}</p>
+                      <p className="text-[11px] text-muted">{w.user.title}</p>
                     </div>
                     <div className="text-right">
-                      <p className="tnum text-[13px] font-semibold text-ink-900">{w.open}</p>
+                      <p className="tnum text-[13px] font-semibold text-fg">{w.open}</p>
                       {w.overdue > 0 && (
                         <p className="tnum text-[10.5px] font-medium text-red-600">{w.overdue} late</p>
                       )}

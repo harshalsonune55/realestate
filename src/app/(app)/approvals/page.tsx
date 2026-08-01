@@ -85,8 +85,8 @@ export default async function ApprovalsPage() {
             <ul className="space-y-2.5">
               {Object.entries(REQUIRES_APPROVAL).map(([k, v]) => (
                 <li key={k} className="text-[12px]">
-                  <p className="font-medium text-ink-900">{titleCase(k)}</p>
-                  <p className="text-slate-500">{v}</p>
+                  <p className="font-medium text-fg">{titleCase(k)}</p>
+                  <p className="text-muted">{v}</p>
                 </li>
               ))}
             </ul>
@@ -95,22 +95,22 @@ export default async function ApprovalsPage() {
           <Card>
             <CardHead title="Recent decisions" />
             {decided.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No decisions recorded yet.</p>
+              <p className="text-[12.5px] text-faint">No decisions recorded yet.</p>
             ) : (
               <ul className="space-y-3">
                 {decided.map((a) => (
                   <li key={a.id} className="text-[12px]">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="min-w-0 flex-1 truncate font-medium text-ink-900">{a.title}</p>
+                      <p className="min-w-0 flex-1 truncate font-medium text-fg">{a.title}</p>
                       <Badge tone={a.status === "approved" ? "good" : "bad"}>
                         {a.status === "approved" ? "Approved" : "Rejected"}
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-muted">
                       {a.decidedBy ? name(a.decidedBy) : "—"} · {fmtDateTime(a.decidedAt)}
                     </p>
                     {a.decisionNote && (
-                      <p className="mt-1 rounded bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+                      <p className="mt-1 rounded bg-subtle px-2 py-1 text-[11px] text-fg-soft">
                         “{a.decisionNote}”
                       </p>
                     )}

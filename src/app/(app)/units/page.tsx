@@ -86,12 +86,12 @@ export default async function UnitsPage({
           <form action="/units" className="relative">
             <input type="hidden" name="status" value={status} />
             <input type="hidden" name="property" value={propertyId} />
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
             <input
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Unit, tenant or building…"
-              className="h-9 w-64 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-64 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
 
@@ -100,7 +100,7 @@ export default async function UnitsPage({
               href={link({ property: "all", page: undefined })}
               className={cx(
                 "rounded-lg border px-2.5 py-1.5 text-[12px]",
-                propertyId === "all" ? "border-ink-900 bg-ink-900 text-white" : "border-line bg-white text-slate-600"
+                propertyId === "all" ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
               )}
             >
               All buildings
@@ -111,7 +111,7 @@ export default async function UnitsPage({
                 href={link({ property: p.id, page: undefined })}
                 className={cx(
                   "rounded-lg border px-2.5 py-1.5 text-[12px]",
-                  propertyId === p.id ? "border-ink-900 bg-ink-900 text-white" : "border-line bg-white text-slate-600"
+                  propertyId === p.id ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
                 )}
               >
                 {p.code}
@@ -119,7 +119,7 @@ export default async function UnitsPage({
             ))}
           </div>
 
-          <p className="tnum ml-auto text-[12.5px] text-slate-500">{rows.length} units</p>
+          <p className="tnum ml-auto text-[12.5px] text-muted">{rows.length} units</p>
         </div>
 
         <div className="px-5 pb-4 pt-2">
@@ -144,15 +144,15 @@ export default async function UnitsPage({
                   return (
                     <tr key={r.unit.id}>
                       <TD>
-                        <Link href={`/units/${r.unit.id}`} className="font-medium text-ink-900 hover:text-brand-600">
+                        <Link href={`/units/${r.unit.id}`} className="font-medium text-fg hover:text-brand-600">
                           {r.unit.unitNo}
                         </Link>
-                        <span className="block text-[11px] text-slate-400">Floor {r.unit.floor}</span>
+                        <span className="block text-[11px] text-faint">Floor {r.unit.floor}</span>
                       </TD>
-                      <TD className="text-slate-600">{r.property.name}</TD>
+                      <TD className="text-fg-soft">{r.property.name}</TD>
                       <TD>
                         {r.unit.type}
-                        <span className="block text-[11px] text-slate-400">{r.unit.sizeSqft} sqft</span>
+                        <span className="block text-[11px] text-faint">{r.unit.sizeSqft} sqft</span>
                       </TD>
                       <TD className="max-w-[180px]">
                         {r.tenant ? (
@@ -160,19 +160,19 @@ export default async function UnitsPage({
                             {r.tenant.name}
                           </Link>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-faint">—</span>
                         )}
                       </TD>
                       <TD align="right" className="tnum">
-                        {r.contract ? AED(r.contract.annualRent) : <span className="text-slate-400">{AED(r.unit.marketRent)}</span>}
+                        {r.contract ? AED(r.contract.annualRent) : <span className="text-faint">{AED(r.unit.marketRent)}</span>}
                       </TD>
                       <TD>
                         {r.contract ? (
-                          <span className={cx(days !== null && days <= 60 ? "font-medium text-amber-600" : "text-slate-600")}>
+                          <span className={cx(days !== null && days <= 60 ? "font-medium text-amber-600" : "text-fg-soft")}>
                             {fmtDate(r.contract.endDate)}
                           </span>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-faint">—</span>
                         )}
                       </TD>
                       <TD>
@@ -190,7 +190,7 @@ export default async function UnitsPage({
 
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
-            <span className="text-slate-500">
+            <span className="text-muted">
               Page {page} of {pages}
             </span>
             <div className="flex gap-2">

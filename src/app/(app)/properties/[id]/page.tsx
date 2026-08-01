@@ -46,7 +46,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
   return (
     <div>
-      <Link href="/properties" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900">
+      <Link href="/properties" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg">
         <ArrowLeft size={14} /> All properties
       </Link>
 
@@ -76,7 +76,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
         <Card padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="text-[15px] font-semibold text-ink-900">Units</h2>
+            <h2 className="text-[15px] font-semibold text-fg">Units</h2>
           </div>
           <div className="px-5 pb-4 pt-2">
             <Table>
@@ -98,14 +98,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   return (
                     <tr key={u.id}>
                       <TD>
-                        <Link href={`/units/${u.id}`} className="font-medium text-ink-900 hover:text-brand-600">
+                        <Link href={`/units/${u.id}`} className="font-medium text-fg hover:text-brand-600">
                           {u.unitNo}
                         </Link>
-                        <span className="block text-[11px] text-slate-400">Floor {u.floor}</span>
+                        <span className="block text-[11px] text-faint">Floor {u.floor}</span>
                       </TD>
                       <TD>
                         {u.type}
-                        <span className="block text-[11px] text-slate-400">{u.sizeSqft} sqft</span>
+                        <span className="block text-[11px] text-faint">{u.sizeSqft} sqft</span>
                       </TD>
                       <TD className="max-w-[180px]">
                         {t ? (
@@ -113,7 +113,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                             {t.name}
                           </Link>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-faint">—</span>
                         )}
                       </TD>
                       <TD align="right" className="tnum">
@@ -121,11 +121,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                       </TD>
                       <TD>
                         {c ? (
-                          <span className={cx(days !== null && days <= 60 ? "font-medium text-amber-600" : "text-slate-600")}>
+                          <span className={cx(days !== null && days <= 60 ? "font-medium text-amber-600" : "text-fg-soft")}>
                             {fmtDate(c.endDate)}
                           </span>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-faint">—</span>
                         )}
                       </TD>
                       <TD>
@@ -162,8 +162,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 }, {})
               ).map(([type, n]) => (
                 <div key={type} className="flex items-center justify-between text-[12.5px]">
-                  <span className="text-slate-600">{type}</span>
-                  <span className="tnum font-medium text-ink-900">{n}</span>
+                  <span className="text-fg-soft">{type}</span>
+                  <span className="tnum font-medium text-fg">{n}</span>
                 </div>
               ))}
             </div>
@@ -172,16 +172,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           <Card>
             <CardHead title="Open maintenance" sub={`${maint.length} job(s)`} />
             {maint.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">Nothing open on this building.</p>
+              <p className="text-[12.5px] text-faint">Nothing open on this building.</p>
             ) : (
               <ul className="space-y-2">
                 {maint.slice(0, 8).map((m) => (
                   <li key={m.id}>
-                    <Link href={`/maintenance/${m.id}`} className="block rounded-lg border border-line p-2.5 hover:bg-slate-50">
-                      <p className="text-[12.5px] font-medium text-ink-900">
+                    <Link href={`/maintenance/${m.id}`} className="block rounded-lg border border-line p-2.5 hover:bg-subtle">
+                      <p className="text-[12.5px] font-medium text-fg">
                         {m.ref} · {m.category}
                       </p>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-muted">
                         {d.units.find((u) => u.id === m.unitId)?.unitNo} · due {fmtDate(m.slaDueAt)}
                       </p>
                     </Link>

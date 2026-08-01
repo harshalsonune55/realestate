@@ -89,12 +89,12 @@ export default async function TenantsPage({
         <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
           <form action="/tenants" className="relative">
             <input type="hidden" name="flag" value={flag} />
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
             <input
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Name, Emirates ID, phone or unit…"
-              className="h-9 w-72 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
           <div className="flex gap-1.5">
@@ -108,14 +108,14 @@ export default async function TenantsPage({
                 href={link({ flag: t.k, page: undefined })}
                 className={cx(
                   "rounded-lg border px-2.5 py-1.5 text-[12px]",
-                  flag === t.k ? "border-ink-900 bg-ink-900 text-white" : "border-line bg-white text-slate-600"
+                  flag === t.k ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
                 )}
               >
                 {t.l}
               </Link>
             ))}
           </div>
-          <p className="tnum ml-auto text-[12.5px] text-slate-500">{rows.length} tenants</p>
+          <p className="tnum ml-auto text-[12.5px] text-muted">{rows.length} tenants</p>
         </div>
 
         <div className="px-5 pb-4 pt-2">
@@ -137,10 +137,10 @@ export default async function TenantsPage({
                 {pageRows.map((r) => (
                   <tr key={r.tenant.id} className={cx(r.arrears > 0 && "bg-red-50/30")}>
                     <TD className="max-w-[220px]">
-                      <Link href={`/tenants/${r.tenant.id}`} className="block truncate font-medium text-ink-900 hover:text-brand-600">
+                      <Link href={`/tenants/${r.tenant.id}`} className="block truncate font-medium text-fg hover:text-brand-600">
                         {r.tenant.name}
                       </Link>
-                      <span className="block text-[11px] text-slate-400">
+                      <span className="block text-[11px] text-faint">
                         {r.tenant.kind === "company" ? "Company" : r.tenant.nationality}
                       </span>
                     </TD>
@@ -148,11 +148,11 @@ export default async function TenantsPage({
                     <TD>
                       {r.unit ? (
                         <>
-                          <span className="font-medium text-ink-900">{r.unit.unitNo}</span>
-                          <span className="block text-[11px] text-slate-400">{r.property?.name}</span>
+                          <span className="font-medium text-fg">{r.unit.unitNo}</span>
+                          <span className="block text-[11px] text-faint">{r.property?.name}</span>
                         </>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-faint">—</span>
                       )}
                     </TD>
                     <TD className="tnum text-[12px]">{r.tenant.phone}</TD>
@@ -175,7 +175,7 @@ export default async function TenantsPage({
 
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
-            <span className="text-slate-500">Page {page} of {pages}</span>
+            <span className="text-muted">Page {page} of {pages}</span>
             <div className="flex gap-2">
               <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
                 Previous

@@ -77,8 +77,8 @@ export default async function RenewalsPage() {
       <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
         <Card padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="text-[15px] font-semibold text-ink-900">Renewal pipeline</h2>
-            <p className="mt-0.5 text-[12.5px] text-slate-500">
+            <h2 className="text-[15px] font-semibold text-fg">Renewal pipeline</h2>
+            <p className="mt-0.5 text-[12.5px] text-muted">
               Sorted by urgency. Payment history is shown so you know who to renew and on what terms.
             </p>
           </div>
@@ -104,26 +104,26 @@ export default async function RenewalsPage() {
                         <span
                           className={cx(
                             "font-medium",
-                            r.days < 0 ? "text-red-700" : r.days <= 30 ? "text-red-600" : "text-ink-900"
+                            r.days < 0 ? "text-red-700" : r.days <= 30 ? "text-red-600" : "text-fg"
                           )}
                         >
                           {fmtDate(r.contract.endDate)}
                         </span>
-                        <span className="block text-[11px] text-slate-400">
+                        <span className="block text-[11px] text-faint">
                           {r.days < 0 ? `${-r.days} days ago` : `in ${r.days} days`}
                         </span>
                       </TD>
                       <TD>
-                        <span className="font-medium text-ink-900">{r.unit?.unitNo}</span>
-                        <span className="block text-[11px] text-slate-400">{r.property?.name}</span>
+                        <span className="font-medium text-fg">{r.unit?.unitNo}</span>
+                        <span className="block text-[11px] text-faint">{r.property?.name}</span>
                       </TD>
                       <TD className="max-w-[170px]">
                         <span className="block truncate">{r.tenant?.name}</span>
-                        <Link href={`/contracts/${r.contract.id}`} className="text-[11px] text-slate-400 hover:text-brand-600">
+                        <Link href={`/contracts/${r.contract.id}`} className="text-[11px] text-faint hover:text-brand-600">
                           {r.contract.ref}
                         </Link>
                       </TD>
-                      <TD align="right" className="tnum font-medium text-ink-900">
+                      <TD align="right" className="tnum font-medium text-fg">
                         {AED(r.contract.annualRent)}
                       </TD>
                       <TD>
@@ -141,12 +141,12 @@ export default async function RenewalsPage() {
                         ) : can(user.role, "renewals.process") ? (
                           <Link
                             href={`/renewals/${r.contract.id}`}
-                            className="inline-flex items-center gap-1 rounded-md bg-brand-600 px-2.5 py-1 text-[11.5px] font-medium text-white transition hover:bg-brand-700"
+                            className="inline-flex items-center gap-1 rounded-md bg-brand-solid px-2.5 py-1 text-[11.5px] font-medium text-white transition hover:bg-brand-solid-hover"
                           >
                             <RefreshCw size={12} /> Start
                           </Link>
                         ) : (
-                          <Link href={`/contracts/${r.contract.id}`} className="text-[11.5px] text-slate-400 hover:text-brand-600">
+                          <Link href={`/contracts/${r.contract.id}`} className="text-[11.5px] text-faint hover:text-brand-600">
                             View
                           </Link>
                         )}
@@ -165,7 +165,7 @@ export default async function RenewalsPage() {
             <ul className="space-y-2">
               {counts.map((b) => (
                 <li key={b.key} className="flex items-center justify-between rounded-lg border border-line px-3 py-2">
-                  <span className="text-[12.5px] text-slate-600">{b.label}</span>
+                  <span className="text-[12.5px] text-fg-soft">{b.label}</span>
                   <Badge tone={b.tone}>{b.n}</Badge>
                 </li>
               ))}
@@ -187,8 +187,8 @@ export default async function RenewalsPage() {
                     {i + 1}
                   </span>
                   <span>
-                    <b className="font-medium text-ink-900">{a}</b>
-                    <span className="block text-slate-500">{b}</span>
+                    <b className="font-medium text-fg">{a}</b>
+                    <span className="block text-muted">{b}</span>
                   </span>
                 </li>
               ))}

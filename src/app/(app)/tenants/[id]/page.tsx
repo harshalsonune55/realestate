@@ -43,7 +43,7 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
 
   return (
     <div>
-      <Link href="/tenants" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900">
+      <Link href="/tenants" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg">
         <ArrowLeft size={14} /> All tenants
       </Link>
 
@@ -80,14 +80,14 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                   <Link
                     key={c.id}
                     href={`/contracts/${c.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-slate-50"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                   >
-                    <span className="font-medium text-ink-900">{c.ref}</span>
-                    <span className="min-w-0 flex-1 truncate text-slate-600">{unitOf(c.unitId)}</span>
-                    <span className="text-slate-500">
+                    <span className="font-medium text-fg">{c.ref}</span>
+                    <span className="min-w-0 flex-1 truncate text-fg-soft">{unitOf(c.unitId)}</span>
+                    <span className="text-muted">
                       {fmtDate(c.startDate)} – {fmtDate(c.endDate)}
                     </span>
-                    <span className="tnum font-medium text-ink-900">{AED(c.annualRent)}</span>
+                    <span className="tnum font-medium text-fg">{AED(c.annualRent)}</span>
                     <ContractStatusBadge status={c.status} />
                   </Link>
                 ))}
@@ -102,12 +102,12 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                 <Link
                   key={c.id}
                   href={`/cheques/${c.id}`}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-slate-50"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
                 >
-                  <span className="tnum w-16 font-medium text-ink-900">{c.chequeNo}</span>
-                  <span className="w-28 truncate text-slate-500">{c.bank}</span>
-                  <span className="w-24 text-slate-600">{fmtDate(c.dueDate)}</span>
-                  <span className="tnum ml-auto w-24 text-right font-medium text-ink-900">{AED(c.amount)}</span>
+                  <span className="tnum w-16 font-medium text-fg">{c.chequeNo}</span>
+                  <span className="w-28 truncate text-muted">{c.bank}</span>
+                  <span className="w-24 text-fg-soft">{fmtDate(c.dueDate)}</span>
+                  <span className="tnum ml-auto w-24 text-right font-medium text-fg">{AED(c.amount)}</span>
                   <ChequeStatusBadge status={c.status} />
                 </Link>
               ))}
@@ -122,11 +122,11 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                   <Link
                     key={m.id}
                     href={`/maintenance/${m.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-slate-50"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
                   >
-                    <span className="font-medium text-ink-900">{m.ref}</span>
-                    <span className="min-w-0 flex-1 truncate text-slate-600">{m.category}</span>
-                    <span className="text-slate-500">{fmtDate(m.reportedAt.slice(0, 10))}</span>
+                    <span className="font-medium text-fg">{m.ref}</span>
+                    <span className="min-w-0 flex-1 truncate text-fg-soft">{m.category}</span>
+                    <span className="text-muted">{fmtDate(m.reportedAt.slice(0, 10))}</span>
                     <Badge tone={["closed", "completed"].includes(m.status) ? "good" : "neutral"}>
                       {titleCase(m.status)}
                     </Badge>
@@ -153,18 +153,18 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
           <Card>
             <CardHead title="Receipts" icon={<Receipt size={17} />} />
             {payments.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No receipts yet.</p>
+              <p className="text-[12.5px] text-faint">No receipts yet.</p>
             ) : (
               <ul className="max-h-72 space-y-2 overflow-y-auto scroll-thin">
                 {payments.slice(0, 20).map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-2 text-[12px]">
                     <div className="min-w-0">
-                      <p className="tnum font-medium text-ink-900">{p.receiptNo}</p>
-                      <p className="truncate text-[11px] text-slate-500">
+                      <p className="tnum font-medium text-fg">{p.receiptNo}</p>
+                      <p className="truncate text-[11px] text-muted">
                         {fmtDate(p.receivedAt)} · {p.category}
                       </p>
                     </div>
-                    <span className="tnum shrink-0 font-medium text-ink-900">{AED(p.amount)}</span>
+                    <span className="tnum shrink-0 font-medium text-fg">{AED(p.amount)}</span>
                   </li>
                 ))}
               </ul>

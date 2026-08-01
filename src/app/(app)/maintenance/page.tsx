@@ -120,17 +120,17 @@ export default async function MaintenancePage({
             className={cx(
               "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
               flag === t.key
-                ? "border-ink-900 bg-ink-900 text-white"
+                ? "border-inverse bg-inverse text-white"
                 : t.key === "breach" && counts.breach > 0
                 ? "border-red-200 bg-red-50 text-red-700"
-                : "border-line bg-white text-slate-600 hover:border-slate-300"
+                : "border-line bg-surface text-fg-soft hover:border-line-strong"
             )}
           >
             {t.label}
             <span
               className={cx(
                 "tnum rounded px-1.5 py-0.5 text-[10.5px]",
-                flag === t.key ? "bg-white/15" : "bg-slate-100 text-slate-500"
+                flag === t.key ? "bg-surface/15" : "bg-subtle text-muted"
               )}
             >
               {counts[t.key] ?? 0}
@@ -160,18 +160,18 @@ export default async function MaintenancePage({
                 {rows.slice(0, 80).map((r) => (
                   <tr key={r.m.id} className={cx(r.breach && "bg-red-50/40")}>
                     <TD>
-                      <Link href={`/maintenance/${r.m.id}`} className="font-medium text-ink-900 hover:text-brand-600">
+                      <Link href={`/maintenance/${r.m.id}`} className="font-medium text-fg hover:text-brand-600">
                         {r.m.ref}
                       </Link>
-                      <span className="block text-[11px] text-slate-400">{fmtDate(r.m.reportedAt.slice(0, 10))}</span>
+                      <span className="block text-[11px] text-faint">{fmtDate(r.m.reportedAt.slice(0, 10))}</span>
                     </TD>
                     <TD>
-                      <span className="font-medium text-ink-900">{r.unit?.unitNo}</span>
-                      <span className="block text-[11px] text-slate-400">{r.property?.name}</span>
+                      <span className="font-medium text-fg">{r.unit?.unitNo}</span>
+                      <span className="block text-[11px] text-faint">{r.property?.name}</span>
                     </TD>
                     <TD className="max-w-[200px]">
                       <span className="block">{r.m.category}</span>
-                      <span className="block truncate text-[11px] text-slate-400">
+                      <span className="block truncate text-[11px] text-faint">
                         {r.m.description.split("\n")[0]}
                       </span>
                     </TD>
@@ -181,7 +181,7 @@ export default async function MaintenancePage({
                       </Badge>
                     </TD>
                     <TD>
-                      <span className={cx("text-[12px]", r.breach ? "font-medium text-red-600" : "text-slate-600")}>
+                      <span className={cx("text-[12px]", r.breach ? "font-medium text-red-600" : "text-fg-soft")}>
                         {fmtDate(r.m.slaDueAt)}
                       </span>
                       {r.breach && (

@@ -48,7 +48,7 @@ export default async function ContractPage({
 
   return (
     <div>
-      <Link href="/contracts" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900">
+      <Link href="/contracts" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg">
         <ArrowLeft size={14} /> All contracts
       </Link>
 
@@ -115,36 +115,36 @@ export default async function ContractPage({
       )}
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-xl border border-line bg-white p-4">
-          <p className="text-[11.5px] uppercase tracking-wide text-slate-500">Annual rent</p>
-          <p className="tnum mt-1.5 text-[22px] font-semibold text-ink-900">{AED(contract.annualRent)}</p>
-          <p className="mt-0.5 text-[11.5px] text-slate-500">{cheques.length} cheques</p>
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="text-[11.5px] uppercase tracking-wide text-muted">Annual rent</p>
+          <p className="tnum mt-1.5 text-[22px] font-semibold text-fg">{AED(contract.annualRent)}</p>
+          <p className="mt-0.5 text-[11.5px] text-muted">{cheques.length} cheques</p>
         </div>
-        <div className="rounded-xl border border-line bg-white p-4">
-          <p className="text-[11.5px] uppercase tracking-wide text-slate-500">Collected</p>
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="text-[11.5px] uppercase tracking-wide text-muted">Collected</p>
           <p className="tnum mt-1.5 text-[22px] font-semibold text-brand-600">{AED(collected)}</p>
           <div className="mt-2">
             <Bar value={contract.annualRent ? collected / contract.annualRent : 0} />
           </div>
         </div>
-        <div className="rounded-xl border border-line bg-white p-4">
-          <p className="text-[11.5px] uppercase tracking-wide text-slate-500">Outstanding</p>
-          <p className="tnum mt-1.5 text-[22px] font-semibold text-ink-900">{AED(outstanding)}</p>
-          <p className="mt-0.5 text-[11.5px] text-slate-500">
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="text-[11.5px] uppercase tracking-wide text-muted">Outstanding</p>
+          <p className="tnum mt-1.5 text-[22px] font-semibold text-fg">{AED(outstanding)}</p>
+          <p className="mt-0.5 text-[11.5px] text-muted">
             {cheques.filter((c) => c.status === "pending").length} cheques still held
           </p>
         </div>
-        <div className="rounded-xl border border-line bg-white p-4">
-          <p className="text-[11.5px] uppercase tracking-wide text-slate-500">Time remaining</p>
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="text-[11.5px] uppercase tracking-wide text-muted">Time remaining</p>
           <p
             className={cx(
               "tnum mt-1.5 text-[22px] font-semibold",
-              daysLeft < 0 ? "text-slate-400" : daysLeft <= 60 ? "text-amber-600" : "text-ink-900"
+              daysLeft < 0 ? "text-faint" : daysLeft <= 60 ? "text-amber-600" : "text-fg"
             )}
           >
             {daysLeft < 0 ? "Ended" : `${daysLeft} days`}
           </p>
-          <p className="mt-0.5 text-[11.5px] text-slate-500">Ends {fmtDate(contract.endDate)}</p>
+          <p className="mt-0.5 text-[11.5px] text-muted">Ends {fmtDate(contract.endDate)}</p>
         </div>
       </div>
 
@@ -171,16 +171,16 @@ export default async function ContractPage({
                         ? "border-red-200 bg-red-50/40"
                         : flag === "due_soon"
                         ? "border-amber-200 bg-amber-50/50"
-                        : "border-line hover:bg-slate-50"
+                        : "border-line hover:bg-subtle"
                     )}
                   >
-                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface text-[11px] font-semibold text-fg-soft ring-1 ring-line">
                       {c.seq}
                     </span>
-                    <span className="tnum w-16 font-medium text-ink-900">{c.chequeNo}</span>
-                    <span className="w-28 truncate text-slate-500">{c.bank}</span>
-                    <span className="w-28 text-slate-600">{fmtDate(c.dueDate)}</span>
-                    <span className="tnum w-24 text-right font-medium text-ink-900">{AED(c.amount)}</span>
+                    <span className="tnum w-16 font-medium text-fg">{c.chequeNo}</span>
+                    <span className="w-28 truncate text-muted">{c.bank}</span>
+                    <span className="w-28 text-fg-soft">{fmtDate(c.dueDate)}</span>
+                    <span className="tnum w-24 text-right font-medium text-fg">{AED(c.amount)}</span>
                     <span className="ml-auto flex items-center gap-2">
                       {flag === "overdue" && <Badge tone="bad" dot>Overdue</Badge>}
                       {flag === "due_soon" && <Badge tone="warn" dot>Due soon</Badge>}
@@ -209,8 +209,8 @@ export default async function ContractPage({
                     <XCircle size={15} className="mt-0.5 shrink-0 text-red-500" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-[12.5px] font-medium text-ink-900">{doc.label}</p>
-                    <p className="truncate text-[11px] text-slate-500">{doc.ref ?? "Not attached"}</p>
+                    <p className="text-[12.5px] font-medium text-fg">{doc.label}</p>
+                    <p className="truncate text-[11px] text-muted">{doc.ref ?? "Not attached"}</p>
                   </div>
                 </div>
               ))}
@@ -222,12 +222,12 @@ export default async function ContractPage({
               <CardHead title="Payments received" icon={<CheckCircle2 size={17} />} />
               <div className="space-y-1">
                 {payments.slice(0, 12).map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 border-b border-slate-100 py-2 text-[12.5px] last:border-0">
-                    <span className="tnum w-24 text-slate-500">{p.receiptNo}</span>
-                    <span className="w-24 text-slate-600">{fmtDate(p.receivedAt)}</span>
-                    <span className="capitalize text-slate-600">{p.category}</span>
-                    <span className="truncate text-[11.5px] text-slate-400">{p.reference}</span>
-                    <span className="tnum ml-auto font-medium text-ink-900">{AED(p.amount)}</span>
+                  <div key={p.id} className="flex items-center gap-3 border-b border-line-soft py-2 text-[12.5px] last:border-0">
+                    <span className="tnum w-24 text-muted">{p.receiptNo}</span>
+                    <span className="w-24 text-fg-soft">{fmtDate(p.receivedAt)}</span>
+                    <span className="capitalize text-fg-soft">{p.category}</span>
+                    <span className="truncate text-[11.5px] text-faint">{p.reference}</span>
+                    <span className="tnum ml-auto font-medium text-fg">{AED(p.amount)}</span>
                   </div>
                 ))}
               </div>
@@ -237,20 +237,20 @@ export default async function ContractPage({
           <Card>
             <CardHead title="Audit trail" sub="Everything that has happened to this contract." icon={<ShieldCheck size={17} />} />
             {trail.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No changes recorded.</p>
+              <p className="text-[12.5px] text-faint">No changes recorded.</p>
             ) : (
-              <ol className="relative ml-2 space-y-4 border-l border-slate-200 pl-6">
+              <ol className="relative ml-2 space-y-4 border-l border-line pl-6">
                 {trail.map((a) => (
                   <li key={a.id} className="relative">
-                    <span className="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-slate-300 ring-4 ring-white" />
-                    <p className="text-[12.5px] font-medium text-ink-900">{a.summary}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <span className="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-line-strong ring-4 ring-white" />
+                    <p className="text-[12.5px] font-medium text-fg">{a.summary}</p>
+                    <p className="text-[11px] text-muted">
                       {a.actorName} · {fmtDateTime(a.at)} · {a.ip}
                     </p>
                     {a.changes && (
                       <ul className="mt-1 space-y-0.5">
                         {a.changes.map((c, i) => (
-                          <li key={i} className="text-[11px] text-slate-500">
+                          <li key={i} className="text-[11px] text-muted">
                             {c.field}: <span className="line-through">{c.from}</span> → <b>{c.to}</b>
                           </li>
                         ))}
@@ -298,8 +298,8 @@ export default async function ContractPage({
             <KV label="Approved by" value={userName(contract.approvedBy)} />
             <KV label="Approved on" value={contract.approvedAt ? fmtDateTime(contract.approvedAt) : "—"} />
             {contract.notes && (
-              <div className="mt-3 rounded-lg bg-slate-50 p-3 text-[12px] text-slate-600">
-                <b className="text-ink-900">Note:</b> {contract.notes}
+              <div className="mt-3 rounded-lg bg-subtle p-3 text-[12px] text-fg-soft">
+                <b className="text-fg">Note:</b> {contract.notes}
               </div>
             )}
           </Card>

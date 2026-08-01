@@ -83,12 +83,12 @@ export default async function PaymentsPage({
         <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
           <form action="/payments" className="relative">
             <input type="hidden" name="category" value={category} />
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
             <input
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Receipt, tenant, unit or reference…"
-              className="h-9 w-72 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
           <div className="flex flex-wrap gap-1.5">
@@ -98,14 +98,14 @@ export default async function PaymentsPage({
                 href={link({ category: c, page: undefined })}
                 className={cx(
                   "rounded-lg border px-2.5 py-1.5 text-[12px] capitalize",
-                  category === c ? "border-ink-900 bg-ink-900 text-white" : "border-line bg-white text-slate-600"
+                  category === c ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
                 )}
               >
                 {c}
               </Link>
             ))}
           </div>
-          <p className="tnum ml-auto text-[12.5px] text-slate-500">
+          <p className="tnum ml-auto text-[12.5px] text-muted">
             {rows.length.toLocaleString("en-US")} · {AED(rows.reduce((s, r) => s + r.p.amount, 0))}
           </p>
         </div>
@@ -129,7 +129,7 @@ export default async function PaymentsPage({
               <tbody>
                 {pageRows.map((r) => (
                   <tr key={r.p.id}>
-                    <TD className="tnum font-medium text-ink-900">{r.p.receiptNo}</TD>
+                    <TD className="tnum font-medium text-fg">{r.p.receiptNo}</TD>
                     <TD>{fmtDate(r.p.receivedAt)}</TD>
                     <TD className="max-w-[180px]">
                       {r.tenant ? (
@@ -144,8 +144,8 @@ export default async function PaymentsPage({
                     <TD>
                       <Badge tone={r.p.category === "rent" ? "good" : "neutral"}>{titleCase(r.p.category)}</Badge>
                     </TD>
-                    <TD className="max-w-[160px] truncate text-[11.5px] text-slate-500">{r.p.reference}</TD>
-                    <TD align="right" className="tnum font-medium text-ink-900">
+                    <TD className="max-w-[160px] truncate text-[11.5px] text-muted">{r.p.reference}</TD>
+                    <TD align="right" className="tnum font-medium text-fg">
                       {AED(r.p.amount)}
                     </TD>
                   </tr>
@@ -157,7 +157,7 @@ export default async function PaymentsPage({
 
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
-            <span className="text-slate-500">Page {page} of {pages}</span>
+            <span className="text-muted">Page {page} of {pages}</span>
             <div className="flex gap-2">
               <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
                 Previous

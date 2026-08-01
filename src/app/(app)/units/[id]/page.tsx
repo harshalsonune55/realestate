@@ -30,7 +30,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div>
-      <Link href="/units" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900">
+      <Link href="/units" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg">
         <ArrowLeft size={14} /> All units
       </Link>
 
@@ -97,7 +97,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
           <Card>
             <CardHead title="Tenancy history" icon={<History size={17} />} />
             {contracts.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No contracts recorded for this unit.</p>
+              <p className="text-[12.5px] text-faint">No contracts recorded for this unit.</p>
             ) : (
               <div className="space-y-1.5">
                 {contracts.map((c) => {
@@ -106,14 +106,14 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
                     <Link
                       key={c.id}
                       href={`/contracts/${c.id}`}
-                      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-slate-50"
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                     >
-                      <span className="font-medium text-ink-900">{c.ref}</span>
-                      <span className="min-w-0 flex-1 truncate text-slate-600">{t?.name}</span>
-                      <span className="text-slate-500">
+                      <span className="font-medium text-fg">{c.ref}</span>
+                      <span className="min-w-0 flex-1 truncate text-fg-soft">{t?.name}</span>
+                      <span className="text-muted">
                         {fmtDate(c.startDate)} – {fmtDate(c.endDate)}
                       </span>
-                      <span className="tnum font-medium text-ink-900">{AED(c.annualRent)}</span>
+                      <span className="tnum font-medium text-fg">{AED(c.annualRent)}</span>
                       <ContractStatusBadge status={c.status} />
                     </Link>
                   );
@@ -125,18 +125,18 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
           <Card>
             <CardHead title="Maintenance history" icon={<Wrench size={17} />} />
             {maint.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No work orders raised on this unit.</p>
+              <p className="text-[12.5px] text-faint">No work orders raised on this unit.</p>
             ) : (
               <div className="space-y-1.5">
                 {maint.slice(0, 12).map((m) => (
                   <Link
                     key={m.id}
                     href={`/maintenance/${m.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-slate-50"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                   >
-                    <span className="font-medium text-ink-900">{m.ref}</span>
-                    <span className="min-w-0 flex-1 truncate text-slate-600">{m.category}</span>
-                    <span className="text-slate-500">{fmtDate(m.reportedAt.slice(0, 10))}</span>
+                    <span className="font-medium text-fg">{m.ref}</span>
+                    <span className="min-w-0 flex-1 truncate text-fg-soft">{m.category}</span>
+                    <span className="text-muted">{fmtDate(m.reportedAt.slice(0, 10))}</span>
                     <Badge tone={["closed", "completed"].includes(m.status) ? "good" : "neutral"}>
                       {titleCase(m.status)}
                     </Badge>

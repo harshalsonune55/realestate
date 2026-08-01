@@ -76,7 +76,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
         <>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-line p-4">
-              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Current contract
               </p>
               <KV label="Reference" value={ctx.contractRef} strong />
@@ -86,7 +86,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
               <KV label="Annual rent" value={AED(ctx.currentRent)} strong />
             </div>
             <div className="rounded-xl border border-line p-4">
-              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Payment record
               </p>
               <KV label="Cheques on contract" value={String(ctx.history.total)} />
@@ -213,17 +213,17 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
         return (
           <>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-line bg-slate-50 p-3">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500">Current rent</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-ink-900">{AED(ctx.currentRent)}</p>
+              <div className="rounded-lg border border-line bg-subtle p-3">
+                <p className="text-[11px] uppercase tracking-wide text-muted">Current rent</p>
+                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(ctx.currentRent)}</p>
               </div>
-              <div className="rounded-lg border border-line bg-slate-50 p-3">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500">Policy ceiling (+5%)</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-ink-900">{AED(maxRent)}</p>
+              <div className="rounded-lg border border-line bg-subtle p-3">
+                <p className="text-[11px] uppercase tracking-wide text-muted">Policy ceiling (+5%)</p>
+                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(maxRent)}</p>
               </div>
-              <div className="rounded-lg border border-line bg-slate-50 p-3">
-                <p className="text-[11px] uppercase tracking-wide text-slate-500">Market rent</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-ink-900">{AED(ctx.marketRent)}</p>
+              <div className="rounded-lg border border-line bg-subtle p-3">
+                <p className="text-[11px] uppercase tracking-wide text-muted">Market rent</p>
+                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(ctx.marketRent)}</p>
               </div>
             </div>
 
@@ -328,7 +328,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
                 <button
                   type="button"
                   onClick={() => set({ cheques: buildSchedule(data.chequeCount, data.newRent, data.startDate, data.cheques) })}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] font-medium hover:bg-slate-50"
+                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-[13px] font-medium hover:bg-subtle"
                 >
                   <Wand2 size={15} className="text-brand-600" /> Recalculate
                 </button>
@@ -338,7 +338,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
             <div className="overflow-x-auto scroll-thin">
               <table className="w-full min-w-[680px] text-[13px]">
                 <thead>
-                  <tr className="border-b border-line text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-line text-[11px] uppercase tracking-wide text-muted">
                     <th className="pb-2 text-left font-semibold">#</th>
                     <th className="pb-2 text-left font-semibold">Cheque no.</th>
                     <th className="pb-2 text-left font-semibold">Bank</th>
@@ -348,8 +348,8 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
                 </thead>
                 <tbody>
                   {data.cheques.map((c, i) => (
-                    <tr key={i} className="border-b border-slate-100">
-                      <td className="py-2 pr-2 text-slate-500">{i + 1}</td>
+                    <tr key={i} className="border-b border-line-soft">
+                      <td className="py-2 pr-2 text-muted">{i + 1}</td>
                       <td className="py-2 pr-2">
                         <Input
                           value={c.chequeNo}
@@ -418,7 +418,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
               <span
                 className={cx(
                   "tnum rounded-lg px-3 py-1 text-[12.5px] font-semibold text-white",
-                  diff === 0 && data.cheques.length ? "bg-brand-600" : "bg-amber-500"
+                  diff === 0 && data.cheques.length ? "bg-brand-solid" : "bg-amber-500"
                 )}
               >
                 {diff === 0 ? "Balanced" : `${diff > 0 ? "Short" : "Over"} ${AED(Math.abs(diff))}`}

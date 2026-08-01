@@ -45,7 +45,7 @@ export default async function MaintenanceDetail({
 
   return (
     <div>
-      <Link href="/maintenance" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900">
+      <Link href="/maintenance" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg">
         <ArrowLeft size={14} /> All work orders
       </Link>
 
@@ -112,13 +112,13 @@ export default async function MaintenanceDetail({
                     <div
                       className={cx(
                         "h-1.5 rounded-full",
-                        i <= stage ? "bg-brand-500" : "bg-slate-200"
+                        i <= stage ? "bg-brand-500" : "bg-subtle-hover"
                       )}
                     />
                     <p
                       className={cx(
                         "mt-1.5 text-[11px]",
-                        i === stage ? "font-semibold text-ink-900" : i < stage ? "text-brand-600" : "text-slate-400"
+                        i === stage ? "font-semibold text-fg" : i < stage ? "text-brand-600" : "text-faint"
                       )}
                     >
                       {titleCase(s)}
@@ -131,7 +131,7 @@ export default async function MaintenanceDetail({
 
           <Card>
             <CardHead title="Reported problem" />
-            <p className="whitespace-pre-line text-[13px] leading-relaxed text-slate-700">
+            <p className="whitespace-pre-line text-[13px] leading-relaxed text-fg-soft">
               {wo.description}
             </p>
             {wo.resolutionNotes && (
@@ -145,13 +145,13 @@ export default async function MaintenanceDetail({
           <Card>
             <CardHead title="Audit trail" />
             {trail.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No changes recorded yet.</p>
+              <p className="text-[12.5px] text-faint">No changes recorded yet.</p>
             ) : (
               <ul className="space-y-3">
                 {trail.map((a) => (
                   <li key={a.id} className="text-[12px]">
-                    <p className="font-medium text-ink-900">{a.summary}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="font-medium text-fg">{a.summary}</p>
+                    <p className="text-[11px] text-muted">
                       {a.actorName} · {fmtDateTime(a.at)}
                     </p>
                   </li>

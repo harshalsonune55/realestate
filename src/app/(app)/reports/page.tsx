@@ -111,17 +111,17 @@ export default async function ReportsPage() {
           <div className="flex h-52 items-end gap-2">
             {forecast.map((f) => (
               <div key={f.month} className="group flex flex-1 flex-col items-center gap-1.5">
-                <span className="text-[10px] font-medium text-slate-500 opacity-0 transition group-hover:opacity-100">
+                <span className="text-[10px] font-medium text-muted opacity-0 transition group-hover:opacity-100">
                   {AEDshort(f.due)}
                 </span>
                 <div className="flex w-full flex-1 items-end">
                   <div
-                    className="w-full rounded-t bg-brand-500/85 transition group-hover:bg-brand-600"
+                    className="w-full rounded-t bg-brand-500/85 transition group-hover:bg-brand-solid"
                     style={{ height: `${Math.max(3, (f.due / maxDue) * 100)}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-slate-500">{f.label}</span>
-                <span className="tnum text-[10px] text-slate-300">{f.count}</span>
+                <span className="text-[10px] text-muted">{f.label}</span>
+                <span className="tnum text-[10px] text-faint">{f.count}</span>
               </div>
             ))}
           </div>
@@ -142,10 +142,10 @@ export default async function ReportsPage() {
             ].map((r) => (
               <div key={r.label}>
                 <div className="mb-1 flex items-baseline justify-between">
-                  <span className="text-[12.5px] text-slate-600">{r.label}</span>
-                  <span className="tnum text-[12.5px] font-semibold text-ink-900">
+                  <span className="text-[12.5px] text-fg-soft">{r.label}</span>
+                  <span className="tnum text-[12.5px] font-semibold text-fg">
                     {r.n}
-                    <span className="ml-1.5 text-[11px] font-normal text-slate-400">
+                    <span className="ml-1.5 text-[11px] font-normal text-faint">
                       {dueCheques.length ? ((r.n / dueCheques.length) * 100).toFixed(1) : 0}%
                     </span>
                   </span>
@@ -154,7 +154,7 @@ export default async function ReportsPage() {
               </div>
             ))}
           </div>
-          <p className="mt-4 border-t border-line pt-3 text-[11.5px] text-slate-500">
+          <p className="mt-4 border-t border-line pt-3 text-[11.5px] text-muted">
             &quot;Never deposited&quot; is the leakage number. Every one of these is a cheque the
             company holds but has not banked.
           </p>
@@ -164,7 +164,7 @@ export default async function ReportsPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2" padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink-900">
+            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
               <Building2 size={17} className="text-brand-600" /> Performance by building
             </h2>
           </div>
@@ -185,10 +185,10 @@ export default async function ReportsPage() {
                 {byProperty.map((r) => (
                   <tr key={r.p.id}>
                     <TD>
-                      <Link href={`/properties/${r.p.id}`} className="font-medium text-ink-900 hover:text-brand-600">
+                      <Link href={`/properties/${r.p.id}`} className="font-medium text-fg hover:text-brand-600">
                         {r.p.name}
                       </Link>
-                      <span className="block text-[11px] text-slate-400">{r.p.area}</span>
+                      <span className="block text-[11px] text-faint">{r.p.area}</span>
                     </TD>
                     <TD align="center" className="tnum">{r.units}</TD>
                     <TD>
@@ -218,8 +218,8 @@ export default async function ReportsPage() {
             {mix.map(([type, v]) => (
               <div key={type}>
                 <div className="mb-1 flex items-baseline justify-between text-[12.5px]">
-                  <span className="text-slate-600">{type}</span>
-                  <span className="tnum text-slate-500">
+                  <span className="text-fg-soft">{type}</span>
+                  <span className="tnum text-muted">
                     {v.occ}/{v.n} let
                   </span>
                 </div>
@@ -232,10 +232,10 @@ export default async function ReportsPage() {
 
       <Card className="mt-5" padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink-900">
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
             <Users size={17} className="text-brand-600" /> Employee activity
           </h2>
-          <p className="mt-0.5 text-[12.5px] text-slate-500">
+          <p className="mt-0.5 text-[12.5px] text-muted">
             Who is doing the work, and who is falling behind.
           </p>
         </div>
@@ -256,10 +256,10 @@ export default async function ReportsPage() {
               {staff.map((s) => (
                 <tr key={s.u.id}>
                   <TD>
-                    <span className="font-medium text-ink-900">{s.u.name}</span>
-                    <span className="block text-[11px] text-slate-400">{s.u.title}</span>
+                    <span className="font-medium text-fg">{s.u.name}</span>
+                    <span className="block text-[11px] text-faint">{s.u.title}</span>
                   </TD>
-                  <TD className="capitalize text-slate-600">{s.u.role}</TD>
+                  <TD className="capitalize text-fg-soft">{s.u.role}</TD>
                   <TD align="center" className="tnum">{s.created}</TD>
                   <TD align="center" className="tnum">{s.deposits}</TD>
                   <TD align="center" className="tnum">{s.done}</TD>

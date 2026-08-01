@@ -24,12 +24,12 @@ async function signIn(formData: FormData) {
 }
 
 const ROLE_COLOR: Record<string, string> = {
-  admin: "bg-ink-800",
-  manager: "bg-brand-700",
+  admin: "bg-inverse-2",
+  manager: "bg-brand-solid-hover",
   accountant: "bg-sky-700",
   leasing: "bg-gold-500",
-  maintenance: "bg-slate-600",
-  viewer: "bg-slate-500",
+  maintenance: "bg-muted",
+  viewer: "bg-muted",
 };
 
 export default async function LoginPage() {
@@ -38,7 +38,7 @@ export default async function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* left: brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-ink-900 p-12 lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-inverse p-12 lg:flex">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.07]"
           style={{
@@ -53,12 +53,12 @@ export default async function LoginPage() {
         />
 
         <div className="relative flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-600 text-lg font-bold text-white">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-solid text-lg font-bold text-white">
             AM
           </div>
           <div>
             <p className="text-sm font-semibold tracking-wide text-white">AL MANARA</p>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">
               Property Management
             </p>
           </div>
@@ -68,12 +68,12 @@ export default async function LoginPage() {
           <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white">
             Every process, guided step by step.
           </h1>
-          <p className="mt-5 text-[15px] leading-relaxed text-slate-300">
+          <p className="mt-5 text-[15px] leading-relaxed text-white/70">
             450 units. 1,800 cheques a year. This system walks each employee through every
             procedure in order, blocks the step until it is done correctly, and records who did
             what and when.
           </p>
-          <ul className="mt-8 space-y-3 text-[14px] text-slate-300">
+          <ul className="mt-8 space-y-3 text-[14px] text-white/70">
             {[
               "No contract goes live without manager approval",
               "No cheque due date passes without a reminder and a task",
@@ -87,7 +87,7 @@ export default async function LoginPage() {
           </ul>
         </div>
 
-        <p className="relative text-[11px] text-slate-500">
+        <p className="relative text-[11px] text-white/40">
           Internal use only · Not accessible outside the company network
         </p>
       </div>
@@ -96,16 +96,16 @@ export default async function LoginPage() {
       <div className="flex items-center justify-center bg-canvas px-6 py-12">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
-            <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-brand-600 text-lg font-bold text-white">
+            <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-brand-solid text-lg font-bold text-white">
               AM
             </div>
             <p className="text-sm font-semibold">AL MANARA Property Management</p>
           </div>
 
-          <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+          <h2 className="text-xl font-semibold tracking-tight text-fg">
             Sign in to continue
           </h2>
-          <p className="mt-1.5 text-[13px] text-slate-500">
+          <p className="mt-1.5 text-[13px] text-muted">
             Choose your staff account. Your role decides exactly what you can see and do.
           </p>
 
@@ -116,7 +116,7 @@ export default async function LoginPage() {
                 name="userId"
                 value={u.id}
                 type="submit"
-                className="group flex w-full items-center gap-3 rounded-xl border border-line bg-white p-3 text-left transition hover:border-brand-400 hover:shadow-md"
+                className="group flex w-full items-center gap-3 rounded-xl border border-line bg-surface p-3 text-left transition hover:border-brand-400 hover:shadow-md"
               >
                 <div
                   className={cx(
@@ -127,21 +127,21 @@ export default async function LoginPage() {
                   {u.name.split(" ").slice(0, 2).map((p) => p[0]).join("")}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-medium text-ink-900">{u.name}</p>
-                  <p className="truncate text-[12px] text-slate-500">
+                  <p className="truncate text-[14px] font-medium text-fg">{u.name}</p>
+                  <p className="truncate text-[12px] text-muted">
                     {u.title} · {ROLE_LABEL[u.role]}
                   </p>
                 </div>
                 <ArrowRight
                   size={16}
-                  className="shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-600"
+                  className="shrink-0 text-faint transition group-hover:translate-x-0.5 group-hover:text-brand-600"
                 />
               </button>
             ))}
           </form>
 
-          <div className="mt-6 flex items-start gap-2 rounded-lg bg-slate-100 p-3 text-[12px] text-slate-600">
-            <Lock size={14} className="mt-0.5 shrink-0 text-slate-400" />
+          <div className="mt-6 flex items-start gap-2 rounded-lg bg-subtle p-3 text-[12px] text-fg-soft">
+            <Lock size={14} className="mt-0.5 shrink-0 text-faint" />
             <p>
               <b>Prototype.</b> In production this screen is replaced with company email +
               password and a one-time code, and the site is reachable only from the office network

@@ -62,33 +62,33 @@ export default function ApprovalCard({
   }
 
   return (
-    <div className="rounded-xl border border-line bg-white">
+    <div className="rounded-xl border border-line bg-surface">
       <div className="flex flex-wrap items-start gap-3 border-b border-line px-4 py-3">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-50 text-amber-600">
           <ShieldAlert size={17} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="tnum text-[11.5px] font-semibold text-slate-400">{approval.ref}</span>
+            <span className="tnum text-[11.5px] font-semibold text-faint">{approval.ref}</span>
             <Badge tone="info">{titleCase(approval.type)}</Badge>
             <Badge tone={tone} dot>
               waiting {approval.waitingDays === 0 ? "today" : `${approval.waitingDays}d`}
             </Badge>
           </div>
-          <p className="mt-1 text-[14px] font-semibold text-ink-900">{approval.title}</p>
-          <p className="text-[12.5px] text-slate-500">{approval.summary}</p>
+          <p className="mt-1 text-[14px] font-semibold text-fg">{approval.title}</p>
+          <p className="text-[12.5px] text-muted">{approval.summary}</p>
         </div>
         {approval.amount ? (
           <div className="text-right">
-            <p className="tnum text-[15px] font-semibold text-ink-900">{AED(approval.amount)}</p>
-            <p className="text-[11px] text-slate-400">value</p>
+            <p className="tnum text-[15px] font-semibold text-fg">{AED(approval.amount)}</p>
+            <p className="text-[11px] text-faint">value</p>
           </div>
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2.5 text-[11.5px] text-slate-500">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2.5 text-[11.5px] text-muted">
         <span>
-          Raised by <b className="font-medium text-ink-900">{approval.requestedByName}</b>
+          Raised by <b className="font-medium text-fg">{approval.requestedByName}</b>
         </span>
         <span>{fmtDateTime(approval.requestedAt)} · {relative(approval.requestedAt.slice(0, 10))}</span>
         <Link href={detailHref} className="ml-auto font-medium text-brand-600 hover:underline">
@@ -96,14 +96,14 @@ export default function ApprovalCard({
         </Link>
       </div>
 
-      <div className="border-t border-line bg-slate-50/60 px-4 py-2.5 text-[11.5px] text-slate-600">
-        <b className="font-medium text-ink-900">Why this needs approval:</b> {approval.rule}
+      <div className="border-t border-line bg-subtle/60 px-4 py-2.5 text-[11.5px] text-fg-soft">
+        <b className="font-medium text-fg">Why this needs approval:</b> {approval.rule}
       </div>
 
       {canDecide && (
         <div className="border-t border-line px-4 py-3">
           {approval.ownRequest ? (
-            <p className="rounded-lg bg-slate-100 px-3 py-2 text-[12px] text-slate-600">
+            <p className="rounded-lg bg-subtle px-3 py-2 text-[12px] text-fg-soft">
               You raised this request, so you cannot approve it. It must be decided by another
               manager.
             </p>
@@ -111,13 +111,13 @@ export default function ApprovalCard({
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setMode("approve")}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-600 px-3.5 text-[13px] font-medium text-white transition hover:bg-brand-700"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-solid px-3.5 text-[13px] font-medium text-white transition hover:bg-brand-solid-hover"
               >
                 <Check size={15} /> Approve
               </button>
               <button
                 onClick={() => setMode("reject")}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-white px-3.5 text-[13px] font-medium text-slate-700 transition hover:border-red-300 hover:text-red-700"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 text-[13px] font-medium text-fg-soft transition hover:border-red-300 hover:text-red-700"
               >
                 <X size={15} /> Reject
               </button>
@@ -141,7 +141,7 @@ export default function ApprovalCard({
                   onClick={() => decide(mode === "approve" ? "approved" : "rejected")}
                   className={cx(
                     "inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-medium text-white transition disabled:opacity-60",
-                    mode === "reject" ? "bg-red-600 hover:bg-red-700" : "bg-brand-600 hover:bg-brand-700"
+                    mode === "reject" ? "bg-red-600 hover:bg-red-700" : "bg-brand-solid hover:bg-brand-solid-hover"
                   )}
                 >
                   {pending && <Loader2 size={14} className="animate-spin" />}
@@ -153,7 +153,7 @@ export default function ApprovalCard({
                     setMode(null);
                     setError(null);
                   }}
-                  className="inline-flex h-9 items-center rounded-lg border border-line px-3.5 text-[13px] text-slate-600 hover:bg-white"
+                  className="inline-flex h-9 items-center rounded-lg border border-line px-3.5 text-[13px] text-fg-soft hover:bg-surface"
                 >
                   Cancel
                 </button>

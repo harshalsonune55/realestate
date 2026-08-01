@@ -46,7 +46,7 @@ export default function TaskRow({
   return (
     <div
       className={cx(
-        "rounded-xl border bg-white p-3.5 transition",
+        "rounded-xl border bg-surface p-3.5 transition",
         done ? "border-line opacity-60" : overdue ? "border-red-200 bg-red-50/40" : "border-line"
       )}
     >
@@ -54,22 +54,22 @@ export default function TaskRow({
         <span
           className={cx(
             "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-            done ? "bg-brand-500" : overdue ? "bg-red-500" : task.priority === "high" ? "bg-amber-400" : "bg-slate-300"
+            done ? "bg-brand-500" : overdue ? "bg-red-500" : task.priority === "high" ? "bg-amber-400" : "bg-line-strong"
           )}
         />
         <div className="min-w-0 flex-1">
-          <p className={cx("text-[13.5px] font-medium", done ? "text-slate-500 line-through" : "text-ink-900")}>
+          <p className={cx("text-[13.5px] font-medium", done ? "text-muted line-through" : "text-fg")}>
             {task.title}
           </p>
-          <p className="mt-0.5 text-[12px] text-slate-500">{task.detail}</p>
+          <p className="mt-0.5 text-[12px] text-muted">{task.detail}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <Badge tone={done ? "good" : overdue ? "bad" : "neutral"} dot>
               {done ? "Done" : overdue ? "Overdue" : "Open"}
             </Badge>
-            <span className={cx("text-[11.5px]", overdue ? "font-medium text-red-600" : "text-slate-500")}>
+            <span className={cx("text-[11.5px]", overdue ? "font-medium text-red-600" : "text-muted")}>
               Due {fmtDate(task.dueDate)} · {relative(task.dueDate)}
             </span>
-            <span className="text-[11.5px] text-slate-400">· {task.assignedToName}</span>
+            <span className="text-[11.5px] text-faint">· {task.assignedToName}</span>
           </div>
         </div>
 
@@ -77,7 +77,7 @@ export default function TaskRow({
           {task.href && (
             <Link
               href={task.href}
-              className="inline-flex h-8 items-center gap-1 rounded-lg bg-brand-600 px-3 text-[12px] font-medium text-white transition hover:bg-brand-700"
+              className="inline-flex h-8 items-center gap-1 rounded-lg bg-brand-solid px-3 text-[12px] font-medium text-white transition hover:bg-brand-solid-hover"
             >
               {task.guided ? "Open procedure" : "Open"}
               <ArrowRight size={13} />
@@ -86,7 +86,7 @@ export default function TaskRow({
           {!done && task.mine && !task.guided && (
             <button
               onClick={() => setOpen((o) => !o)}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12px] font-medium text-slate-600 hover:text-ink-900"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12px] font-medium text-fg-soft hover:text-fg"
             >
               <Check size={13} /> Close
             </button>
@@ -94,7 +94,7 @@ export default function TaskRow({
           {!done && task.guided && (
             <span
               title="This task closes itself when you finish the guided procedure"
-              className="inline-flex h-8 items-center gap-1 rounded-lg bg-slate-100 px-3 text-[11.5px] text-slate-500"
+              className="inline-flex h-8 items-center gap-1 rounded-lg bg-subtle px-3 text-[11.5px] text-muted"
             >
               <Lock size={12} /> Auto-closes
             </span>
@@ -102,7 +102,7 @@ export default function TaskRow({
           {canReassign && !done && (
             <button
               onClick={() => setReassigning((r) => !r)}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-2.5 text-[12px] text-slate-500 hover:text-ink-900"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-2.5 text-[12px] text-muted hover:text-fg"
             >
               <UserPlus size={13} />
             </button>
@@ -111,8 +111,8 @@ export default function TaskRow({
       </div>
 
       {open && (
-        <div className="mt-3 space-y-2 rounded-lg bg-slate-50 p-3">
-          <p className="text-[12px] font-medium text-ink-900">
+        <div className="mt-3 space-y-2 rounded-lg bg-subtle p-3">
+          <p className="text-[12px] font-medium text-fg">
             What did you do? This note is stored with your name.
           </p>
           <Input
@@ -133,11 +133,11 @@ export default function TaskRow({
                   }
                 })
               }
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand-600 px-3 text-[12.5px] font-medium text-white disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand-solid px-3 text-[12.5px] font-medium text-white disabled:opacity-60"
             >
               {pending && <Loader2 size={13} className="animate-spin" />} Close task
             </button>
-            <button onClick={() => setOpen(false)} className="text-[12.5px] text-slate-500">
+            <button onClick={() => setOpen(false)} className="text-[12.5px] text-muted">
               Cancel
             </button>
           </div>
@@ -145,8 +145,8 @@ export default function TaskRow({
       )}
 
       {reassigning && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 p-3">
-          <span className="text-[12px] font-medium text-ink-900">Reassign to</span>
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-subtle p-3">
+          <span className="text-[12px] font-medium text-fg">Reassign to</span>
           <div className="w-56">
             <Select
               defaultValue=""
@@ -173,7 +173,7 @@ export default function TaskRow({
         </div>
       )}
 
-      {msg && <p className="mt-2 text-[11.5px] text-slate-500">{msg}</p>}
+      {msg && <p className="mt-2 text-[11.5px] text-muted">{msg}</p>}
     </div>
   );
 }

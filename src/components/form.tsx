@@ -20,7 +20,7 @@ export function Field({
 }) {
   return (
     <label className={cx("block", className)}>
-      <span className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-ink-900">
+      <span className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-fg">
         {label}
         {required && <span className="text-red-500">*</span>}
       </span>
@@ -28,14 +28,16 @@ export function Field({
       {error ? (
         <span className="mt-1 block text-[11.5px] font-medium text-red-600">{error}</span>
       ) : hint ? (
-        <span className="mt-1 block text-[11.5px] text-slate-500">{hint}</span>
+        <span className="mt-1 block text-[11.5px] text-muted">{hint}</span>
       ) : null}
     </label>
   );
 }
 
 const baseInput =
-  "w-full rounded-lg border bg-white px-3 py-2 text-[13.5px] text-ink-900 outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500/25";
+  "w-full rounded-lg border bg-surface px-3 py-2 text-[13.5px] text-fg shadow-xs transition " +
+  "placeholder:text-faint focus:outline-none focus-visible:outline-none " +
+  "focus:ring-[3px] focus:ring-brand-500/20";
 
 export function Input({
   invalid,
@@ -48,7 +50,7 @@ export function Input({
       className={cx(
         baseInput,
         invalid ? "border-red-300 focus:border-red-400" : "border-line focus:border-brand-500",
-        rest.disabled && "cursor-not-allowed bg-slate-50 text-slate-400",
+        rest.disabled && "cursor-not-allowed bg-subtle text-faint",
         className
       )}
     />
@@ -87,7 +89,7 @@ export function Select({
           baseInput,
           "appearance-none pr-9",
           invalid ? "border-red-300" : "border-line focus:border-brand-500",
-          rest.disabled && "cursor-not-allowed bg-slate-50 text-slate-400",
+          rest.disabled && "cursor-not-allowed bg-subtle text-faint",
           className
         )}
       >
@@ -95,7 +97,7 @@ export function Select({
       </select>
       <ChevronDown
         size={15}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-faint"
       />
     </div>
   );
@@ -125,23 +127,23 @@ export function CheckItem({
       className={cx(
         "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition",
         locked
-          ? "cursor-not-allowed border-line bg-slate-50"
+          ? "cursor-not-allowed border-line bg-subtle"
           : checked
           ? "border-brand-400 bg-brand-50/60"
-          : "border-line bg-white hover:border-brand-300 hover:bg-slate-50"
+          : "border-line bg-surface hover:border-brand-300 hover:bg-subtle"
       )}
     >
       <span
         className={cx(
           "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border transition",
-          checked ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300 bg-white"
+          checked ? "border-brand-solid bg-brand-solid text-white" : "border-line-strong bg-surface"
         )}
       >
-        {locked ? <Lock size={11} className="text-slate-400" /> : checked ? <Check size={13} /> : null}
+        {locked ? <Lock size={11} className="text-faint" /> : checked ? <Check size={13} /> : null}
       </span>
       <span className="min-w-0">
-        <span className="block text-[13px] font-medium text-ink-900">{title}</span>
-        {detail && <span className="mt-0.5 block text-[11.5px] leading-snug text-slate-500">{detail}</span>}
+        <span className="block text-[13px] font-medium text-fg">{title}</span>
+        {detail && <span className="mt-0.5 block text-[11.5px] leading-snug text-muted">{detail}</span>}
         {locked && <span className="mt-1 block text-[11.5px] font-medium text-amber-700">{locked}</span>}
       </span>
     </button>
@@ -171,23 +173,23 @@ export function RadioCards<T extends string>({
             "flex items-start gap-3 rounded-xl border p-3.5 text-left transition",
             value === o.value
               ? "border-brand-500 bg-brand-50/70 ring-1 ring-brand-500"
-              : "border-line bg-white hover:border-brand-300"
+              : "border-line bg-surface hover:border-brand-300"
           )}
         >
           {o.icon && (
             <span
               className={cx(
                 "grid h-9 w-9 shrink-0 place-items-center rounded-lg",
-                value === o.value ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-500"
+                value === o.value ? "bg-brand-solid text-white" : "bg-subtle text-muted"
               )}
             >
               {o.icon}
             </span>
           )}
           <span className="min-w-0">
-            <span className="block text-[13.5px] font-medium text-ink-900">{o.title}</span>
+            <span className="block text-[13.5px] font-medium text-fg">{o.title}</span>
             {o.detail && (
-              <span className="mt-0.5 block text-[11.5px] leading-snug text-slate-500">{o.detail}</span>
+              <span className="mt-0.5 block text-[11.5px] leading-snug text-muted">{o.detail}</span>
             )}
           </span>
         </button>
@@ -237,9 +239,9 @@ export function Row({ children, cols = 2 }: { children: React.ReactNode; cols?: 
 
 export function KV({ label, value, strong }: { label: string; value: React.ReactNode; strong?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-slate-100 py-2 last:border-0">
-      <span className="shrink-0 text-[12px] text-slate-500">{label}</span>
-      <span className={cx("text-right text-[12.5px]", strong ? "font-semibold text-ink-900" : "text-ink-900")}>
+    <div className="flex items-baseline justify-between gap-4 border-b border-line-soft py-2 last:border-0">
+      <span className="shrink-0 text-[12px] text-muted">{label}</span>
+      <span className={cx("text-right text-[12.5px]", strong ? "font-semibold text-fg" : "text-fg")}>
         {value}
       </span>
     </div>

@@ -32,7 +32,7 @@ export default function AdvanceButton({ id, next }: { id: string; next: string }
             else setError(res.message);
           })
         }
-        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-[13px] font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-solid px-4 text-[13px] font-medium text-white transition hover:bg-brand-solid-hover disabled:opacity-60"
       >
         {pending && <Loader2 size={14} className="animate-spin" />}
         Move to {titleCase(next)}

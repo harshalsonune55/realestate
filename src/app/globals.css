@@ -1,31 +1,271 @@
 @import "tailwindcss";
 
-@theme {
-  --color-ink-950: #070c16;
-  --color-ink-900: #0b1220;
-  --color-ink-800: #111b2e;
-  --color-ink-700: #1b283f;
-  --color-ink-600: #2a3a56;
+/* ==========================================================================
+   Al Manara design tokens
 
-  --color-brand-50: #eef8f5;
-  --color-brand-100: #d3ede5;
-  --color-brand-200: #a8dbcc;
-  --color-brand-400: #3aa88f;
-  --color-brand-500: #178a72;
-  --color-brand-600: #0f766e;
-  --color-brand-700: #0b5c56;
-  --color-brand-900: #063b38;
+   Two layers:
+   1. Runtime vars (`--c-*`) defined per theme on :root / [data-theme="dark"].
+   2. `@theme inline` maps Tailwind utility names onto those runtime vars, so
+      `bg-surface` emits `var(--c-surface)` rather than a baked hex. Flipping
+      the theme attribute on <html> re-points every utility at once.
 
-  --color-gold-500: #b4884a;
-  --color-gold-100: #f6ecdc;
-
-  --color-canvas: #f5f6f8;
-  --color-line: #e3e6ec;
-}
+   Scale convention used throughout the app: low numbers are backgrounds,
+   high numbers are text. Dark mode inverts within that convention.
+   ========================================================================== */
 
 :root {
   color-scheme: light;
+
+  /* neutrals ------------------------------------------------------------- */
+  --c-canvas: #f4f6f9;
+  --c-surface: #ffffff;
+  --c-surface-2: #fafbfc;
+  --c-subtle: #f1f4f8;
+  --c-subtle-hover: #e8edf3;
+
+  --c-line: #e3e8ef;
+  --c-line-soft: #eef1f6;
+  --c-line-strong: #cdd5e0;
+
+  --c-fg: #0d1524;
+  --c-fg-soft: #38455c;
+  --c-muted: #5b6980;
+  --c-faint: #78869a;
+
+  /* fixed dark chrome — sidebar, gate, selected filter chips.
+     Deliberately does NOT invert: it is dark in both themes. */
+  --c-inverse: #0b1220;
+  --c-inverse-2: #131d30;
+  --c-inverse-line: #ffffff1a;
+  --c-inverse-fg: #ffffff;
+  --c-inverse-muted: #93a3bb;
+
+  /* brand — teal ---------------------------------------------------------- */
+  --c-brand-50: #eefaf6;
+  --c-brand-100: #d3f1e6;
+  --c-brand-200: #a8e2cd;
+  --c-brand-300: #71ccaf;
+  --c-brand-400: #3fb192;
+  --c-brand-500: #1d9479;
+  --c-brand-600: #0f7865;
+  --c-brand-700: #0e6053;
+  --c-brand-800: #0f4d44;
+  --c-brand-900: #0c3f38;
+  --c-brand-950: #042620;
+
+  /* Solid brand fills that always carry white text. Kept separate from the
+     ramp because a fill dark enough for white text can never also be light
+     enough to read *as* text on a dark surface — one token cannot do both. */
+  --c-brand-solid: #0f7865;
+  --c-brand-solid-hover: #0e6053;
+  --c-brand-solid-active: #0f4d44;
+
+  /* accent — gold --------------------------------------------------------- */
+  --c-gold-50: #fdf9ef;
+  --c-gold-100: #f8ecd2;
+  --c-gold-200: #efd9a4;
+  --c-gold-500: #b4884a;
+  --c-gold-600: #976d38;
+  --c-gold-700: #79552d;
+
+  /* status surfaces / borders / deep text.
+     Mid steps (400–600) stay vivid in both themes so solid fills keep working. */
+  --c-red-50: #fef2f2;
+  --c-red-100: #fee2e2;
+  --c-red-200: #fecaca;
+  --c-red-300: #fca5a5;
+  --c-red-700: #b91c1c;
+  --c-red-800: #991b1b;
+  --c-red-900: #7f1d1d;
+
+  --c-amber-50: #fffbeb;
+  --c-amber-100: #fef3c7;
+  --c-amber-200: #fde68a;
+  --c-amber-700: #b45309;
+  --c-amber-800: #92400e;
+  --c-amber-900: #78350f;
+
+  --c-sky-50: #f0f9ff;
+  --c-sky-100: #e0f2fe;
+  --c-sky-200: #bae6fd;
+  --c-sky-700: #0369a1;
+  --c-sky-800: #075985;
+  --c-sky-900: #0c4a6e;
+
+  /* elevation — tuned for a light canvas */
+  --c-shadow-xs: 0 1px 2px rgb(16 24 40 / 0.04);
+  --c-shadow-sm: 0 1px 3px rgb(16 24 40 / 0.06), 0 1px 2px rgb(16 24 40 / 0.04);
+  --c-shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
+  --c-shadow-lg: 0 12px 28px -6px rgb(16 24 40 / 0.12), 0 4px 8px -4px rgb(16 24 40 / 0.06);
 }
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --c-canvas: #080b12;
+  --c-surface: #10161f;
+  --c-surface-2: #151c27;
+  --c-subtle: #1a222f;
+  --c-subtle-hover: #222b3a;
+
+  --c-line: #232c3a;
+  --c-line-soft: #1a222e;
+  --c-line-strong: #36425a;
+
+  --c-fg: #edf1f7;
+  --c-fg-soft: #c2ccda;
+  --c-muted: #8d9bb0;
+  --c-faint: #66748a;
+
+  --c-inverse: #0b1220;
+  --c-inverse-2: #131d30;
+  --c-inverse-line: #ffffff14;
+  --c-inverse-fg: #ffffff;
+  --c-inverse-muted: #93a3bb;
+
+  /* brand shifts lighter so it stays legible on dark surfaces */
+  --c-brand-50: #0c241f;
+  --c-brand-100: #0f342c;
+  --c-brand-200: #16493d;
+  --c-brand-300: #1d6753;
+  --c-brand-400: #35a184;
+  --c-brand-500: #3fbb99;
+  --c-brand-600: #4fcaa6;
+  --c-brand-700: #7bdcc0;
+  --c-brand-800: #a6e9d5;
+  --c-brand-900: #cdf3e6;
+  --c-brand-950: #e8faf4;
+
+  /* Stays dark in dark mode — these fills carry white text. Chosen so white
+     clears 4.5:1 on the fill while the fill itself still clears 3:1 against
+     the dark surface, so the button reads as a distinct shape. */
+  --c-brand-solid: #0e8168;
+  --c-brand-solid-hover: #0c7360;
+  --c-brand-solid-active: #0a5f50;
+
+  --c-gold-50: #241b0d;
+  --c-gold-100: #33270f;
+  --c-gold-200: #4d3c1a;
+  --c-gold-500: #d3a86b;
+  --c-gold-600: #e0b877;
+  --c-gold-700: #edd0a1;
+
+  --c-red-50: #2a1215;
+  --c-red-100: #3a171c;
+  --c-red-200: #55222a;
+  --c-red-300: #6d2b34;
+  --c-red-700: #fca5a5;
+  --c-red-800: #fecaca;
+  --c-red-900: #fee2e2;
+
+  --c-amber-50: #2a1e08;
+  --c-amber-100: #3a290b;
+  --c-amber-200: #543c11;
+  --c-amber-700: #fcd34d;
+  --c-amber-800: #fde68a;
+  --c-amber-900: #fef3c7;
+
+  --c-sky-50: #0a1e2c;
+  --c-sky-100: #0d2b3e;
+  --c-sky-200: #134058;
+  --c-sky-700: #7dd3fc;
+  --c-sky-800: #bae6fd;
+  --c-sky-900: #e0f2fe;
+
+  /* shadows read as depth-by-darkness on a dark canvas */
+  --c-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --c-shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);
+  --c-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.35);
+  --c-shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.65), 0 4px 8px -4px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+  /* neutrals */
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-subtle: var(--c-subtle);
+  --color-subtle-hover: var(--c-subtle-hover);
+
+  --color-line: var(--c-line);
+  --color-line-soft: var(--c-line-soft);
+  --color-line-strong: var(--c-line-strong);
+
+  --color-fg: var(--c-fg);
+  --color-fg-soft: var(--c-fg-soft);
+  --color-muted: var(--c-muted);
+  --color-faint: var(--c-faint);
+
+  --color-inverse: var(--c-inverse);
+  --color-inverse-2: var(--c-inverse-2);
+  --color-inverse-line: var(--c-inverse-line);
+  --color-inverse-fg: var(--c-inverse-fg);
+  --color-inverse-muted: var(--c-inverse-muted);
+
+  /* brand + accent */
+  --color-brand-50: var(--c-brand-50);
+  --color-brand-100: var(--c-brand-100);
+  --color-brand-200: var(--c-brand-200);
+  --color-brand-300: var(--c-brand-300);
+  --color-brand-400: var(--c-brand-400);
+  --color-brand-500: var(--c-brand-500);
+  --color-brand-600: var(--c-brand-600);
+  --color-brand-700: var(--c-brand-700);
+  --color-brand-800: var(--c-brand-800);
+  --color-brand-900: var(--c-brand-900);
+  --color-brand-950: var(--c-brand-950);
+  --color-brand-solid: var(--c-brand-solid);
+  --color-brand-solid-hover: var(--c-brand-solid-hover);
+  --color-brand-solid-active: var(--c-brand-solid-active);
+
+  --color-gold-50: var(--c-gold-50);
+  --color-gold-100: var(--c-gold-100);
+  --color-gold-200: var(--c-gold-200);
+  --color-gold-500: var(--c-gold-500);
+  --color-gold-600: var(--c-gold-600);
+  --color-gold-700: var(--c-gold-700);
+
+  /* status — only the steps that must flip; 400–600 keep Tailwind's vivid defaults */
+  --color-red-50: var(--c-red-50);
+  --color-red-100: var(--c-red-100);
+  --color-red-200: var(--c-red-200);
+  --color-red-300: var(--c-red-300);
+  --color-red-700: var(--c-red-700);
+  --color-red-800: var(--c-red-800);
+  --color-red-900: var(--c-red-900);
+
+  --color-amber-50: var(--c-amber-50);
+  --color-amber-100: var(--c-amber-100);
+  --color-amber-200: var(--c-amber-200);
+  --color-amber-700: var(--c-amber-700);
+  --color-amber-800: var(--c-amber-800);
+  --color-amber-900: var(--c-amber-900);
+
+  --color-sky-50: var(--c-sky-50);
+  --color-sky-100: var(--c-sky-100);
+  --color-sky-200: var(--c-sky-200);
+  --color-sky-700: var(--c-sky-700);
+  --color-sky-800: var(--c-sky-800);
+  --color-sky-900: var(--c-sky-900);
+
+  /* elevation */
+  --shadow-xs: var(--c-shadow-xs);
+  --shadow-sm: var(--c-shadow-sm);
+  --shadow-md: var(--c-shadow-md);
+  --shadow-lg: var(--c-shadow-lg);
+
+  /* type + shape */
+  --font-sans: var(--font-inter, ui-sans-serif), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-face, ui-monospace), "SF Mono", Menlo, monospace;
+
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ------------------------------------------------------------------- base */
 
 html,
 body {
@@ -33,25 +273,58 @@ body {
 }
 
 body {
-  background: var(--color-canvas);
-  color: #16202f;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--c-canvas);
+  color: var(--c-fg-soft);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: "cv02", "cv03", "cv04";
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--color-brand-200);
+  background: var(--c-brand-200);
+  color: var(--c-fg);
 }
 
+/* One consistent focus treatment. Keyboard users get a clear ring; pointer
+   users never see it. Individual components no longer hand-roll this. */
+:focus-visible {
+  outline: 2px solid var(--c-brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Headings carry the tighter tracking; body text stays neutral. */
+h1,
+h2,
+h3,
+h4 {
+  color: var(--c-fg);
+  letter-spacing: -0.011em;
+}
+
+h1 {
+  letter-spacing: -0.021em;
+}
+
+/* --------------------------------------------------------------- utilities */
+
 /* thin, unobtrusive scrollbars inside panels */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-line-strong) transparent;
+}
 .scroll-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: #cdd3dc;
+  background: var(--c-line-strong);
   border-radius: 99px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--c-faint);
 }
 .scroll-thin::-webkit-scrollbar-track {
   background: transparent;
@@ -60,7 +333,17 @@ body {
 /* number columns should line up */
 .tnum {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
+
+/* Fades the right edge of a horizontally scrollable table so it reads as
+   "there is more over here" rather than a hard clip. */
+.scroll-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+}
+
+/* ---------------------------------------------------------------- motion */
 
 @keyframes fade-up {
   from {
@@ -73,20 +356,37 @@ body {
   }
 }
 .fade-up {
-  animation: fade-up 0.28s ease-out both;
+  animation: fade-up 0.32s var(--ease-out-soft) both;
 }
 
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35);
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0.35);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    box-shadow: 0 0 0 8px rgb(220 38 38 / 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0);
   }
 }
 .pulse-ring {
   animation: pulse-ring 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

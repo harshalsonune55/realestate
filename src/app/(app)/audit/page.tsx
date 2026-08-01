@@ -94,18 +94,18 @@ export default async function AuditPage({
             <form action="/audit" className="relative">
               <input type="hidden" name="actor" value={actor} />
               <input type="hidden" name="entity" value={entity} />
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
               <input
                 name="q"
                 defaultValue={sp.q ?? ""}
                 placeholder="Action, employee or record id…"
-                className="h-9 w-72 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               />
             </form>
-            <p className="tnum ml-auto text-[12.5px] text-slate-500">{rows.length.toLocaleString("en-US")} entries</p>
+            <p className="tnum ml-auto text-[12.5px] text-muted">{rows.length.toLocaleString("en-US")} entries</p>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-line-soft">
             {pageRows.length === 0 ? (
               <div className="p-5">
                 <Empty title="No entries match" icon={<ScrollText size={22} />} />
@@ -115,14 +115,14 @@ export default async function AuditPage({
                 const href = entityHref(a.entityType, a.entityId);
                 return (
                   <div key={a.id} className="flex flex-wrap items-start gap-3 px-5 py-3">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-[10.5px] font-semibold text-slate-600">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-subtle text-[10.5px] font-semibold text-fg-soft">
                       {a.actorName.split(" ").slice(0, 2).map((p) => p[0]).join("")}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] text-ink-900">
+                      <p className="text-[13px] text-fg">
                         <b className="font-semibold">{a.actorName}</b> — {a.summary}
                       </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted">
                         <span>{fmtDateTime(a.at)}</span>
                         <span className="tnum">IP {a.ip}</span>
                         {href ? (
@@ -136,11 +136,11 @@ export default async function AuditPage({
                         )}
                       </div>
                       {a.changes && a.changes.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5 rounded-lg bg-slate-50 px-2.5 py-1.5">
+                        <ul className="mt-1.5 space-y-0.5 rounded-lg bg-subtle px-2.5 py-1.5">
                           {a.changes.map((c, i) => (
-                            <li key={i} className="text-[11px] text-slate-600">
-                              <b className="font-medium text-ink-900">{c.field}</b>{" "}
-                              <span className="text-slate-400 line-through">{c.from}</span> →{" "}
+                            <li key={i} className="text-[11px] text-fg-soft">
+                              <b className="font-medium text-fg">{c.field}</b>{" "}
+                              <span className="text-faint line-through">{c.from}</span> →{" "}
                               <b className="font-medium">{c.to}</b>
                             </li>
                           ))}
@@ -156,7 +156,7 @@ export default async function AuditPage({
 
           {pages > 1 && (
             <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
-              <span className="text-slate-500">Page {page} of {pages}</span>
+              <span className="text-muted">Page {page} of {pages}</span>
               <div className="flex gap-2">
                 <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
                   Previous
@@ -177,7 +177,7 @@ export default async function AuditPage({
                 href={link({ actor: "all", page: undefined })}
                 className={cx(
                   "block rounded-lg px-2.5 py-1.5 text-[12.5px]",
-                  actor === "all" ? "bg-ink-900 text-white" : "hover:bg-slate-50"
+                  actor === "all" ? "bg-inverse text-white" : "hover:bg-subtle"
                 )}
               >
                 Everyone
@@ -188,7 +188,7 @@ export default async function AuditPage({
                   href={link({ actor: u.id, page: undefined })}
                   className={cx(
                     "block truncate rounded-lg px-2.5 py-1.5 text-[12.5px]",
-                    actor === u.id ? "bg-ink-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                    actor === u.id ? "bg-inverse text-white" : "text-fg-soft hover:bg-subtle"
                   )}
                 >
                   {u.name}
@@ -206,7 +206,7 @@ export default async function AuditPage({
                   href={link({ entity: e, page: undefined })}
                   className={cx(
                     "rounded-lg border px-2.5 py-1 text-[12px]",
-                    entity === e ? "border-ink-900 bg-ink-900 text-white" : "border-line text-slate-600 hover:bg-slate-50"
+                    entity === e ? "border-inverse bg-inverse text-white" : "border-line text-fg-soft hover:bg-subtle"
                   )}
                 >
                   {titleCase(e)}
@@ -217,7 +217,7 @@ export default async function AuditPage({
 
           <Card>
             <CardHead title="Why this matters" icon={<ShieldCheck size={17} />} />
-            <p className="text-[12.5px] leading-relaxed text-slate-600">
+            <p className="text-[12.5px] leading-relaxed text-fg-soft">
               If money goes missing, a cheque is not banked, or a contract is signed at the wrong
               rent, this log answers the only question that matters: who did it, and when. Nobody
               in the company can remove an entry.

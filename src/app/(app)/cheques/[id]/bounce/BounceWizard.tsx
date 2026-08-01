@@ -33,7 +33,7 @@ export default function BounceWizard({ cheque }: { cheque: ChequeInfo }) {
       problems: (d) => p(d, 0),
       render: ({ data, set }) => (
         <>
-          <div className="rounded-xl border border-line bg-slate-50 p-4">
+          <div className="rounded-xl border border-line bg-subtle p-4">
             <KV label="Cheque" value={<span className="tnum">{cheque.chequeNo} · {cheque.bank}</span>} strong />
             <KV label="Amount" value={<span className="tnum">{AED(cheque.amount)}</span>} strong />
             <KV label="Tenant" value={cheque.tenantName} />
@@ -92,7 +92,7 @@ export default function BounceWizard({ cheque }: { cheque: ChequeInfo }) {
               placeholder="0"
             />
           </Field>
-          <div className="rounded-lg border border-line bg-slate-50 p-4">
+          <div className="rounded-lg border border-line bg-subtle p-4">
             <KV label="Unpaid rent instalment" value={AED(cheque.amount)} />
             <KV label="Bank charges" value={AED(Number(data.bankCharges))} />
             <KV label="Total recoverable from tenant" value={AED(cheque.amount + Number(data.bankCharges))} strong />

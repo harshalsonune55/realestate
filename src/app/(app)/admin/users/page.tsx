@@ -62,7 +62,7 @@ export default async function UsersPage() {
 
       <Card className="mb-5" padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink-900">
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
             <UserCog size={17} className="text-brand-600" /> Employees
           </h2>
         </div>
@@ -83,14 +83,14 @@ export default async function UsersPage() {
                 <tr key={u.id}>
                   <TD>
                     <div className="flex items-center gap-2.5">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-[10.5px] font-semibold text-slate-600">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-subtle text-[10.5px] font-semibold text-fg-soft">
                         {u.name.split(" ").slice(0, 2).map((p) => p[0]).join("")}
                       </span>
-                      <span className="font-medium text-ink-900">{u.name}</span>
+                      <span className="font-medium text-fg">{u.name}</span>
                     </div>
                   </TD>
-                  <TD className="text-slate-600">{u.title}</TD>
-                  <TD className="text-[12px] text-slate-500">{u.email}</TD>
+                  <TD className="text-fg-soft">{u.title}</TD>
+                  <TD className="text-[12px] text-muted">{u.email}</TD>
                   <TD>
                     <Badge tone={u.role === "admin" ? "gold" : u.role === "manager" ? "good" : "info"}>
                       {ROLE_LABEL[u.role]}
@@ -113,10 +113,10 @@ export default async function UsersPage() {
 
       <Card padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink-900">
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
             <ShieldCheck size={17} className="text-brand-600" /> Permission matrix
           </h2>
-          <p className="mt-0.5 text-[12.5px] text-slate-500">
+          <p className="mt-0.5 text-[12.5px] text-muted">
             What each role can do. A blank cell means the screen and the action are both hidden.
           </p>
         </div>
@@ -124,13 +124,13 @@ export default async function UsersPage() {
           <table className="w-full min-w-[720px] text-[12.5px]">
             <thead>
               <tr>
-                <th className="border-b border-line pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                <th className="border-b border-line pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-muted">
                   Capability
                 </th>
                 {ROLES.map((r) => (
                   <th
                     key={r}
-                    className="border-b border-line pb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500"
+                    className="border-b border-line pb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted"
                   >
                     {titleCase(r)}
                   </th>
@@ -143,22 +143,22 @@ export default async function UsersPage() {
                   <tr>
                     <td
                       colSpan={ROLES.length + 1}
-                      className="bg-slate-50 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500"
+                      className="bg-subtle px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted"
                     >
                       {g.title}
                     </td>
                   </tr>
                   {g.perms.map((p) => (
                     <tr key={p.key}>
-                      <td className="border-b border-slate-100 py-2 pr-4 text-slate-700">{p.label}</td>
+                      <td className="border-b border-line-soft py-2 pr-4 text-fg-soft">{p.label}</td>
                       {ROLES.map((r) => {
                         const allowed = ROLE_PERMS[r].includes(p.key);
                         return (
-                          <td key={r} className="border-b border-slate-100 py-2 text-center">
+                          <td key={r} className="border-b border-line-soft py-2 text-center">
                             {allowed ? (
                               <Check size={15} className="mx-auto text-brand-600" />
                             ) : (
-                              <Minus size={15} className="mx-auto text-slate-200" />
+                              <Minus size={15} className="mx-auto text-faint" />
                             )}
                           </td>
                         );
@@ -175,8 +175,8 @@ export default async function UsersPage() {
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ROLES.map((r) => (
           <Card key={r}>
-            <p className="text-[13.5px] font-semibold text-ink-900">{ROLE_LABEL[r]}</p>
-            <p className="mt-1 text-[12px] text-slate-500">
+            <p className="text-[13.5px] font-semibold text-fg">{ROLE_LABEL[r]}</p>
+            <p className="mt-1 text-[12px] text-muted">
               {
                 {
                   admin: "Full access including user management. Reserved for the systems administrator.",
@@ -191,7 +191,7 @@ export default async function UsersPage() {
             <p
               className={cx(
                 "mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium",
-                r === "manager" ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"
+                r === "manager" ? "bg-brand-50 text-brand-700" : "bg-subtle text-fg-soft"
               )}
             >
               {ROLE_PERMS[r].length} capabilities

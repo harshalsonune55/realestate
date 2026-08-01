@@ -117,19 +117,19 @@ export default async function ChequesPage({
             className={cx(
               "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
               flag === t.key
-                ? "border-ink-900 bg-ink-900 text-white"
+                ? "border-inverse bg-inverse text-white"
                 : t.key === "overdue" && counts.overdue > 0
                 ? "border-red-200 bg-red-50 text-red-700 hover:border-red-300"
                 : t.key === "bounced" && counts.bounced > 0
                 ? "border-red-200 bg-red-50 text-red-700 hover:border-red-300"
-                : "border-line bg-white text-slate-600 hover:border-slate-300"
+                : "border-line bg-surface text-fg-soft hover:border-line-strong"
             )}
           >
             {t.label}
             <span
               className={cx(
                 "tnum rounded px-1.5 py-0.5 text-[10.5px]",
-                flag === t.key ? "bg-white/15" : "bg-slate-100 text-slate-500"
+                flag === t.key ? "bg-surface/15" : "bg-subtle text-muted"
               )}
             >
               {counts[t.key] ?? 0}
@@ -142,17 +142,17 @@ export default async function ChequesPage({
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3">
           <form action="/cheques" className="relative">
             <input type="hidden" name="flag" value={flag} />
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
             <input
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Cheque number, tenant, unit or bank…"
-              className="h-9 w-72 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
-          <p className="text-[12.5px] text-slate-500">
-            <b className="tnum text-ink-900">{total.toLocaleString("en-US")}</b> cheques ·{" "}
-            <b className="tnum text-ink-900">{AED(value)}</b>
+          <p className="text-[12.5px] text-muted">
+            <b className="tnum text-fg">{total.toLocaleString("en-US")}</b> cheques ·{" "}
+            <b className="tnum text-fg">{AED(value)}</b>
           </p>
         </div>
 
@@ -180,14 +180,14 @@ export default async function ChequesPage({
                       <TD>
                         <div className="flex items-center gap-2">
                           {late && <AlertTriangle size={13} className="shrink-0 text-red-500" />}
-                          <span className={cx("font-medium", late ? "text-red-700" : "text-ink-900")}>
+                          <span className={cx("font-medium", late ? "text-red-700" : "text-fg")}>
                             {fmtDate(r.cheque.dueDate)}
                           </span>
                         </div>
                         <span
                           className={cx(
                             "block text-[11px]",
-                            late ? "font-medium text-red-600" : "text-slate-400"
+                            late ? "font-medium text-red-600" : "text-faint"
                           )}
                         >
                           {late
@@ -196,23 +196,23 @@ export default async function ChequesPage({
                         </span>
                       </TD>
                       <TD>
-                        <Link href={`/cheques/${r.cheque.id}`} className="tnum font-medium text-ink-900 hover:text-brand-600">
+                        <Link href={`/cheques/${r.cheque.id}`} className="tnum font-medium text-fg hover:text-brand-600">
                           {r.cheque.chequeNo}
                         </Link>
-                        <span className="block text-[11px] text-slate-400">
+                        <span className="block text-[11px] text-faint">
                           {r.cheque.bank} · {r.cheque.seq}/{r.cheque.ofTotal}
                         </span>
                       </TD>
                       <TD>
-                        <span className="font-medium text-ink-900">{r.unit.unitNo}</span>
-                        <span className="block text-[11px] text-slate-400">{r.property}</span>
+                        <span className="font-medium text-fg">{r.unit.unitNo}</span>
+                        <span className="block text-[11px] text-faint">{r.property}</span>
                       </TD>
                       <TD className="max-w-[190px]">
                         <Link href={`/tenants/${r.tenant.id}`} className="block truncate hover:text-brand-600">
                           {r.tenant.name}
                         </Link>
                       </TD>
-                      <TD align="right" className="tnum font-medium text-ink-900">
+                      <TD align="right" className="tnum font-medium text-fg">
                         {AED(r.cheque.amount)}
                       </TD>
                       <TD>
@@ -230,19 +230,19 @@ export default async function ChequesPage({
                         {r.cheque.status === "pending" && can(user.role, "cheques.deposit") ? (
                           <Link
                             href={`/cheques/${r.cheque.id}/deposit`}
-                            className="inline-flex items-center gap-1 rounded-md bg-brand-600 px-2.5 py-1 text-[11.5px] font-medium text-white transition hover:bg-brand-700"
+                            className="inline-flex items-center gap-1 rounded-md bg-brand-solid px-2.5 py-1 text-[11.5px] font-medium text-white transition hover:bg-brand-solid-hover"
                           >
                             Deposit
                           </Link>
                         ) : r.cheque.status === "deposited" && can(user.role, "cheques.bounce") ? (
                           <Link
                             href={`/cheques/${r.cheque.id}`}
-                            className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1 text-[11.5px] font-medium text-slate-600 transition hover:text-ink-900"
+                            className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1 text-[11.5px] font-medium text-fg-soft transition hover:text-fg"
                           >
                             Update
                           </Link>
                         ) : (
-                          <Link href={`/cheques/${r.cheque.id}`} className="text-[11.5px] text-slate-400 hover:text-brand-600">
+                          <Link href={`/cheques/${r.cheque.id}`} className="text-[11.5px] text-faint hover:text-brand-600">
                             View
                           </Link>
                         )}
@@ -257,7 +257,7 @@ export default async function ChequesPage({
 
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3">
-            <p className="text-[12px] text-slate-500">
+            <p className="text-[12px] text-muted">
               Page {page} of {pages}
             </p>
             <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default async function ChequesPage({
                 href={link({ page: String(Math.max(1, page - 1)) })}
                 className={cx(
                   "inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12.5px]",
-                  page === 1 ? "pointer-events-none opacity-40" : "hover:bg-slate-50"
+                  page === 1 ? "pointer-events-none opacity-40" : "hover:bg-subtle"
                 )}
               >
                 <ChevronLeft size={14} /> Previous
@@ -274,7 +274,7 @@ export default async function ChequesPage({
                 href={link({ page: String(Math.min(pages, page + 1)) })}
                 className={cx(
                   "inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12.5px]",
-                  page === pages ? "pointer-events-none opacity-40" : "hover:bg-slate-50"
+                  page === pages ? "pointer-events-none opacity-40" : "hover:bg-subtle"
                 )}
               >
                 Next <ChevronRight size={14} />

@@ -71,10 +71,10 @@ export default async function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">
             {greeting}, {user.name.split(" ")[0]}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted">
             {new Date().toLocaleDateString("en-GB", {
               weekday: "long",
               day: "numeric",
@@ -188,18 +188,18 @@ export default async function Dashboard() {
             <Link
               key={a.href}
               href={a.href}
-              className="group flex items-center gap-3 rounded-xl border border-line bg-white p-3.5 transition hover:border-brand-400 hover:shadow-md"
+              className="group flex items-center gap-3 rounded-xl border border-line bg-surface p-3.5 transition hover:border-brand-400 hover:shadow-md"
             >
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-solid group-hover:text-white">
                 <a.icon size={17} />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-ink-900">{a.title}</p>
-                <p className="truncate text-[12px] text-slate-500">{a.sub}</p>
+                <p className="truncate text-[13px] font-semibold text-fg">{a.title}</p>
+                <p className="truncate text-[12px] text-muted">{a.sub}</p>
               </div>
               <ArrowUpRight
                 size={14}
-                className="ml-auto shrink-0 text-slate-300 group-hover:text-brand-600"
+                className="ml-auto shrink-0 text-faint group-hover:text-brand-600"
               />
             </Link>
           ))}
@@ -247,31 +247,31 @@ export default async function Dashboard() {
                                 late ? "bg-red-500" : "bg-amber-400"
                               )}
                             />
-                            <span className={cx("font-medium", late ? "text-red-600" : "text-ink-900")}>
+                            <span className={cx("font-medium", late ? "text-red-600" : "text-fg")}>
                               {fmtDate(e.cheque.dueDate)}
                             </span>
                           </div>
-                          <span className="ml-3.5 text-[11px] text-slate-400">
+                          <span className="ml-3.5 text-[11px] text-faint">
                             {relative(e.cheque.dueDate)}
                           </span>
                         </TD>
                         <TD>
-                          <span className="font-medium text-ink-900">{e.unit.unitNo}</span>
-                          <span className="block text-[11px] text-slate-400">{e.property}</span>
+                          <span className="font-medium text-fg">{e.unit.unitNo}</span>
+                          <span className="block text-[11px] text-faint">{e.property}</span>
                         </TD>
                         <TD className="max-w-[180px] truncate">{e.tenant.name}</TD>
                         <TD>
                           <span className="tnum">{e.cheque.chequeNo}</span>
-                          <span className="block text-[11px] text-slate-400">{e.cheque.bank}</span>
+                          <span className="block text-[11px] text-faint">{e.cheque.bank}</span>
                         </TD>
-                        <TD align="right" className="tnum font-medium text-ink-900">
+                        <TD align="right" className="tnum font-medium text-fg">
                           {AED(e.cheque.amount)}
                         </TD>
                         <TD>
                           {can(user.role, "cheques.deposit") ? (
                             <Link
                               href={`/cheques/${e.cheque.id}/deposit`}
-                              className="inline-flex items-center gap-1 rounded-md bg-brand-600 px-2 py-1 text-[11px] font-medium text-white transition hover:bg-brand-700"
+                              className="inline-flex items-center gap-1 rounded-md bg-brand-solid px-2 py-1 text-[11px] font-medium text-white transition hover:bg-brand-solid-hover"
                             >
                               Deposit
                               <ChevronRight size={12} />
@@ -297,21 +297,21 @@ export default async function Dashboard() {
             <div className="flex h-44 items-end gap-2">
               {forecast.map((f) => (
                 <div key={f.month} className="group flex flex-1 flex-col items-center gap-1.5">
-                  <span className="text-[10px] font-medium text-slate-400 opacity-0 transition group-hover:opacity-100">
+                  <span className="text-[10px] font-medium text-faint opacity-0 transition group-hover:opacity-100">
                     {AEDshort(f.due)}
                   </span>
                   <div className="relative flex w-full flex-1 items-end">
                     <div
-                      className="w-full rounded-t bg-brand-500/85 transition group-hover:bg-brand-600"
+                      className="w-full rounded-t bg-brand-500/85 transition group-hover:bg-brand-solid"
                       style={{ height: `${Math.max(3, (f.due / maxDue) * 100)}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-slate-500">{f.label}</span>
-                  <span className="tnum text-[10px] text-slate-300">{f.count}</span>
+                  <span className="text-[10px] text-muted">{f.label}</span>
+                  <span className="tnum text-[10px] text-faint">{f.count}</span>
                 </div>
               ))}
             </div>
-            <p className="mt-3 border-t border-line pt-3 text-[11px] text-slate-400">
+            <p className="mt-3 border-t border-line pt-3 text-[11px] text-faint">
               Bottom row shows the number of cheques falling due that month.
             </p>
           </Card>
@@ -347,16 +347,16 @@ export default async function Dashboard() {
                             ? "bg-red-500"
                             : t.priority === "high"
                             ? "bg-amber-400"
-                            : "bg-slate-300"
+                            : "bg-line-strong"
                         )}
                       />
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium text-ink-900">{t.title}</p>
-                        <p className="truncate text-[11.5px] text-slate-500">{t.detail}</p>
+                        <p className="truncate text-[13px] font-medium text-fg">{t.title}</p>
+                        <p className="truncate text-[11.5px] text-muted">{t.detail}</p>
                         <p
                           className={cx(
                             "mt-1 text-[11px]",
-                            t.status === "overdue" ? "font-medium text-red-600" : "text-slate-400"
+                            t.status === "overdue" ? "font-medium text-red-600" : "text-faint"
                           )}
                         >
                           Due {fmtDate(t.dueDate)} · {relative(t.dueDate)}
@@ -382,7 +382,7 @@ export default async function Dashboard() {
                         ? "border-red-200 bg-red-50/60"
                         : a.severity === "warning"
                         ? "border-amber-200 bg-amber-50/50"
-                        : "border-line bg-white"
+                        : "border-line bg-surface"
                     )}
                   >
                     {a.severity === "critical" ? (
@@ -393,8 +393,8 @@ export default async function Dashboard() {
                       <Info size={14} className="mt-0.5 shrink-0 text-sky-600" />
                     )}
                     <div className="min-w-0">
-                      <p className="text-[12.5px] font-medium leading-snug text-ink-900">{a.title}</p>
-                      <p className="mt-0.5 text-[11.5px] leading-snug text-slate-500">{a.detail}</p>
+                      <p className="text-[12.5px] font-medium leading-snug text-fg">{a.title}</p>
+                      <p className="mt-0.5 text-[11.5px] leading-snug text-muted">{a.detail}</p>
                     </div>
                   </Link>
                 </li>
@@ -411,10 +411,10 @@ export default async function Dashboard() {
                 return (
                   <Link key={p.id} href={`/properties/${p.id}`} className="block group">
                     <div className="mb-1 flex items-baseline justify-between gap-2">
-                      <span className="truncate text-[12.5px] font-medium text-ink-900 group-hover:text-brand-600">
+                      <span className="truncate text-[12.5px] font-medium text-fg group-hover:text-brand-600">
                         {p.name}
                       </span>
-                      <span className="tnum shrink-0 text-[11.5px] text-slate-500">
+                      <span className="tnum shrink-0 text-[11.5px] text-muted">
                         {occ}/{us.length}
                       </span>
                     </div>
@@ -444,12 +444,12 @@ export default async function Dashboard() {
             <ul className="space-y-2.5">
               {recent.map((a) => (
                 <li key={a.id} className="flex gap-2.5 text-[12px]">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-line-strong" />
                   <div className="min-w-0">
-                    <p className="truncate text-ink-900">
+                    <p className="truncate text-fg">
                       <b className="font-medium">{a.actorName.split(" ")[0]}</b> {a.summary.toLowerCase()}
                     </p>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-faint">
                       {new Date(a.at).toLocaleString("en-GB", {
                         day: "2-digit",
                         month: "short",

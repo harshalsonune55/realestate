@@ -56,7 +56,7 @@ function Section({
 }) {
   return items.length === 0 ? null : (
       <div>
-        <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-ink-900">
+        <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-fg">
           {tone === "critical" ? (
             <TriangleAlert size={15} className="text-red-600" />
           ) : tone === "warning" ? (
@@ -77,7 +77,7 @@ function Section({
                   ? "border-red-200 bg-red-50"
                   : tone === "warning"
                   ? "border-amber-200 bg-amber-50"
-                  : "border-line bg-white"
+                  : "border-line bg-surface"
               )}
             >
               <span
@@ -92,7 +92,7 @@ function Section({
                 <p
                   className={cx(
                     "text-[13.5px] font-semibold",
-                    tone === "critical" ? "text-red-900" : tone === "warning" ? "text-amber-900" : "text-ink-900"
+                    tone === "critical" ? "text-red-900" : tone === "warning" ? "text-amber-900" : "text-fg"
                   )}
                 >
                   {a.title}
@@ -100,13 +100,13 @@ function Section({
                 <p
                   className={cx(
                     "mt-0.5 text-[12.5px]",
-                    tone === "critical" ? "text-red-700" : tone === "warning" ? "text-amber-800" : "text-slate-500"
+                    tone === "critical" ? "text-red-700" : tone === "warning" ? "text-amber-800" : "text-muted"
                   )}
                 >
                   {a.detail}
                 </p>
               </div>
-              <ChevronRight size={16} className="mt-1 shrink-0 text-slate-400" />
+              <ChevronRight size={16} className="mt-1 shrink-0 text-faint" />
             </Link>
           ))}
         </div>
@@ -159,10 +159,10 @@ export default async function AlertsPage() {
           />
           <ul className="space-y-3">
             {RULES.map((r) => (
-              <li key={r.title} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                <p className="text-[12.5px] font-medium text-ink-900">{r.title}</p>
-                <p className="mt-0.5 text-[11.5px] leading-snug text-slate-500">{r.detail}</p>
-                <p className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] text-slate-500">
+              <li key={r.title} className="border-b border-line-soft pb-3 last:border-0 last:pb-0">
+                <p className="text-[12.5px] font-medium text-fg">{r.title}</p>
+                <p className="mt-0.5 text-[11.5px] leading-snug text-muted">{r.detail}</p>
+                <p className="mt-1 inline-flex rounded-full bg-subtle px-2 py-0.5 text-[10.5px] text-muted">
                   {r.when}
                 </p>
               </li>

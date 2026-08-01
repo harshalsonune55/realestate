@@ -91,7 +91,7 @@ export default function MaintenanceWizard({
             </Row>
 
             {unit && (
-              <div className="rounded-lg border border-line bg-slate-50 p-4">
+              <div className="rounded-lg border border-line bg-subtle p-4">
                 <KV label="Unit" value={`${unit.unitNo} · ${unit.type}`} strong />
                 <KV label="Occupancy" value={unit.tenantName ? "Occupied" : "Vacant"} />
                 <KV label="Tenant" value={unit.tenantName ?? "No active tenancy"} />
@@ -172,20 +172,20 @@ export default function MaintenanceWizard({
                       ? pr === "emergency"
                         ? "border-red-400 bg-red-50 ring-1 ring-red-400"
                         : "border-brand-500 bg-brand-50/70 ring-1 ring-brand-500"
-                      : "border-line bg-white hover:border-brand-300"
+                      : "border-line bg-surface hover:border-brand-300"
                   )}
                 >
                   <span
                     className={cx(
                       "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white",
-                      pr === "emergency" ? "bg-red-600" : pr === "high" ? "bg-amber-500" : pr === "medium" ? "bg-sky-600" : "bg-slate-400"
+                      pr === "emergency" ? "bg-red-600" : pr === "high" ? "bg-amber-500" : pr === "medium" ? "bg-sky-600" : "bg-faint"
                     )}
                   >
                     {SLA_DAYS[pr]}d
                   </span>
                   <span>
-                    <span className="block text-[13px] font-medium capitalize text-ink-900">{pr}</span>
-                    <span className="block text-[11.5px] leading-snug text-slate-500">{PRIORITY_HELP[pr]}</span>
+                    <span className="block text-[13px] font-medium capitalize text-fg">{pr}</span>
+                    <span className="block text-[11.5px] leading-snug text-muted">{PRIORITY_HELP[pr]}</span>
                   </span>
                 </button>
               ))}

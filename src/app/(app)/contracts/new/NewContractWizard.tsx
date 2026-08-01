@@ -120,7 +120,7 @@ export default function NewContractWizard({
 
             {data.propertyId && (
               <div>
-                <p className="mb-2 text-[12.5px] font-medium text-ink-900">
+                <p className="mb-2 text-[12.5px] font-medium text-fg">
                   Vacant units <span className="text-red-500">*</span>
                 </p>
                 {list.length === 0 ? (
@@ -144,16 +144,16 @@ export default function NewContractWizard({
                           "rounded-lg border p-3 text-left transition",
                           data.unitId === u.id
                             ? "border-brand-500 bg-brand-50/70 ring-1 ring-brand-500"
-                            : "border-line bg-white hover:border-brand-300"
+                            : "border-line bg-surface hover:border-brand-300"
                         )}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-[14px] font-semibold text-ink-900">{u.unitNo}</span>
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-medium text-slate-600">
+                          <span className="text-[14px] font-semibold text-fg">{u.unitNo}</span>
+                          <span className="rounded bg-subtle px-1.5 py-0.5 text-[10.5px] font-medium text-fg-soft">
                             {u.type}
                           </span>
                         </div>
-                        <p className="mt-1 text-[11.5px] text-slate-500">
+                        <p className="mt-1 text-[11.5px] text-muted">
                           Floor {u.floor} · {u.sizeSqft} sqft · {u.parkingSlots} parking
                         </p>
                         <p className="mt-1.5 text-[12px] font-medium tnum text-brand-700">
@@ -454,7 +454,7 @@ export default function NewContractWizard({
                   onClick={() =>
                     set({ cheques: buildSchedule(data.chequeCount, data.annualRent, data.startDate, data.cheques) })
                   }
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] font-medium text-ink-900 hover:bg-slate-50"
+                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-[13px] font-medium text-fg hover:bg-subtle"
                 >
                   <Wand2 size={15} className="text-brand-600" />
                   Recalculate dates and amounts
@@ -465,7 +465,7 @@ export default function NewContractWizard({
             <div className="overflow-x-auto scroll-thin">
               <table className="w-full min-w-[720px] text-[13px]">
                 <thead>
-                  <tr className="border-b border-line text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-line text-[11px] uppercase tracking-wide text-muted">
                     <th className="pb-2 text-left font-semibold">#</th>
                     <th className="pb-2 text-left font-semibold">Cheque number</th>
                     <th className="pb-2 text-left font-semibold">Bank</th>
@@ -477,9 +477,9 @@ export default function NewContractWizard({
                   {data.cheques.map((c, i) => {
                     const bad = !validChequeNo(c.chequeNo) && c.chequeNo.length > 0;
                     return (
-                      <tr key={i} className="border-b border-slate-100">
+                      <tr key={i} className="border-b border-line-soft">
                         <td className="py-2 pr-2">
-                          <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">
+                          <span className="grid h-6 w-6 place-items-center rounded-full bg-subtle text-[11px] font-semibold text-fg-soft">
                             {i + 1}
                           </span>
                         </td>
@@ -565,7 +565,7 @@ export default function NewContractWizard({
               <span
                 className={cx(
                   "tnum rounded-lg px-3 py-1.5 text-[13px] font-semibold",
-                  balanced ? "bg-brand-600 text-white" : "bg-amber-500 text-white"
+                  balanced ? "bg-brand-solid text-white" : "bg-amber-500 text-white"
                 )}
               >
                 {diff === 0 ? "Balanced" : `${diff > 0 ? "Short" : "Over"} by ${AED(Math.abs(diff))}`}
@@ -619,8 +619,8 @@ export default function NewContractWizard({
               </Field>
             </Row>
 
-            <div className="rounded-lg border border-line bg-slate-50 p-4">
-              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+            <div className="rounded-lg border border-line bg-subtle p-4">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Total due from tenant on move-in
               </p>
               <KV label="First cheque" value={AED(data.cheques[0]?.amount ?? 0)} />
@@ -652,9 +652,9 @@ export default function NewContractWizard({
         const done = REQUIRED_DOCS.filter((d2) => data.docs[d2.key]).length;
         return (
           <>
-            <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2.5">
-              <span className="text-[12.5px] text-slate-600">Attached</span>
-              <span className="tnum text-[13px] font-semibold text-ink-900">
+            <div className="flex items-center justify-between rounded-lg bg-subtle px-4 py-2.5">
+              <span className="text-[12.5px] text-fg-soft">Attached</span>
+              <span className="tnum text-[13px] font-semibold text-fg">
                 {done} of {REQUIRED_DOCS.length}
               </span>
             </div>
@@ -720,7 +720,7 @@ export default function NewContractWizard({
           <>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-line p-4">
-                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                   <Building2 size={13} /> Unit
                 </p>
                 <KV label="Building" value={prop?.name ?? "—"} />
@@ -728,7 +728,7 @@ export default function NewContractWizard({
                 <KV label="Size" value={unit ? `${unit.sizeSqft} sqft` : "—"} />
               </div>
               <div className="rounded-lg border border-line p-4">
-                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                   <User size={13} /> Tenant
                 </p>
                 <KV label="Name" value={tenantName || "—"} strong />
@@ -742,14 +742,14 @@ export default function NewContractWizard({
                 />
               </div>
               <div className="rounded-lg border border-line p-4">
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-slate-500">Terms</p>
+                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">Terms</p>
                 <KV label="Start" value={fmtDate(data.startDate)} />
                 <KV label="Term" value={`${data.termMonths} months`} />
                 <KV label="Annual rent" value={AED(Number(data.annualRent))} strong />
                 <KV label="Ejari / Tawtheeq" value={data.ejariNo} />
               </div>
               <div className="rounded-lg border border-line p-4">
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-slate-500">Money</p>
+                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">Money</p>
                 <KV label="Cheques" value={`${data.cheques.length} · total ${AED(chequeTotal(data.cheques))}`} />
                 <KV label="Security deposit" value={AED(Number(data.securityDeposit))} />
                 <KV label="Commission" value={AED(Number(data.commission))} />
@@ -758,19 +758,19 @@ export default function NewContractWizard({
             </div>
 
             <div className="rounded-lg border border-line">
-              <p className="border-b border-line px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+              <p className="border-b border-line px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Cheque schedule
               </p>
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-line-soft">
                 {data.cheques.map((c, i) => (
                   <div key={i} className="flex items-center gap-3 px-4 py-2 text-[12.5px]">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-slate-100 text-[10px] font-semibold text-slate-600">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-subtle text-[10px] font-semibold text-fg-soft">
                       {i + 1}
                     </span>
-                    <span className="tnum w-20 font-medium text-ink-900">{c.chequeNo}</span>
-                    <span className="w-32 truncate text-slate-600">{c.bank}</span>
-                    <span className="text-slate-600">{fmtDate(c.dueDate)}</span>
-                    <span className="tnum ml-auto font-medium text-ink-900">{AED(c.amount)}</span>
+                    <span className="tnum w-20 font-medium text-fg">{c.chequeNo}</span>
+                    <span className="w-32 truncate text-fg-soft">{c.bank}</span>
+                    <span className="text-fg-soft">{fmtDate(c.dueDate)}</span>
+                    <span className="tnum ml-auto font-medium text-fg">{AED(c.amount)}</span>
                   </div>
                 ))}
               </div>
@@ -784,9 +784,9 @@ export default function NewContractWizard({
               />
             </Field>
 
-            <div className="rounded-lg border border-ink-900/15 bg-ink-900/[0.03] p-4">
-              <p className="mb-2 text-[13px] font-semibold text-ink-900">Final confirmation</p>
-              <p className="mb-3 text-[12.5px] text-slate-600">
+            <div className="rounded-lg border border-inverse/15 bg-inverse/[0.03] p-4">
+              <p className="mb-2 text-[13px] font-semibold text-fg">Final confirmation</p>
+              <p className="mb-3 text-[12.5px] text-fg-soft">
                 Type the tenant&apos;s name exactly as it appears above to confirm you have checked
                 every detail on this contract.
               </p>

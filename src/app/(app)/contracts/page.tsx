@@ -98,15 +98,15 @@ export default async function ContractsPage({
             className={cx(
               "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
               status === t.key
-                ? "border-ink-900 bg-ink-900 text-white"
-                : "border-line bg-white text-slate-600 hover:border-slate-300"
+                ? "border-inverse bg-inverse text-white"
+                : "border-line bg-surface text-fg-soft hover:border-line-strong"
             )}
           >
             {t.label}
             <span
               className={cx(
                 "tnum rounded px-1.5 py-0.5 text-[10.5px]",
-                status === t.key ? "bg-white/15" : "bg-slate-100 text-slate-500"
+                status === t.key ? "bg-surface/15" : "bg-subtle text-muted"
               )}
             >
               {counts[t.key] ?? 0}
@@ -119,15 +119,15 @@ export default async function ContractsPage({
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3">
           <form action="/contracts" className="relative">
             <input type="hidden" name="status" value={status} />
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
             <input
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Contract ref, tenant, unit or Ejari…"
-              className="h-9 w-72 rounded-lg border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
-          <p className="tnum text-[12.5px] text-slate-500">{rows.length.toLocaleString("en-US")} contracts</p>
+          <p className="tnum text-[12.5px] text-muted">{rows.length.toLocaleString("en-US")} contracts</p>
         </div>
 
         <div className="px-5 pb-4 pt-2">
@@ -155,17 +155,17 @@ export default async function ContractsPage({
                       <TD>
                         <Link
                           href={`/contracts/${r.contract.id}`}
-                          className="font-medium text-ink-900 hover:text-brand-600"
+                          className="font-medium text-fg hover:text-brand-600"
                         >
                           {r.contract.ref}
                         </Link>
-                        <span className="block text-[11px] text-slate-400">
+                        <span className="block text-[11px] text-faint">
                           Ejari {r.contract.ejariNo}
                         </span>
                       </TD>
                       <TD>
-                        <span className="font-medium text-ink-900">{r.unit?.unitNo}</span>
-                        <span className="block text-[11px] text-slate-400">{r.property?.name}</span>
+                        <span className="font-medium text-fg">{r.unit?.unitNo}</span>
+                        <span className="block text-[11px] text-faint">{r.property?.name}</span>
                       </TD>
                       <TD className="max-w-[190px]">
                         <span className="block truncate">{r.tenant?.name}</span>
@@ -175,17 +175,17 @@ export default async function ContractsPage({
                         <span
                           className={cx(
                             "block text-[11px]",
-                            days >= 0 && days <= 60 ? "font-medium text-amber-600" : "text-slate-400"
+                            days >= 0 && days <= 60 ? "font-medium text-amber-600" : "text-faint"
                           )}
                         >
                           to {fmtDate(r.contract.endDate)}
                         </span>
                       </TD>
-                      <TD align="right" className="tnum font-medium text-ink-900">
+                      <TD align="right" className="tnum font-medium text-fg">
                         {AED(r.contract.annualRent)}
                       </TD>
                       <TD align="center">
-                        <span className="tnum text-[12px] text-slate-600">
+                        <span className="tnum text-[12px] text-fg-soft">
                           {cleared}/{r.cheques.length}
                         </span>
                       </TD>
@@ -202,7 +202,7 @@ export default async function ContractsPage({
 
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
-            <span className="text-slate-500">
+            <span className="text-muted">
               Page {page} of {pages}
             </span>
             <div className="flex gap-2">

@@ -45,8 +45,8 @@ export default function DepositWizard({ cheque }: { cheque: ChequeInfo }) {
       problems: (d) => p(d, 0),
       render: ({ data, set }) => (
         <>
-          <div className="rounded-xl border border-line bg-slate-50 p-4">
-            <p className="mb-3 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+          <div className="rounded-xl border border-line bg-subtle p-4">
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-wide text-muted">
               What the system holds on record
             </p>
             <div className="grid gap-x-8 sm:grid-cols-2">

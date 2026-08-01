@@ -66,7 +66,7 @@ export default async function ChequePage({
     <div>
       <Link
         href="/cheques"
-        className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-ink-900"
+        className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-fg"
       >
         <ArrowLeft size={14} /> All cheques
       </Link>
@@ -161,21 +161,21 @@ export default async function ChequePage({
               sub="Each stage is stamped with a date and a named employee."
               icon={<CalendarClock size={17} />}
             />
-            <ol className="relative ml-2 border-l border-slate-200 pl-6">
+            <ol className="relative ml-2 border-l border-line pl-6">
               {timeline.map((t, i) => (
                 <li key={i} className="relative pb-5 last:pb-0">
                   <span
                     className={cx(
                       "absolute -left-[31px] grid h-5 w-5 place-items-center rounded-full ring-4 ring-white",
-                      t.bad ? "bg-red-500" : t.done ? "bg-brand-600" : "bg-slate-200"
+                      t.bad ? "bg-red-500" : t.done ? "bg-brand-solid" : "bg-subtle-hover"
                     )}
                   >
                     {t.done && <CheckCircle2 size={12} className="text-white" />}
                   </span>
-                  <p className={cx("text-[13px] font-medium", t.done ? "text-ink-900" : "text-slate-400")}>
+                  <p className={cx("text-[13px] font-medium", t.done ? "text-fg" : "text-faint")}>
                     {t.label}
                   </p>
-                  <p className="text-[11.5px] text-slate-500">
+                  <p className="text-[11.5px] text-muted">
                     {t.at ? fmtDate(t.at.slice(0, 10)) : "Pending"} · {t.detail}
                   </p>
                 </li>
@@ -192,16 +192,16 @@ export default async function ChequePage({
                   href={`/cheques/${c.id}`}
                   className={cx(
                     "flex items-center gap-3 rounded-lg border px-3 py-2 text-[12.5px] transition",
-                    c.id === cheque.id ? "border-brand-400 bg-brand-50/60" : "border-line hover:bg-slate-50"
+                    c.id === cheque.id ? "border-brand-400 bg-brand-50/60" : "border-line hover:bg-subtle"
                   )}
                 >
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-subtle text-[11px] font-semibold text-fg-soft">
                     {c.seq}
                   </span>
-                  <span className="tnum w-16 font-medium text-ink-900">{c.chequeNo}</span>
-                  <span className="w-28 truncate text-slate-500">{c.bank}</span>
-                  <span className="w-24 text-slate-500">{fmtDate(c.dueDate)}</span>
-                  <span className="tnum ml-auto font-medium text-ink-900">{AED(c.amount)}</span>
+                  <span className="tnum w-16 font-medium text-fg">{c.chequeNo}</span>
+                  <span className="w-28 truncate text-muted">{c.bank}</span>
+                  <span className="w-24 text-muted">{fmtDate(c.dueDate)}</span>
+                  <span className="tnum ml-auto font-medium text-fg">{AED(c.amount)}</span>
                   <ChequeStatusBadge status={c.status} />
                 </Link>
               ))}
@@ -236,8 +236,8 @@ export default async function ChequePage({
               <ul className="space-y-2">
                 {tasks.map((t) => (
                   <li key={t.id} className="rounded-lg border border-line p-2.5">
-                    <p className="text-[12.5px] font-medium text-ink-900">{t.title}</p>
-                    <p className="mt-0.5 text-[11.5px] text-slate-500">
+                    <p className="text-[12.5px] font-medium text-fg">{t.title}</p>
+                    <p className="mt-0.5 text-[11.5px] text-muted">
                       {d.users.find((u) => u.id === t.assignedTo)?.name} · due {fmtDate(t.dueDate)}
                     </p>
                     <div className="mt-1.5">
@@ -254,19 +254,19 @@ export default async function ChequePage({
           <Card>
             <CardHead title="Audit trail" sub="Who touched this cheque." icon={<ShieldCheck size={17} />} />
             {trail.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No changes recorded yet.</p>
+              <p className="text-[12.5px] text-faint">No changes recorded yet.</p>
             ) : (
               <ul className="space-y-3">
                 {trail.map((a) => (
                   <li key={a.id} className="text-[12px]">
-                    <p className="font-medium text-ink-900">{a.summary}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="font-medium text-fg">{a.summary}</p>
+                    <p className="text-[11px] text-muted">
                       {a.actorName} · {fmtDateTime(a.at)} · {a.ip}
                     </p>
                     {a.changes && (
                       <ul className="mt-1 space-y-0.5">
                         {a.changes.map((c, i) => (
-                          <li key={i} className="text-[11px] text-slate-500">
+                          <li key={i} className="text-[11px] text-muted">
                             {c.field}: <span className="line-through">{c.from}</span> → <b>{c.to}</b>
                           </li>
                         ))}
