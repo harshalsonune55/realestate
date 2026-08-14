@@ -31,9 +31,23 @@ class _AiChatScreenState extends State<AiChatScreen> {
   @override
   void initState() {
     super.initState();
-    Ai.instance.load().then((_) {
-      if (mounted) setState(() {});
-    });
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    await Ai.instance.load();
+    final user = Store.instance.currentUser;
+    final saved = user == null
+        ? <ChatMessage>[]
+        : await Ai.instance.loadHistory(user.id);
+    if (!mounted) return;
+    setState(() => _history.addAll(saved));
+    if (saved.isNotEmpty) _toBottom();
+  }
+
+  void _persist() {
+    final user = Store.instance.currentUser;
+    if (user != null) Ai.instance.saveHistory(user.id, _history);
   }
 
   @override
@@ -62,9 +76,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
       );
       if (!mounted) return;
       setState(() => _history.add(ChatMessage(role: 'assistant', text: reply)));
+      _persist();
     } on AiException catch (e) {
       if (!mounted) return;
       setState(() => _error = e.message);
+      // The question is kept even when the answer failed, so a retry after a
+      // dropped connection does not mean retyping it.
+      _persist();
     } finally {
       if (mounted) setState(() => _sending = false);
       _toBottom();
@@ -93,6 +111,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
         title: const Text('Assistant'),
         backgroundColor: c.surface,
         actions: [
+          if (_history.isNotEmpty)
+            IconButton(
+              tooltip: 'Clear conversation',
+              icon: const Icon(Icons.delete_outline, size: 20),
+              onPressed: () {
+                final user = Store.instance.currentUser;
+                if (user != null) Ai.instance.clearHistory(user.id);
+                setState(() {
+                  _history.clear();
+                  _error = null;
+                });
+              },
+            ),
           IconButton(
             tooltip: 'Assistant settings',
             icon: const Icon(Icons.tune, size: 20),

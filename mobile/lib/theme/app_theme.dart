@@ -186,8 +186,13 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// Splash gradient. Fixed in both themes — the opening title card is brand
   /// furniture, not a themed surface, so it must not follow the toggle.
-  static const splashGlow = Color(0xFF2F3524);
-  static const splashGround = Color(0xFF14170E);
+  ///
+  /// Near-black, matching the pure-black panel the logo artwork sits on in the
+  /// sign-in header, so launch and sign-in read as one continuous surface. The
+  /// glow is only a few points lighter — enough to lift the centre, not enough
+  /// to look olive.
+  static const splashGlow = Color(0xFF14150F);
+  static const splashGround = Color(0xFF000000);
 
   @override
   AppColors copyWith() => this;

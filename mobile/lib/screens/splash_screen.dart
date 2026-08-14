@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen>
     const colors = AppColors.light;
 
     return Scaffold(
-      backgroundColor: colors.inverse,
+      backgroundColor: Colors.black,
       body: Container(
         decoration: const BoxDecoration(
           gradient: RadialGradient(

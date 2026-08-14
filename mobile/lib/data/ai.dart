@@ -14,6 +14,11 @@ class ChatMessage {
   const ChatMessage({required this.role, required this.text});
   final String role; // 'user' | 'assistant'
   final String text;
+
+  Map<String, dynamic> toJson() => {'role': role, 'text': text};
+
+  static ChatMessage fromJson(Map<String, dynamic> j) =>
+      ChatMessage(role: j['role'] as String, text: j['text'] as String);
 }
 
 /// Client for Groq's chat completions, which speak the OpenAI shape.
@@ -67,6 +72,55 @@ class Ai {
       await prefs.setString(_modelPref, _model!);
     } catch (_) {
       // In-memory only; the choice simply does not survive a restart.
+    }
+  }
+
+  /* ------------------------------------------------------ chat persistence
+
+     Kept per user id: a shared handset must not show one employee's
+     conversation to the next person who signs in. Cleared on sign-out for the
+     same reason. */
+
+  static String _historyKey(String userId) => 'ai_history_v1_$userId';
+
+  /// Caps what is written back, so a long-running thread cannot grow the prefs
+  /// blob without bound.
+  static const maxStoredTurns = 60;
+
+  Future<List<ChatMessage>> loadHistory(String userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_historyKey(userId));
+      if (raw == null) return [];
+      return raw
+          .map((s) => ChatMessage.fromJson(jsonDecode(s) as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> saveHistory(String userId, List<ChatMessage> history) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final trimmed = history.length > maxStoredTurns
+          ? history.sublist(history.length - maxStoredTurns)
+          : history;
+      await prefs.setStringList(
+        _historyKey(userId),
+        trimmed.map((m) => jsonEncode(m.toJson())).toList(),
+      );
+    } catch (_) {
+      // Best-effort; the thread simply does not survive a restart.
+    }
+  }
+
+  Future<void> clearHistory(String userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_historyKey(userId));
+    } catch (_) {
+      // Nothing stored to clear.
     }
   }
 

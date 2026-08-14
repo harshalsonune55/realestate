@@ -7,8 +7,11 @@ import 'screens/more_screen.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Restored before the first frame so the app opens in the saved theme rather
+  // than flashing light and correcting itself a moment later.
+  await ThemeController.instance.load();
   runApp(const AlManaraApp());
 }
 

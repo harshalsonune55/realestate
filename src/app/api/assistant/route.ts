@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
 import { briefing, type ChatTurn } from "@/lib/assistant";
+import { retrievedBlock } from "@/lib/rag";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Nothing to answer." }, { status: 400 });
   }
 
+  /* Retrieval runs against the newest question plus the one before it, so a
+     follow-up like "and when is it due?" still carries enough of the subject
+     to hit the right record. */
+  const recentQuestions = turns
+    .filter((t) => t.role === "user")
+    .slice(-2)
+    .map((t) => t.content)
+    .join(" ");
+  const system = briefing(user) + retrievedBlock(user, recentQuestions);
+
   let res: Response;
   try {
     res = await fetch(ENDPOINT, {
@@ -61,7 +72,7 @@ export async function POST(req: Request) {
         model: process.env.GROQ_MODEL ?? DEFAULT_MODEL,
         temperature: 0.2,
         messages: [
-          { role: "system", content: briefing(user) },
+          { role: "system", content: system },
           ...turns.map((t) => ({ role: t.role, content: t.content })),
         ],
       }),

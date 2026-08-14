@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/notifications.dart';
 import '../data/rbac.dart';
 import '../data/store.dart';
@@ -407,13 +408,39 @@ class ThemeController extends ChangeNotifier {
   ThemeController._();
   static final ThemeController instance = ThemeController._();
 
+  static const _pref = 'theme_mode_v1';
+
   // Light by default — the company runs the app light; dark stays available
   // behind the toggle rather than following the OS setting.
   ThemeMode _mode = ThemeMode.light;
   ThemeMode get mode => _mode;
 
+  /// Reads the saved choice. Awaited in `main()` before the first frame so the
+  /// app opens in the chosen theme rather than flashing light and correcting.
+  Future<void> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _mode = prefs.getString(_pref) == 'dark'
+          ? ThemeMode.dark
+          : ThemeMode.light;
+      notifyListeners();
+    } catch (_) {
+      // No prefs plugin — the default stands.
+    }
+  }
+
   void set(ThemeMode m) {
     _mode = m;
     notifyListeners();
+    _save(m);
+  }
+
+  Future<void> _save(ThemeMode m) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_pref, m == ThemeMode.dark ? 'dark' : 'light');
+    } catch (_) {
+      // In-memory only; the choice simply does not survive a restart.
+    }
   }
 }
