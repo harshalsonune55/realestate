@@ -65,6 +65,23 @@ export const ROLE_LABEL: Record<Role, string> = {
   viewer: "Auditor (read only)",
 };
 
+/** One line of plain English per role, shown on the signup screen. */
+export const ROLE_SUMMARY: Record<Role, string> = {
+  admin: "Full access, including user accounts and roles.",
+  manager: "Approves contracts, renewals and spend across the portfolio.",
+  accountant: "Deposits cheques, records payments and reconciles the rent roll.",
+  leasing: "Prepares contracts, handles tenants and processes renewals.",
+  maintenance: "Raises and progresses work orders on units.",
+  viewer: "Reads everything, changes nothing.",
+};
+
+/**
+ * Roles a person may request for themselves. Administrator is excluded on
+ * purpose: it hands out permissions, so it can only ever be granted by someone
+ * who already holds it.
+ */
+export const SIGNUP_ROLES: Role[] = ["leasing", "accountant", "maintenance", "manager", "viewer"];
+
 export function can(role: Role, perm: Perm) {
   return ROLE_PERMS[role].includes(perm);
 }

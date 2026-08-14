@@ -81,6 +81,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       }),
     ]),
     clean("Insight", [
+      item({ href: "/assistant", label: "Assistant", icon: "Sparkles" }),
       only(can(user.role, "reports.view"), { href: "/reports", label: "Reports", icon: "BarChart3" }),
       only(can(user.role, "audit.view"), { href: "/audit", label: "Audit Log", icon: "ScrollText" }),
     ]),

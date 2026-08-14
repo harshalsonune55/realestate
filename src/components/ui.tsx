@@ -180,6 +180,28 @@ const STAT_ACCENT: Record<Tone, string> = {
   gold: "text-gold-600",
 };
 
+/* Tinted chip behind a stat's icon. Uses the 50/700 steps only — both flip
+   with the theme, so the chip stays legible in dark mode. */
+const STAT_CHIP: Record<Tone, string> = {
+  neutral: "bg-subtle text-muted",
+  good: "bg-brand-50 text-brand-600",
+  warn: "bg-amber-50 text-amber-700",
+  bad: "bg-red-50 text-red-700",
+  info: "bg-sky-50 text-sky-700",
+  gold: "bg-gold-50 text-gold-600",
+};
+
+/* Hairline down the left edge, carrying the tone. Reads as a quiet accent on
+   a light canvas where a full tinted card would shout. */
+const STAT_EDGE: Record<Tone, string> = {
+  neutral: "before:bg-line-strong",
+  good: "before:bg-brand-400",
+  warn: "before:bg-amber-200",
+  bad: "before:bg-red-300",
+  info: "before:bg-sky-200",
+  gold: "before:bg-gold-200",
+};
+
 export function Stat({
   label,
   value,
@@ -197,20 +219,33 @@ export function Stat({
 }) {
   const body = (
     <>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-start justify-between gap-2">
         <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
           {label}
         </span>
-        {icon && <span className="text-faint">{icon}</span>}
+        {icon && (
+          <span
+            className={cx(
+              "grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors",
+              STAT_CHIP[tone]
+            )}
+          >
+            {icon}
+          </span>
+        )}
       </div>
-      <div className={cx("tnum mt-2 text-[26px] font-semibold leading-none", STAT_ACCENT[tone])}>
+      <div className={cx("tnum mt-3 text-[27px] font-semibold leading-none", STAT_ACCENT[tone])}>
         {value}
       </div>
       {sub && <div className="mt-2 text-[12px] leading-snug text-muted">{sub}</div>}
     </>
   );
 
-  const shell = "rounded-xl border border-line bg-surface p-4 shadow-xs";
+  const shell = cx(
+    "relative overflow-hidden rounded-xl border border-line bg-surface p-4 shadow-xs",
+    "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:content-['']",
+    STAT_EDGE[tone]
+  );
 
   return href ? (
     <Link

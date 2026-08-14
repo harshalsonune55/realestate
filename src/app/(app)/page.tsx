@@ -1,7 +1,8 @@
 import Link from "next/link";
 import {
   AlertTriangle, ArrowUpRight, Building2, CalendarClock, CheckCircle2, ChevronRight,
-  FilePlus2, Landmark, RefreshCw, ShieldAlert, TriangleAlert, Wrench, Info,
+  FilePlus2, Landmark, RefreshCw, ShieldAlert, TrendingUp, TriangleAlert, Wallet,
+  Wrench, Info,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
@@ -30,6 +31,8 @@ export default async function Dashboard() {
     .sort((a, b) => (a.cheque.dueDate < b.cheque.dueDate ? -1 : 1));
 
   const recent = d.audit.slice(0, 8);
+  const overdueTasks = myTasks.filter((t) => t.status === "overdue").length;
+  const critical = alertList.filter((a) => a.severity === "critical");
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const maxDue = Math.max(...forecast.map((f) => f.due), 1);
@@ -69,42 +72,63 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-fg">
-            {greeting}, {user.name.split(" ")[0]}
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            {new Date().toLocaleDateString("en-GB", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-            {" · "}
-            {myTasks.length === 0
-              ? "You have no open tasks."
-              : `You have ${myTasks.length} open task${myTasks.length > 1 ? "s" : ""}${
-                  myTasks.filter((t) => t.status === "overdue").length
-                    ? `, ${myTasks.filter((t) => t.status === "overdue").length} overdue`
-                    : ""
-                }.`}
-          </p>
+      {/* ------------------------------------------------------------- hero */}
+      <section className="relative overflow-hidden rounded-2xl border border-line bg-surface shadow-xs">
+        {/* Light wash so the header reads as a distinct band without a heavy
+            fill. Sits behind the content and is purely decorative. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50 via-surface to-gold-50/40"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-brand-100/50 blur-3xl"
+        />
+
+        <div className="relative flex flex-wrap items-end justify-between gap-5 px-6 py-6">
+          <div className="min-w-0">
+            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-brand-600">
+              {new Date().toLocaleDateString("en-GB", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <h1 className="mt-1.5 text-[28px] font-semibold leading-tight tracking-tight text-fg">
+              {greeting}, {user.name.split(" ")[0]}
+            </h1>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <Badge tone={overdueTasks ? "bad" : myTasks.length ? "warn" : "good"} dot>
+                {myTasks.length === 0
+                  ? "No open tasks"
+                  : `${myTasks.length} open task${myTasks.length > 1 ? "s" : ""}`}
+              </Badge>
+              {overdueTasks > 0 && <Badge tone="bad">{overdueTasks} overdue</Badge>}
+              {critical.length > 0 && (
+                <Badge tone="bad" dot>
+                  {critical.length} needing attention
+                </Badge>
+              )}
+              <Badge tone="neutral">{k.activeContracts} live contracts</Badge>
+            </div>
+          </div>
+
+          {actions.length > 0 && (
+            <LinkButton href={actions[0].href} size="lg">
+              <FilePlus2 size={16} />
+              {actions[0].title}
+            </LinkButton>
+          )}
         </div>
-        {actions.length > 0 && (
-          <LinkButton href={actions[0].href} size="lg">
-            <FilePlus2 size={16} />
-            {actions[0].title}
-          </LinkButton>
-        )}
-      </div>
+      </section>
 
       {/* ------------------------------------------------ critical alert band */}
-      {alertList.filter((a) => a.severity === "critical").length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-red-200 bg-red-50">
-          <div className="flex items-center gap-2 border-b border-red-200 bg-red-100/60 px-4 py-2.5">
-            <TriangleAlert size={15} className="text-red-600" />
-            <p className="text-[13px] font-semibold text-red-800">
+      {critical.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-red-200 bg-red-50/70">
+          <div className="flex items-center gap-2 border-b border-red-200 px-4 py-2.5">
+            <TriangleAlert size={15} className="text-red-700" />
+            <p className="text-[13px] font-semibold text-red-900">
               Requires attention — money is at risk
             </p>
             <Link
@@ -115,24 +139,22 @@ export default async function Dashboard() {
             </Link>
           </div>
           <div className="divide-y divide-red-100">
-            {alertList
-              .filter((a) => a.severity === "critical")
-              .map((a) => (
-                <Link
-                  key={a.id}
-                  href={a.href}
-                  className="flex items-center gap-3 px-4 py-3 transition hover:bg-red-100/40"
-                >
-                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-red-600 text-[11px] font-bold text-white tnum">
-                    {a.count}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-medium text-red-900">{a.title}</p>
-                    <p className="truncate text-[12px] text-red-700/80">{a.detail}</p>
-                  </div>
-                  <ChevronRight size={15} className="shrink-0 text-red-400" />
-                </Link>
-              ))}
+            {critical.map((a) => (
+              <Link
+                key={a.id}
+                href={a.href}
+                className="flex items-center gap-3 px-4 py-3 transition hover:bg-red-100/50"
+              >
+                <span className="tnum grid h-7 w-7 shrink-0 place-items-center rounded-full bg-red-600 text-[11px] font-bold text-white">
+                  {a.count}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-medium text-red-900">{a.title}</p>
+                  <p className="truncate text-[12px] text-red-800/80">{a.detail}</p>
+                </div>
+                <ChevronRight size={15} className="shrink-0 text-red-300" />
+              </Link>
+            ))}
           </div>
         </div>
       )}
@@ -144,12 +166,14 @@ export default async function Dashboard() {
           value={`${(k.occupancy * 100).toFixed(1)}%`}
           sub={`${k.occupied} of ${k.totalUnits} units`}
           tone="good"
+          icon={<Building2 size={15} />}
           href="/units"
         />
         <Stat
           label="Annual rent roll"
           value={AEDshort(k.annualised)}
           sub={`${k.activeContracts} live contracts`}
+          icon={<TrendingUp size={15} />}
           href="/contracts"
         />
         <Stat
@@ -157,12 +181,14 @@ export default async function Dashboard() {
           value={AEDshort(k.collected)}
           sub={`${k.chequesCleared} cheques cleared`}
           tone="good"
+          icon={<Wallet size={15} />}
           href="/payments"
         />
         <Stat
           label="Outstanding"
           value={AEDshort(k.outstanding)}
           sub="Cheques not yet cleared"
+          icon={<Landmark size={15} />}
           href="/cheques"
         />
         <Stat
@@ -170,6 +196,7 @@ export default async function Dashboard() {
           value={AEDshort(k.atRisk)}
           sub="Overdue + bounced"
           tone="bad"
+          icon={<TriangleAlert size={15} />}
           href="/cheques?flag=overdue"
         />
         <Stat
@@ -177,6 +204,7 @@ export default async function Dashboard() {
           value={String(k.expiring90)}
           sub={`${k.pendingApprovals} approvals pending`}
           tone="warn"
+          icon={<CalendarClock size={15} />}
           href="/renewals"
         />
       </div>
@@ -188,7 +216,7 @@ export default async function Dashboard() {
             <Link
               key={a.href}
               href={a.href}
-              className="group flex items-center gap-3 rounded-xl border border-line bg-surface p-3.5 transition hover:border-brand-400 hover:shadow-md"
+              className="group flex items-center gap-3 rounded-xl border border-line bg-surface p-3.5 shadow-xs transition duration-200 hover:-translate-y-px hover:border-brand-300 hover:shadow-md"
             >
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600 transition group-hover:bg-brand-solid group-hover:text-white">
                 <a.icon size={17} />
@@ -199,7 +227,7 @@ export default async function Dashboard() {
               </div>
               <ArrowUpRight
                 size={14}
-                className="ml-auto shrink-0 text-faint group-hover:text-brand-600"
+                className="ml-auto shrink-0 text-faint transition group-hover:text-brand-600"
               />
             </Link>
           ))}
@@ -238,16 +266,16 @@ export default async function Dashboard() {
                   {upcoming.slice(0, 8).map((e) => {
                     const late = daysFromToday(e.cheque.dueDate) < 0;
                     return (
-                      <tr key={e.cheque.id} className="group">
+                      <tr key={e.cheque.id} className="group transition-colors hover:bg-subtle/60">
                         <TD>
                           <div className="flex items-center gap-2">
                             <span
                               className={cx(
                                 "h-1.5 w-1.5 shrink-0 rounded-full",
-                                late ? "bg-red-500" : "bg-amber-400"
+                                late ? "bg-red-500" : "bg-amber-500"
                               )}
                             />
-                            <span className={cx("font-medium", late ? "text-red-600" : "text-fg")}>
+                            <span className={cx("font-medium", late ? "text-red-700" : "text-fg")}>
                               {fmtDate(e.cheque.dueDate)}
                             </span>
                           </div>
@@ -293,26 +321,48 @@ export default async function Dashboard() {
               title="Expected collections — next 12 months"
               sub="Based on post-dated cheques already held in the safe."
               icon={<Landmark size={17} />}
+              action={
+                <span className="tnum text-[12px] text-muted">
+                  Peak {AEDshort(maxDue)}
+                </span>
+              }
             />
-            <div className="flex h-44 items-end gap-2">
-              {forecast.map((f) => (
-                <div key={f.month} className="group flex flex-1 flex-col items-center gap-1.5">
-                  <span className="text-[10px] font-medium text-faint opacity-0 transition group-hover:opacity-100">
-                    {AEDshort(f.due)}
-                  </span>
-                  <div className="relative flex w-full flex-1 items-end">
-                    <div
-                      className="w-full rounded-t bg-brand-500/85 transition group-hover:bg-brand-solid"
-                      style={{ height: `${Math.max(3, (f.due / maxDue) * 100)}%` }}
-                    />
+            <div className="relative h-48">
+              {/* Gridlines at 0/25/50/75/100% of the peak month, so bar heights
+                  can actually be read as values rather than compared by eye. */}
+              <div aria-hidden className="absolute inset-0 bottom-9 flex flex-col justify-between">
+                {[1, 0.75, 0.5, 0.25, 0].map((t) => (
+                  <div key={t} className="flex items-center gap-2">
+                    <span className="tnum w-10 shrink-0 text-right text-[9.5px] leading-none text-faint">
+                      {t === 0 ? "0" : AEDshort(maxDue * t)}
+                    </span>
+                    <span className="h-px flex-1 bg-line-soft" />
                   </div>
-                  <span className="text-[10px] text-muted">{f.label}</span>
-                  <span className="tnum text-[10px] text-faint">{f.count}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <div className="absolute inset-0 left-12 flex items-end gap-1.5">
+                {forecast.map((f) => (
+                  <div key={f.month} className="group flex h-full flex-1 flex-col justify-end">
+                    <div className="relative flex flex-1 items-end pb-0">
+                      <span className="tnum absolute inset-x-0 bottom-full mb-1 text-center text-[9.5px] font-medium text-fg opacity-0 transition group-hover:opacity-100">
+                        {AEDshort(f.due)}
+                      </span>
+                      <div
+                        className="w-full rounded-t-[3px] bg-gradient-to-t from-brand-300 to-brand-500 transition-colors group-hover:from-brand-400 group-hover:to-brand-solid"
+                        style={{ height: `${Math.max(2, (f.due / maxDue) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="h-9 pt-2 text-center">
+                      <span className="block text-[10px] font-medium text-muted">{f.label}</span>
+                      <span className="tnum block text-[9.5px] text-faint">{f.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             <p className="mt-3 border-t border-line pt-3 text-[11px] text-faint">
-              Bottom row shows the number of cheques falling due that month.
+              Small number under each month is the count of cheques falling due.
             </p>
           </Card>
         </div>
@@ -338,7 +388,7 @@ export default async function Dashboard() {
                   <li key={t.id}>
                     <Link
                       href="/tasks"
-                      className="flex gap-3 rounded-lg border border-line p-3 transition hover:border-brand-300 hover:bg-brand-50/40"
+                      className="flex gap-3 rounded-lg border border-line p-3 transition hover:border-brand-300 hover:bg-brand-50/50"
                     >
                       <span
                         className={cx(
@@ -346,7 +396,7 @@ export default async function Dashboard() {
                           t.status === "overdue"
                             ? "bg-red-500"
                             : t.priority === "high"
-                            ? "bg-amber-400"
+                            ? "bg-amber-500"
                             : "bg-line-strong"
                         )}
                       />
@@ -356,7 +406,7 @@ export default async function Dashboard() {
                         <p
                           className={cx(
                             "mt-1 text-[11px]",
-                            t.status === "overdue" ? "font-medium text-red-600" : "text-faint"
+                            t.status === "overdue" ? "font-medium text-red-700" : "text-faint"
                           )}
                         >
                           Due {fmtDate(t.dueDate)} · {relative(t.dueDate)}
@@ -382,15 +432,15 @@ export default async function Dashboard() {
                         ? "border-red-200 bg-red-50/60"
                         : a.severity === "warning"
                         ? "border-amber-200 bg-amber-50/50"
-                        : "border-line bg-surface"
+                        : "border-line bg-surface-2"
                     )}
                   >
                     {a.severity === "critical" ? (
-                      <TriangleAlert size={14} className="mt-0.5 shrink-0 text-red-600" />
+                      <TriangleAlert size={14} className="mt-0.5 shrink-0 text-red-700" />
                     ) : a.severity === "warning" ? (
-                      <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />
+                      <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-700" />
                     ) : (
-                      <Info size={14} className="mt-0.5 shrink-0 text-sky-600" />
+                      <Info size={14} className="mt-0.5 shrink-0 text-sky-700" />
                     )}
                     <div className="min-w-0">
                       <p className="text-[12.5px] font-medium leading-snug text-fg">{a.title}</p>
@@ -404,24 +454,23 @@ export default async function Dashboard() {
 
           <Card>
             <CardHead title="Portfolio" icon={<Building2 size={17} />} />
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {d.properties.map((p) => {
                 const us = d.units.filter((u) => u.propertyId === p.id);
                 const occ = us.filter((u) => u.status === "occupied").length;
+                const rate = us.length ? occ / us.length : 0;
                 return (
-                  <Link key={p.id} href={`/properties/${p.id}`} className="block group">
-                    <div className="mb-1 flex items-baseline justify-between gap-2">
+                  <Link key={p.id} href={`/properties/${p.id}`} className="group block">
+                    <div className="mb-1.5 flex items-baseline justify-between gap-2">
                       <span className="truncate text-[12.5px] font-medium text-fg group-hover:text-brand-600">
                         {p.name}
                       </span>
                       <span className="tnum shrink-0 text-[11.5px] text-muted">
                         {occ}/{us.length}
+                        <span className="ml-1.5 text-faint">{(rate * 100).toFixed(0)}%</span>
                       </span>
                     </div>
-                    <Bar
-                      value={occ / us.length}
-                      tone={occ / us.length > 0.9 ? "good" : occ / us.length > 0.75 ? "warn" : "bad"}
-                    />
+                    <Bar value={rate} tone={rate > 0.9 ? "good" : rate > 0.75 ? "warn" : "bad"} />
                   </Link>
                 );
               })}
@@ -441,10 +490,11 @@ export default async function Dashboard() {
                 ) : undefined
               }
             />
-            <ul className="space-y-2.5">
+            {/* Rail down the left so the entries read as one timeline. */}
+            <ul className="relative space-y-3 before:absolute before:bottom-2 before:left-[3px] before:top-2 before:w-px before:bg-line before:content-['']">
               {recent.map((a) => (
-                <li key={a.id} className="flex gap-2.5 text-[12px]">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-line-strong" />
+                <li key={a.id} className="relative flex gap-3 text-[12px]">
+                  <span className="relative z-10 mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full bg-line-strong ring-2 ring-surface" />
                   <div className="min-w-0">
                     <p className="truncate text-fg">
                       <b className="font-medium">{a.actorName.split(" ")[0]}</b> {a.summary.toLowerCase()}

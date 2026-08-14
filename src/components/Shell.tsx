@@ -6,16 +6,19 @@ import { useState } from "react";
 import {
   LayoutDashboard, ListChecks, Building2, DoorOpen, Users, FileSignature,
   RefreshCw, Landmark, Receipt, Wrench, ShieldCheck, BarChart3, ScrollText,
-  UserCog, LogOut, Menu, X, Search, BellRing, ChevronRight,
+  UserCog, LogOut, Menu, X, BellRing, ChevronRight, Sparkles,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { ROLE_LABEL } from "@/lib/rbac";
 import type { Role } from "@/lib/types";
 import ThemeToggle from "./ThemeToggle";
+import CommandPalette from "./CommandPalette";
+import { Monogram } from "./Brand";
 
 const ICONS = {
   LayoutDashboard, ListChecks, Building2, DoorOpen, Users, FileSignature,
   RefreshCw, Landmark, Receipt, Wrench, ShieldCheck, BarChart3, ScrollText, UserCog,
+  Sparkles,
 } as const;
 
 export interface NavItem {
@@ -120,13 +123,14 @@ export default function Shell({
 
   const sidebar = (
     <div className="flex h-full w-64 flex-col bg-inverse">
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-inverse-line px-5">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-solid font-bold text-white shadow-sm">
-          AM
-        </div>
+      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-inverse-line px-5 text-white">
+        <Monogram size="sm" />
+        <span className="h-7 w-px bg-white/15" />
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-semibold tracking-wide text-white">AL MANARA</p>
-          <p className="truncate text-[10px] uppercase tracking-[0.16em] text-inverse-muted">
+          <p className="truncate font-serif text-[12.5px] font-medium tracking-[0.28em] text-white">
+            ABER GROUP
+          </p>
+          <p className="truncate text-[9px] uppercase tracking-[0.18em] text-inverse-muted">
             Property Management
           </p>
         </div>
@@ -192,13 +196,11 @@ export default function Shell({
           <Breadcrumbs pathname={pathname} />
 
           <div className="ml-auto flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-lg border border-line bg-canvas px-3 py-2 text-[13px] text-faint transition hover:border-line-strong md:flex">
-              <Search size={14} />
-              <span>Search unit, tenant, cheque…</span>
-              <kbd className="ml-2 rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] text-faint">
-                ⌘K
-              </kbd>
-            </div>
+            <CommandPalette
+              pages={groups.flatMap((g) =>
+                g.items.map((i) => ({ href: i.href, label: i.label, group: g.title }))
+              )}
+            />
 
             <ThemeToggle />
 
@@ -222,7 +224,7 @@ export default function Shell({
         </main>
 
         <footer className="border-t border-line px-4 py-4 text-[11px] text-faint lg:px-8">
-          Al Manara Property Management — internal system. Every action on this system is recorded
+          Aber Group Property Management — internal system. Every action on this system is recorded
           in the audit log.
         </footer>
       </div>

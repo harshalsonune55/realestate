@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Al Manara PMS — Property Management System",
+  title: "Aber Group — Property Management System",
   description:
     "Internal property management system: contracts, cheques, renewals, maintenance and approvals.",
   robots: { index: false, follow: false },

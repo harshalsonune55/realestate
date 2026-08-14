@@ -3,6 +3,7 @@ import { stepProblems, type ContractDraft } from "@/lib/actions/contract-rules";
 import { depositProblems, bounceProblems, type DepositDraft } from "@/lib/actions/cheque-rules";
 import { maintenanceProblems, type MaintenanceDraft } from "@/lib/actions/maintenance-rules";
 import { renewalProblems, type RenewalDraft } from "@/lib/actions/renewal-rules";
+import { highestUserNumber, signUpProblems, type SignUpDraft } from "@/lib/actions/account-rules";
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const today = iso(new Date());
@@ -190,5 +191,48 @@ check("requires the 90-day notice before a non-renewal can proceed", () => {
   const d = { ...renewal, outcome: "not_renew" as const, nonRenewalReason: "Owner requires the unit" };
   assert.ok(renewalProblems(d, ctx)[1].some((p) => p.includes("90-day")));
 });
+
+/* ------------------------------------------------------------------ signup */
+
+const signup: SignUpDraft = {
+  name: "Sara Khalifa",
+  email: "sara@abergroup.ae",
+  phone: "+971 50 123 4567",
+  title: "Leasing Executive",
+  role: "leasing",
+  password: "Marina2026Bay",
+  confirm: "Marina2026Bay",
+  terms: true,
+};
+
+console.log("\nSignup");
+check("accepts a complete request", () =>
+  assert.deepStrictEqual(signUpProblems(signup), {}));
+check("requires a full name, not just a first name", () =>
+  assert.ok(signUpProblems({ ...signup, name: "Sara" }).name));
+check("rejects a malformed email", () =>
+  assert.ok(signUpProblems({ ...signup, email: "sara@abergroup" }).email));
+check("rejects a password missing an upper-case letter", () =>
+  assert.ok(signUpProblems({ ...signup, password: "marina2026bay", confirm: "marina2026bay" }).password));
+check("rejects a password built from the email address", () => {
+  const d = { ...signup, password: "SaraSara2026", confirm: "SaraSara2026" };
+  assert.ok(d.password.toLowerCase().includes("sara") && signUpProblems(d).password);
+});
+check("catches a mistyped confirmation", () =>
+  assert.ok(signUpProblems({ ...signup, confirm: "Marina2026Bat" }).confirm));
+check("will not let anyone enrol themselves as administrator", () =>
+  assert.ok(signUpProblems({ ...signup, role: "admin" }).role));
+check("blocks an address that is already registered", () =>
+  assert.ok(signUpProblems(signup, ["SARA@abergroup.ae"]).email));
+check("requires the employment confirmation", () =>
+  assert.ok(signUpProblems({ ...signup, terms: false }).terms));
+check("treats the phone number as optional", () =>
+  assert.deepStrictEqual(signUpProblems({ ...signup, phone: "" }), {}));
+check("never hands a new account an id an employee already holds", () => {
+  const seeded = ["U1", "U2", "U3", "U4", "U5", "U6", "U7", "U8", "U9"];
+  assert.strictEqual("U" + (highestUserNumber(seeded) + 1), "U10");
+});
+check("ignores ids that are not plain user ids", () =>
+  assert.strictEqual(highestUserNumber(["U3", "P1-U5", "CTR-2026-0007"]), 3));
 
 console.log(`\n${pass} checks passed`);

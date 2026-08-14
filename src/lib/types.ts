@@ -9,14 +9,40 @@ export type Role =
   | "maintenance"
   | "viewer";
 
+/**
+ * Signups land as `pending` and cannot sign in until an administrator approves
+ * them — otherwise anyone who reaches the URL could enrol themselves into the
+ * company's live tenancy data.
+ */
+export type UserStatus = "pending" | "active" | "suspended";
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: Role;
   title: string;
+  /** Whether the account may sign in. Pending and declined accounts are false. */
   active: boolean;
+  phone?: string;
+  /** Absent on the seeded demo accounts, which are active by definition. */
+  status?: UserStatus;
+  /** scrypt hash; absent on demo accounts, which sign in by one-click selection. */
+  passwordHash?: string;
+  /** The role the person asked for at signup — the admin decides the real one. */
+  requestedRole?: Role;
+  createdAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  declinedBy?: string;
+  declinedAt?: string;
+  declineReason?: string;
+  lastLoginAt?: string;
 }
+
+/** Seeded accounts predate the status field; they are active by definition. */
+export const userStatus = (u: User): UserStatus =>
+  u.status ?? (u.active ? "active" : "suspended");
 
 export interface Property {
   id: string;

@@ -1,11 +1,12 @@
 import { Fragment } from "react";
-import { Check, Minus, ShieldCheck, UserCog } from "lucide-react";
+import { Check, Minus, ShieldCheck, UserCog, UserPlus } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { ROLE_LABEL, ROLE_PERMS, can } from "@/lib/rbac";
 import { db } from "@/lib/store";
 import { cx, titleCase } from "@/lib/utils";
 import { Badge, Card, PageHead, Table, TD, TH } from "@/components/ui";
-import type { Role } from "@/lib/types";
+import { userStatus, type Role } from "@/lib/types";
+import PendingRequests from "./PendingRequests";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ const PERM_GROUPS: { title: string; perms: { key: Parameters<typeof can>[1]; lab
 export default async function UsersPage() {
   await requirePerm("admin.users");
   const d = db();
+  const pending = d.users.filter((u) => userStatus(u) === "pending");
 
   return (
     <div>
@@ -59,6 +61,26 @@ export default async function UsersPage() {
         title="Users & roles"
         sub="Each employee sees only what their job needs. Permissions are attached to the role, not to the person, so a change applies everywhere at once."
       />
+
+      {pending.length > 0 && (
+        <Card className="mb-5 border-amber-200" padded={false}>
+          <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+                <UserPlus size={17} className="text-amber-700" /> Access requests
+              </h2>
+              <p className="mt-0.5 text-[12.5px] text-muted">
+                These people signed up and cannot see anything until you approve them. Set the role
+                they should actually hold before approving.
+              </p>
+            </div>
+            <Badge tone="warn" dot>
+              {pending.length} waiting
+            </Badge>
+          </div>
+          <PendingRequests users={pending} />
+        </Card>
+      )}
 
       <Card className="mb-5" padded={false}>
         <div className="border-b border-line px-5 py-3">
@@ -79,7 +101,7 @@ export default async function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {d.users.map((u) => (
+              {d.users.filter((u) => userStatus(u) !== "pending").map((u) => (
                 <tr key={u.id}>
                   <TD>
                     <div className="flex items-center gap-2.5">
@@ -100,8 +122,8 @@ export default async function UsersPage() {
                     {d.tasks.filter((t) => t.assignedTo === u.id && t.status !== "done").length}
                   </TD>
                   <TD>
-                    <Badge tone={u.active ? "good" : "neutral"} dot>
-                      {u.active ? "Active" : "Disabled"}
+                    <Badge tone={u.active ? "good" : u.declinedAt ? "bad" : "neutral"} dot>
+                      {u.active ? "Active" : u.declinedAt ? "Declined" : "Disabled"}
                     </Badge>
                   </TD>
                 </tr>

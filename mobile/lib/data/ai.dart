@@ -1,0 +1,299 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/models.dart';
+import 'ai_key.dart';
+import 'rbac.dart';
+import 'store.dart';
+
+@immutable
+class ChatMessage {
+  const ChatMessage({required this.role, required this.text});
+  final String role; // 'user' | 'assistant'
+  final String text;
+}
+
+/// Client for Groq's chat completions, which speak the OpenAI shape.
+///
+/// Note the spelling: Groq (groq.com, keys begin `gsk_`) is an inference host
+/// running open models such as Llama. It is a different company from xAI's
+/// Grok (keys begin `xai-`). Swapping providers is a matter of changing
+/// [endpoint] and [defaultModel] — the request and response shape is identical.
+///
+/// SECURITY NOTE: the key lives on the handset, which means anyone holding the
+/// APK can extract it and spend the account's credits. This is acceptable for
+/// an internal demo build and is *not* how it should ship — the request
+/// belongs behind the Next.js backend so the key never leaves the server. See
+/// the note in the chat screen's header.
+class Ai {
+  Ai._();
+  static final Ai instance = Ai._();
+
+  static const endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+
+  /// The key every build ships with, from the git-ignored [kAiApiKey].
+  ///
+  /// A `--dart-define=AI_API_KEY=…` at build time still wins, which is how a
+  /// CI build supplies its own without touching the file.
+  static const _defined = String.fromEnvironment('AI_API_KEY');
+
+  static const _modelPref = 'ai_model_v1';
+  static const defaultModel = 'llama-3.3-70b-versatile';
+
+  String? _model;
+
+  Future<void> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _model = prefs.getString(_modelPref);
+    } catch (_) {
+      // No prefs plugin (widget tests) — the default model still applies.
+    }
+  }
+
+  String get key => _defined.isNotEmpty ? _defined : kAiApiKey;
+
+  bool get configured => key.isNotEmpty;
+
+  String get model => (_model?.isNotEmpty ?? false) ? _model! : defaultModel;
+
+  Future<void> setModel(String value) async {
+    _model = value.trim();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_modelPref, _model!);
+    } catch (_) {
+      // In-memory only; the choice simply does not survive a restart.
+    }
+  }
+
+  /// Builds the briefing the model answers from.
+  ///
+  /// Scoped to what the signed-in role may see, for the same reason the search
+  /// on the web app is: an assistant that will happily recite tenant contact
+  /// details to a viewer is a permission hole with a chat box in front of it.
+  String systemPrompt(Store store) {
+    final user = store.currentUser!;
+    final b = StringBuffer()
+      ..writeln(
+        'You are the assistant inside Aber Group\'s property management app '
+        '(Al Manara PMS). Answer questions about this company\'s portfolio, '
+        'staff and processes using only the briefing below. If something is '
+        'not in the briefing, say you do not have that information rather '
+        'than guessing. Amounts are in AED. Keep answers short and concrete.',
+      )
+      ..writeln()
+      ..writeln('## Who you are talking to')
+      ..writeln('Name: ${user.name}')
+      ..writeln('Title: ${user.title}')
+      ..writeln('Role: ${roleLabel[user.role]}')
+      ..writeln('Email: ${user.email}')
+      ..writeln(
+        'This person may only be told what their role permits. '
+        'Do not reveal anything excluded from the briefing.',
+      )
+      ..writeln()
+      ..writeln('## Portfolio')
+      ..writeln('Properties: ${store.properties.length}')
+      ..writeln(
+        'Units: ${store.units.length} '
+        '(${store.occupiedCount} occupied, '
+        '${(store.occupancy * 100).toStringAsFixed(1)}% occupancy)',
+      );
+
+    for (final p in store.properties) {
+      final units = store.units.where((u) => u.propertyId == p.id).toList();
+      final occ = units.where((u) => u.status == UnitStatus.occupied).length;
+      b.writeln(
+        '- ${p.name} (${p.code}), ${p.area}: '
+        '$occ/${units.length} units occupied',
+      );
+    }
+
+    if (can(user.role, Perm.contractsView)) {
+      b
+        ..writeln()
+        ..writeln('## Contracts')
+        ..writeln('Total: ${store.contracts.length}')
+        ..writeln(
+          'Annualised rent roll: AED '
+          '${store.annualisedRent.toStringAsFixed(0)}',
+        )
+        ..writeln(
+          'Expiring: '
+          '${store.contracts.where((x) => x.status == ContractStatus.expiring).length}',
+        );
+    }
+
+    if (can(user.role, Perm.chequesView)) {
+      final overdue = store.cheques.where((x) => x.isOverdue).length;
+      final bounced = store.cheques
+          .where((x) => x.status == ChequeStatus.bounced)
+          .length;
+      b
+        ..writeln()
+        ..writeln('## Cheques')
+        ..writeln('Total held: ${store.cheques.length}')
+        ..writeln('Overdue: $overdue')
+        ..writeln('Bounced: $bounced')
+        ..writeln('Collected: AED ${store.collected.toStringAsFixed(0)}')
+        ..writeln('At risk: AED ${store.atRisk.toStringAsFixed(0)}');
+    }
+
+    if (can(user.role, Perm.tenantsView)) {
+      b
+        ..writeln()
+        ..writeln('## Tenants')
+        ..writeln('Count: ${store.tenants.length}');
+      // Names only. Phone numbers, Emirates IDs and passport numbers are
+      // deliberately withheld — the chat box is not an export route for PII.
+      for (final t in store.tenants.take(40)) {
+        b.writeln('- ${t.name}');
+      }
+    }
+
+    b
+      ..writeln()
+      ..writeln('## Employees')
+      ..writeln(
+        'These are the staff accounts. Never disclose passwords or hashes.',
+      );
+    for (final u in store.users.where((u) => u.status == UserStatus.active)) {
+      b.writeln('- ${u.name} — ${u.title} (${roleLabel[u.role]})');
+    }
+
+    if (can(user.role, Perm.adminUsers)) {
+      // Cross-employee workload — the view an HR or line-management question
+      // needs. Gated on adminUsers because a per-person productivity
+      // breakdown is management information, not open to every colleague.
+      b
+        ..writeln()
+        ..writeln('## Employee workload')
+        ..writeln('Task counts per employee across the whole team.');
+      for (final u in store.users.where((u) => u.status == UserStatus.active)) {
+        final mine = store.tasks.where((t) => t.assignedTo == u.id);
+        final done = mine.where((t) => t.status == TaskStatus.done).length;
+        final overdue =
+            mine.where((t) => t.status == TaskStatus.overdue).length;
+        final open = mine.where((t) => t.status != TaskStatus.done).length;
+        final acted = store.audit.where((a) => a.actorName == u.name).length;
+        b.writeln(
+          '- ${u.name} (${roleLabel[u.role]}): $open open, $overdue overdue, '
+          '$done completed, $acted recorded actions',
+        );
+      }
+
+      final completed = store.tasks
+          .where((t) => t.status == TaskStatus.done)
+          .take(20);
+      if (completed.isNotEmpty) {
+        b
+          ..writeln()
+          ..writeln('## Recently completed work');
+        for (final t in completed) {
+          final who = store.users.where((u) => u.id == t.assignedTo).firstOrNull;
+          b.writeln('- ${who?.name ?? 'Unassigned'}: ${t.title}');
+        }
+      }
+
+      final recent = store.sessions.take(10);
+      if (recent.isNotEmpty) {
+        b
+          ..writeln()
+          ..writeln('## Recent employee access');
+        for (final s in recent) {
+          b.writeln(
+            '- ${s.userName} ${sessionKindLabel[s.kind]!.toLowerCase()} '
+            'at ${s.at.toIso8601String()}',
+          );
+        }
+      }
+    }
+
+    final mine = store.tasksFor(user.id);
+    if (mine.isNotEmpty) {
+      b
+        ..writeln()
+        ..writeln('## This person\'s open tasks');
+      for (final t in mine.take(10)) {
+        b.writeln('- ${t.title} (${t.status.name}) — ${t.detail}');
+      }
+    }
+
+    return b.toString();
+  }
+
+  /// Sends the conversation and returns the reply text.
+  ///
+  /// Throws [AiException] with a readable message on any non-200, so the chat
+  /// screen can show something better than a raw status code.
+  Future<String> send({
+    required Store store,
+    required List<ChatMessage> history,
+  }) async {
+    if (!configured) {
+      throw const AiException(
+        'This build shipped without an API key. Fill in '
+        'lib/data/ai_key.dart and rebuild.',
+      );
+    }
+
+    final body = jsonEncode({
+      'model': model,
+      'temperature': 0.2,
+      'messages': [
+        {'role': 'system', 'content': systemPrompt(store)},
+        for (final m in history) {'role': m.role, 'content': m.text},
+      ],
+    });
+
+    late final http.Response res;
+    try {
+      res = await http
+          .post(
+            Uri.parse(endpoint),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $key',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 60));
+    } catch (e) {
+      throw AiException('Could not reach the assistant: $e');
+    }
+
+    if (res.statusCode == 401 || res.statusCode == 403) {
+      throw const AiException(
+        'The API key was rejected — it may have been revoked or rotated.',
+      );
+    }
+    if (res.statusCode == 404) {
+      throw AiException(
+        'Model "$model" was not found. Pick another in Assistant settings.',
+      );
+    }
+    if (res.statusCode != 200) {
+      throw AiException('Assistant error ${res.statusCode}: ${res.body}');
+    }
+
+    final json = jsonDecode(res.body) as Map<String, dynamic>;
+    final choices = json['choices'] as List<dynamic>?;
+    if (choices == null || choices.isEmpty) {
+      throw const AiException('The assistant returned an empty reply.');
+    }
+    final message = (choices.first as Map<String, dynamic>)['message'];
+    return ((message as Map<String, dynamic>)['content'] as String?)?.trim() ??
+        '';
+  }
+}
+
+class AiException implements Exception {
+  const AiException(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}

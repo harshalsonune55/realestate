@@ -1,155 +1,110 @@
-import { cookies } from "next/headers";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
-import { db } from "@/lib/store";
-import { SESSION_COOKIE } from "@/lib/auth";
+import { ArrowRight, ChevronDown, ShieldCheck } from "lucide-react";
+import { currentUser, startSession } from "@/lib/auth";
 import { ROLE_LABEL } from "@/lib/rbac";
-import { cx } from "@/lib/utils";
+import { db } from "@/lib/store";
+import { userStatus } from "@/lib/types";
+import { AuthFooterLink, AuthHeading, AuthShell } from "@/components/AuthShell";
+import SignInForm from "./SignInForm";
 
 export const dynamic = "force-dynamic";
 
-async function signIn(formData: FormData) {
+export const metadata: Metadata = { title: "Sign in — Aber Group" };
+
+/**
+ * One-click sign-in for the seeded demo accounts, which carry no password. Real
+ * accounts — anything created through signup — go through `signInAction`.
+ */
+async function useDemoAccount(formData: FormData) {
   "use server";
   const id = String(formData.get("userId") ?? "");
-  const user = db().users.find((u) => u.id === id && u.active);
-  if (!user) redirect("/login?error=1");
-  const jar = await cookies();
-  jar.set(SESSION_COOKIE, user.id, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 12,
-  });
+  const user = db().users.find((u) => u.id === id && u.active && !u.passwordHash);
+  if (!user) redirect("/login");
+  await startSession(user.id);
   redirect("/");
 }
 
-const ROLE_COLOR: Record<string, string> = {
-  admin: "bg-inverse-2",
-  manager: "bg-brand-solid-hover",
-  accountant: "bg-sky-700",
-  leasing: "bg-gold-500",
-  maintenance: "bg-muted",
-  viewer: "bg-muted",
-};
+const GUARANTEES = [
+  "No contract goes live without manager approval",
+  "No cheque due date passes without a reminder and a task",
+  "No action happens without an audit trail",
+];
 
 export default async function LoginPage() {
-  const users = db().users.filter((u) => u.active);
+  if (await currentUser()) redirect("/");
+
+  // Only the seeded accounts belong in the quick-access list; accounts created
+  // through signup must use their own password.
+  const demoUsers = db().users.filter(
+    (u) => u.active && !u.passwordHash && userStatus(u) === "active"
+  );
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      {/* left: brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-inverse p-12 lg:flex">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-25 blur-3xl"
-          style={{ background: "radial-gradient(circle, #0f766e, transparent 70%)" }}
-        />
+    <AuthShell
+      aside={
+        <ul className="space-y-4">
+          {GUARANTEES.map((t) => (
+            <li key={t} className="flex items-start gap-3 text-[13.5px] text-inverse-muted">
+              <ShieldCheck size={16} className="mt-0.5 shrink-0 text-inverse-fg opacity-60" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      }
+    >
+      <AuthHeading
+        eyebrow="Property management"
+        title="Sign in"
+        sub="Your role decides exactly what you can see and do once you are in."
+      />
 
-        <div className="relative flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-solid text-lg font-bold text-white">
-            AM
-          </div>
-          <div>
-            <p className="text-sm font-semibold tracking-wide text-white">AL MANARA</p>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">
-              Property Management
-            </p>
-          </div>
-        </div>
+      <SignInForm />
 
-        <div className="relative max-w-lg">
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white">
-            Every process, guided step by step.
-          </h1>
-          <p className="mt-5 text-[15px] leading-relaxed text-white/70">
-            450 units. 1,800 cheques a year. This system walks each employee through every
-            procedure in order, blocks the step until it is done correctly, and records who did
-            what and when.
-          </p>
-          <ul className="mt-8 space-y-3 text-[14px] text-white/70">
-            {[
-              "No contract goes live without manager approval",
-              "No cheque due date passes without a reminder and a task",
-              "No action happens without an audit trail",
-            ].map((t) => (
-              <li key={t} className="flex items-start gap-3">
-                <ShieldCheck size={17} className="mt-0.5 shrink-0 text-brand-400" />
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
+      {demoUsers.length > 0 && (
+        <details className="group mt-8 border-t border-line-soft pt-6">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13.5px] font-medium text-fg-soft transition hover:text-fg">
+            Continue with a demo account
+            <ChevronDown
+              size={16}
+              className="shrink-0 text-faint transition group-open:rotate-180"
+            />
+          </summary>
 
-        <p className="relative text-[11px] text-white/40">
-          Internal use only · Not accessible outside the company network
-        </p>
-      </div>
-
-      {/* right: sign in */}
-      <div className="flex items-center justify-center bg-canvas px-6 py-12">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-brand-solid text-lg font-bold text-white">
-              AM
-            </div>
-            <p className="text-sm font-semibold">AL MANARA Property Management</p>
-          </div>
-
-          <h2 className="text-xl font-semibold tracking-tight text-fg">
-            Sign in to continue
-          </h2>
-          <p className="mt-1.5 text-[13px] text-muted">
-            Choose your staff account. Your role decides exactly what you can see and do.
+          <p className="mt-3 text-[12.5px] leading-relaxed text-muted">
+            Pre-seeded staff accounts, one per role, for walking through the system. They have no
+            password.
           </p>
 
-          <form action={signIn} className="mt-6 space-y-2">
-            {users.map((u) => (
+          <form action={useDemoAccount} className="mt-4 space-y-1.5">
+            {demoUsers.map((u) => (
               <button
                 key={u.id}
                 name="userId"
                 value={u.id}
                 type="submit"
-                className="group flex w-full items-center gap-3 rounded-xl border border-line bg-surface p-3 text-left transition hover:border-brand-400 hover:shadow-md"
+                className="group/row flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:border-line hover:bg-surface"
               >
-                <div
-                  className={cx(
-                    "grid h-10 w-10 shrink-0 place-items-center rounded-full text-[13px] font-semibold text-white",
-                    ROLE_COLOR[u.role]
-                  )}
-                >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-subtle text-[11.5px] font-semibold text-fg-soft">
                   {u.name.split(" ").slice(0, 2).map((p) => p[0]).join("")}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-medium text-fg">{u.name}</p>
-                  <p className="truncate text-[12px] text-muted">
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13.5px] font-medium text-fg">{u.name}</span>
+                  <span className="block truncate text-[12px] text-muted">
                     {u.title} · {ROLE_LABEL[u.role]}
-                  </p>
-                </div>
+                  </span>
+                </span>
                 <ArrowRight
-                  size={16}
-                  className="shrink-0 text-faint transition group-hover:translate-x-0.5 group-hover:text-brand-600"
+                  size={15}
+                  className="shrink-0 text-faint transition group-hover/row:translate-x-0.5 group-hover/row:text-fg"
                 />
               </button>
             ))}
           </form>
+        </details>
+      )}
 
-          <div className="mt-6 flex items-start gap-2 rounded-lg bg-subtle p-3 text-[12px] text-fg-soft">
-            <Lock size={14} className="mt-0.5 shrink-0 text-faint" />
-            <p>
-              <b>Prototype.</b> In production this screen is replaced with company email +
-              password and a one-time code, and the site is reachable only from the office network
-              or VPN.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <AuthFooterLink question="No account yet?" href="/signup" action="Request access" />
+    </AuthShell>
   );
 }
