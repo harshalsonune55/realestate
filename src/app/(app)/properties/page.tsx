@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Building2, MapPin } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AEDshort, daysFromToday } from "@/lib/utils";
 import { Badge, Bar, Card, PageHead, Stat } from "@/components/ui";
 
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PropertiesPage() {
   await requirePerm("properties.view");
-  const d = db();
+  const d = await loadData();
 
   const rows = d.properties.map((p) => {
     const units = d.units.filter((u) => u.propertyId === p.id);
@@ -59,11 +59,11 @@ export default async function PropertiesPage() {
             <Link key={r.p.id} href={`/properties/${r.p.id}`}>
               <Card className="h-full transition hover:border-brand-300 hover:shadow-md">
                 <div className="flex items-start gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-inverse text-[13px] font-bold text-white">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-inverse text-[13px] font-bold text-white">
                     {r.p.code}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[15px] font-semibold text-fg">{r.p.name}</h3>
+                    <h3 className="text-[17px] font-bold text-fg">{r.p.name}</h3>
                     <p className="mt-0.5 flex items-center gap-1 text-[12px] text-muted">
                       <MapPin size={12} /> {r.p.area}, {r.p.city}
                     </p>
@@ -74,17 +74,17 @@ export default async function PropertiesPage() {
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   <div>
                     <p className="text-[11px] uppercase tracking-wide text-muted">Units</p>
-                    <p className="tnum mt-0.5 text-[16px] font-semibold text-fg">{r.units.length}</p>
+                    <p className="tnum mt-0.5 text-[17px] font-bold text-fg">{r.units.length}</p>
                   </div>
                   <div>
                     <p className="text-[11px] uppercase tracking-wide text-muted">Occupancy</p>
-                    <p className="tnum mt-0.5 text-[16px] font-semibold text-fg">
+                    <p className="tnum mt-0.5 text-[17px] font-bold text-fg">
                       {(occ * 100).toFixed(0)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-[11px] uppercase tracking-wide text-muted">Rent roll</p>
-                    <p className="tnum mt-0.5 text-[16px] font-semibold text-fg">{AEDshort(r.rent)}</p>
+                    <p className="tnum mt-0.5 text-[17px] font-bold text-fg">{AEDshort(r.rent)}</p>
                   </div>
                 </div>
 

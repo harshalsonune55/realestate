@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Check, Loader2, ShieldAlert, X } from "lucide-react";
 import { decideApprovalAction } from "@/lib/actions/approvals";
 import { Badge, Tone } from "@/components/ui";
+import { celebrate } from "@/components/SuccessCelebration";
 import { Textarea } from "@/components/form";
 import { AED, cx, fmtDateTime, relative, titleCase } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ export default function ApprovalCard({
     start(async () => {
       const res = await decideApprovalAction(approval.id, decision, note);
       if (res.ok) {
+        celebrate();
         setMode(null);
         setNote("");
         router.refresh();
@@ -64,7 +66,7 @@ export default function ApprovalCard({
   return (
     <div className="rounded-xl border border-line bg-surface">
       <div className="flex flex-wrap items-start gap-3 border-b border-line px-4 py-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-50 text-amber-600">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-600">
           <ShieldAlert size={17} />
         </span>
         <div className="min-w-0 flex-1">
@@ -80,7 +82,7 @@ export default function ApprovalCard({
         </div>
         {approval.amount ? (
           <div className="text-right">
-            <p className="tnum text-[15px] font-semibold text-fg">{AED(approval.amount)}</p>
+            <p className="tnum text-[17px] font-bold text-fg">{AED(approval.amount)}</p>
             <p className="text-[11px] text-faint">value</p>
           </div>
         ) : null}
@@ -103,7 +105,7 @@ export default function ApprovalCard({
       {canDecide && (
         <div className="border-t border-line px-4 py-3">
           {approval.ownRequest ? (
-            <p className="rounded-lg bg-subtle px-3 py-2 text-[12px] text-fg-soft">
+            <p className="rounded-xl bg-subtle px-3 py-2 text-[12px] text-fg-soft">
               You raised this request, so you cannot approve it. It must be decided by another
               manager.
             </p>
@@ -111,13 +113,13 @@ export default function ApprovalCard({
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setMode("approve")}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-solid px-3.5 text-[13px] font-medium text-white transition hover:bg-brand-solid-hover"
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-solid px-3.5 text-[13px] font-medium text-white transition hover:bg-brand-solid-hover"
               >
                 <Check size={15} /> Approve
               </button>
               <button
                 onClick={() => setMode("reject")}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3.5 text-[13px] font-medium text-fg-soft transition hover:border-red-300 hover:text-red-700"
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-line bg-surface px-3.5 text-[13px] font-medium text-fg-soft transition hover:border-red-300 hover:text-red-700"
               >
                 <X size={15} /> Reject
               </button>
@@ -153,7 +155,7 @@ export default function ApprovalCard({
                     setMode(null);
                     setError(null);
                   }}
-                  className="inline-flex h-9 items-center rounded-lg border border-line px-3.5 text-[13px] text-fg-soft hover:bg-surface"
+                  className="inline-flex h-9 items-center rounded-xl border border-line px-3.5 text-[13px] text-fg-soft hover:bg-surface"
                 >
                   Cancel
                 </button>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DoorOpen, Search } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, cx, daysFromToday, fmtDate } from "@/lib/utils";
 import { Badge, Card, Empty, PageHead, Stat, Table, TD, TH, Tone } from "@/components/ui";
 
@@ -27,7 +27,7 @@ export default async function UnitsPage({
   const q = (sp.q ?? "").trim().toLowerCase();
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  const d = db();
+  const d = await loadData();
   const props = new Map(d.properties.map((p) => [p.id, p]));
 
   let rows = d.units.map((u) => {
@@ -91,7 +91,7 @@ export default async function UnitsPage({
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Unit, tenant or building…"
-              className="h-9 w-64 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-64 rounded-xl border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
 
@@ -99,7 +99,7 @@ export default async function UnitsPage({
             <Link
               href={link({ property: "all", page: undefined })}
               className={cx(
-                "rounded-lg border px-2.5 py-1.5 text-[12px]",
+                "rounded-xl border px-2.5 py-1.5 text-[12px]",
                 propertyId === "all" ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
               )}
             >
@@ -110,7 +110,7 @@ export default async function UnitsPage({
                 key={p.id}
                 href={link({ property: p.id, page: undefined })}
                 className={cx(
-                  "rounded-lg border px-2.5 py-1.5 text-[12px]",
+                  "rounded-xl border px-2.5 py-1.5 text-[12px]",
                   propertyId === p.id ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
                 )}
               >
@@ -196,13 +196,13 @@ export default async function UnitsPage({
             <div className="flex gap-2">
               <Link
                 href={link({ page: String(Math.max(1, page - 1)) })}
-                className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}
+                className={cx("rounded-xl border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}
               >
                 Previous
               </Link>
               <Link
                 href={link({ page: String(Math.min(pages, page + 1)) })}
-                className={cx("rounded-lg border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}
+                className={cx("rounded-xl border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}
               >
                 Next
               </Link>

@@ -9,14 +9,40 @@ export type Role =
   | "maintenance"
   | "viewer";
 
+/**
+ * Signups land as `pending` and cannot sign in until an administrator approves
+ * them — otherwise anyone who reaches the URL could enrol themselves into the
+ * company's live tenancy data.
+ */
+export type UserStatus = "pending" | "active" | "suspended";
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: Role;
   title: string;
+  /** Whether the account may sign in. Pending and declined accounts are false. */
   active: boolean;
+  phone?: string;
+  /** Absent on the seeded demo accounts, which are active by definition. */
+  status?: UserStatus;
+  /** scrypt hash; absent on demo accounts, which sign in by one-click selection. */
+  passwordHash?: string;
+  /** The role the person asked for at signup — the admin decides the real one. */
+  requestedRole?: Role;
+  createdAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  declinedBy?: string;
+  declinedAt?: string;
+  declineReason?: string;
+  lastLoginAt?: string;
 }
+
+/** Seeded accounts predate the status field; they are active by definition. */
+export const userStatus = (u: User): UserStatus =>
+  u.status ?? (u.active ? "active" : "suspended");
 
 export interface Property {
   id: string;
@@ -125,6 +151,10 @@ export interface Cheque {
   bounceReason?: string;
   replacedByChequeId?: string;
   heldReason?: string;
+  /** Draft `account.payment` id in Odoo, once the mirror has landed. */
+  odooPaymentId?: number;
+  odooSyncedAt?: string;
+  odooError?: string;
 }
 
 export type PaymentMethod = "cheque" | "cash" | "bank_transfer" | "card";
@@ -140,6 +170,10 @@ export interface Payment {
   receivedAt: string;
   receivedBy: string;
   reference: string;
+  /** Draft `account.payment` id in Odoo, once the mirror has landed. */
+  odooPaymentId?: number;
+  odooSyncedAt?: string;
+  odooError?: string;
 }
 
 export type MaintenanceStatus =
@@ -214,6 +248,11 @@ export interface Task {
   createdAt: string;
   completedAt?: string;
   source: "system" | "manual";
+  /** `mail.activity` id in Odoo, once the follow-up mirror has landed. */
+  odooTaskId?: number;
+  odooSyncedAt?: string;
+  /** Why the last push failed. Present means Odoo is behind, not the task. */
+  odooError?: string;
 }
 
 export interface AuditEntry {
@@ -229,6 +268,56 @@ export interface AuditEntry {
   ip: string;
 }
 
+
+export type VisitStatus = "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show";
+export type VisitOutcome = "" | "interested" | "not_interested" | "offer_made";
+
+/** A property viewing: a person, a unit, and a slot in the diary. */
+export interface Visit {
+  id: string;
+  ref: string;
+  propertyId: string;
+  unitId: string;
+  /** Set when the visitor is already a tenant on file. */
+  tenantId?: string;
+  visitorName: string;
+  visitorPhone: string;
+  visitorEmail?: string;
+  /** UTC instant. The form collects Gulf wall-clock time and converts. */
+  startsAt: string;
+  durationMins: number;
+  status: VisitStatus;
+  outcome: VisitOutcome;
+  notes: string;
+  bookedBy: string;
+  createdAt: string;
+  /** `calendar.event` id in Odoo, once the mirror has landed. */
+  odooEventId?: number;
+  odooSyncedAt?: string;
+  /** Why the last push failed. Present means the calendar is behind. */
+  odooError?: string;
+}
+
+/**
+ * A span of time an employee had the app open.
+ *
+ * `lastSeenAt` is what makes the figure honest. Closing a tab never signs
+ * anybody out, so a span measured to its sign-out would run until the cookie
+ * expired; measured to its last heartbeat, it stops when the person actually
+ * stopped. `endedReason` keeps the two apart, because only a deliberate sign
+ * out is a real end time — an idle span merely ran out of evidence.
+ */
+export interface WorkSession {
+  id: string;
+  userId: string;
+  startedAt: string;
+  lastSeenAt: string;
+  /** Absent while the span is still open. */
+  endedAt?: string;
+  endedReason?: "signed_out" | "idle";
+  userAgent?: string;
+}
+
 export interface DB {
   users: User[];
   properties: Property[];
@@ -241,5 +330,9 @@ export interface DB {
   approvals: Approval[];
   tasks: Task[];
   audit: AuditEntry[];
+  /** Optional: files written before viewings existed have no such key. */
+  visits?: Visit[];
+  /** Optional: files written before time tracking existed have no such key. */
+  workSessions?: WorkSession[];
   counters: Record<string, number>;
 }

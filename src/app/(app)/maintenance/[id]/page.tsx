@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, User, Wrench } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, cx, daysFromToday, fmtDate, fmtDateTime, titleCase } from "@/lib/utils";
 import { Badge, Card, CardHead, PageHead } from "@/components/ui";
 import { KV } from "@/components/form";
@@ -30,7 +30,7 @@ export default async function MaintenanceDetail({
   const { id } = await params;
   const sp = await searchParams;
 
-  const d = db();
+  const d = await loadData();
   const wo = d.maintenance.find((m) => m.id === id);
   if (!wo) notFound();
 
@@ -50,7 +50,7 @@ export default async function MaintenanceDetail({
       </Link>
 
       {sp.created && (
-        <div className="mb-5 flex items-center gap-2.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
+        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
           <CheckCircle2 size={16} /> Work order raised. The maintenance supervisor has an SLA task due{" "}
           {fmtDate(wo.slaDueAt)}.
         </div>
@@ -135,7 +135,7 @@ export default async function MaintenanceDetail({
               {wo.description}
             </p>
             {wo.resolutionNotes && (
-              <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 p-3">
+              <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50 p-3">
                 <p className="text-[12px] font-semibold text-brand-800">Resolution</p>
                 <p className="mt-0.5 text-[12.5px] text-brand-700">{wo.resolutionNotes}</p>
               </div>

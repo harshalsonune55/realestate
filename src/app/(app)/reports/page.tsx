@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BarChart3, Building2, Landmark, TrendingUp, Users } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { chequeFlag, collectionForecast, kpis } from "@/lib/queries";
 import { AEDshort, addDays, cx, daysFromToday } from "@/lib/utils";
 import { Bar, Card, CardHead, PageHead, Stat, Table, TD, TH } from "@/components/ui";
@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
   await requirePerm("reports.view");
-  const d = db();
-  const k = kpis();
-  const forecast = collectionForecast();
+  const d = await loadData();
+  const k = kpis(d);
+  const forecast = collectionForecast(d);
   const maxDue = Math.max(...forecast.map((f) => f.due), 1);
 
   /* ---------------------------------------------- collection performance -- */
@@ -108,7 +108,10 @@ export default async function ReportsPage() {
             sub="Value of post-dated cheques falling due, month by month."
             icon={<TrendingUp size={17} />}
           />
-          <div className="flex h-52 items-end gap-2">
+          {/* items-stretch, not items-end: the columns have to fill the 208px
+              before a bar sized in % of its column has anything to be a
+              percentage of. Aligned to the end, every bar collapsed to zero. */}
+          <div className="flex h-52 items-stretch gap-2">
             {forecast.map((f) => (
               <div key={f.month} className="group flex flex-1 flex-col items-center gap-1.5">
                 <span className="text-[10px] font-medium text-muted opacity-0 transition group-hover:opacity-100">
@@ -164,7 +167,7 @@ export default async function ReportsPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2" padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+            <h2 className="flex items-center gap-2 text-[17px] font-bold text-fg">
               <Building2 size={17} className="text-brand-600" /> Performance by building
             </h2>
           </div>
@@ -232,7 +235,7 @@ export default async function ReportsPage() {
 
       <Card className="mt-5" padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+          <h2 className="flex items-center gap-2 text-[17px] font-bold text-fg">
             <Users size={17} className="text-brand-600" /> Employee activity
           </h2>
           <p className="mt-0.5 text-[12.5px] text-muted">

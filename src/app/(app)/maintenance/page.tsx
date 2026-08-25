@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, Plus, Wrench } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, cx, daysFromToday, fmtDate, titleCase } from "@/lib/utils";
 import { Badge, Card, Empty, LinkButton, PageHead, Stat, Table, TD, TH, Tone } from "@/components/ui";
 
@@ -43,7 +43,7 @@ export default async function MaintenancePage({
   const sp = await searchParams;
   const flag = sp.flag ?? "open";
 
-  const d = db();
+  const d = await loadData();
   const units = new Map(d.units.map((u) => [u.id, u]));
   const props = new Map(d.properties.map((p) => [p.id, p]));
   const tenants = new Map(d.tenants.map((t) => [t.id, t]));
@@ -118,7 +118,7 @@ export default async function MaintenancePage({
             key={t.key}
             href={`/maintenance?flag=${t.key}`}
             className={cx(
-              "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
+              "inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 text-[12.5px] font-semibold transition",
               flag === t.key
                 ? "border-inverse bg-inverse text-white"
                 : t.key === "breach" && counts.breach > 0

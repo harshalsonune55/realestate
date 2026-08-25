@@ -8,18 +8,25 @@
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
     "test": "tsx tests/rules.test.ts",
+    "test:pg": "for t in accounts cheques contracts maintenance tasks approvals renewals audit persistence task-odoo payment-odoo e2e; do echo \"\\n===== pg-$t =====\"; tsx --conditions=react-server tests/pg-$t.ts || exit 1; done",
+    "test:odoo": "tsx --conditions=react-server tests/odoo-live.ts",
+    "test:odoo:tasks": "tsx --conditions=react-server tests/odoo-live-tasks.ts",
+    "test:odoo:payments": "tsx --conditions=react-server tests/odoo-live-payments.ts",
     "reset-data": "rm -rf .data && echo \"Demo data cleared - it regenerates on the next page load.\""
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
     "next": "16.2.12",
+    "pg": "^8.22.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

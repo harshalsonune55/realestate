@@ -141,7 +141,7 @@ export default function NewContractWizard({
                           })
                         }
                         className={cx(
-                          "rounded-lg border p-3 text-left transition",
+                          "rounded-xl border p-3 text-left transition",
                           data.unitId === u.id
                             ? "border-brand-500 bg-brand-50/70 ring-1 ring-brand-500"
                             : "border-line bg-surface hover:border-brand-300"
@@ -454,7 +454,7 @@ export default function NewContractWizard({
                   onClick={() =>
                     set({ cheques: buildSchedule(data.chequeCount, data.annualRent, data.startDate, data.cheques) })
                   }
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-[13px] font-medium text-fg hover:bg-subtle"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-[13px] font-medium text-fg hover:bg-subtle"
                 >
                   <Wand2 size={15} className="text-brand-600" />
                   Recalculate dates and amounts
@@ -543,7 +543,7 @@ export default function NewContractWizard({
 
             <div
               className={cx(
-                "flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3",
+                "flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3",
                 balanced ? "border-brand-200 bg-brand-50" : "border-amber-200 bg-amber-50"
               )}
             >
@@ -619,7 +619,7 @@ export default function NewContractWizard({
               </Field>
             </Row>
 
-            <div className="rounded-lg border border-line bg-subtle p-4">
+            <div className="rounded-xl border border-line bg-subtle p-4">
               <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Total due from tenant on move-in
               </p>
@@ -652,7 +652,7 @@ export default function NewContractWizard({
         const done = REQUIRED_DOCS.filter((d2) => data.docs[d2.key]).length;
         return (
           <>
-            <div className="flex items-center justify-between rounded-lg bg-subtle px-4 py-2.5">
+            <div className="flex items-center justify-between rounded-xl bg-subtle px-4 py-2.5">
               <span className="text-[12.5px] text-fg-soft">Attached</span>
               <span className="tnum text-[13px] font-semibold text-fg">
                 {done} of {REQUIRED_DOCS.length}
@@ -719,7 +719,7 @@ export default function NewContractWizard({
         return (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-line p-4">
+              <div className="rounded-xl border border-line p-4">
                 <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                   <Building2 size={13} /> Unit
                 </p>
@@ -727,7 +727,7 @@ export default function NewContractWizard({
                 <KV label="Unit" value={unit ? `${unit.unitNo} · ${unit.type}` : "—"} strong />
                 <KV label="Size" value={unit ? `${unit.sizeSqft} sqft` : "—"} />
               </div>
-              <div className="rounded-lg border border-line p-4">
+              <div className="rounded-xl border border-line p-4">
                 <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                   <User size={13} /> Tenant
                 </p>
@@ -741,14 +741,14 @@ export default function NewContractWizard({
                   value={data.tenantMode === "new" ? data.phone : tenantById.get(data.existingTenantId)?.phone ?? "—"}
                 />
               </div>
-              <div className="rounded-lg border border-line p-4">
+              <div className="rounded-xl border border-line p-4">
                 <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">Terms</p>
                 <KV label="Start" value={fmtDate(data.startDate)} />
                 <KV label="Term" value={`${data.termMonths} months`} />
                 <KV label="Annual rent" value={AED(Number(data.annualRent))} strong />
                 <KV label="Ejari / Tawtheeq" value={data.ejariNo} />
               </div>
-              <div className="rounded-lg border border-line p-4">
+              <div className="rounded-xl border border-line p-4">
                 <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">Money</p>
                 <KV label="Cheques" value={`${data.cheques.length} · total ${AED(chequeTotal(data.cheques))}`} />
                 <KV label="Security deposit" value={AED(Number(data.securityDeposit))} />
@@ -757,7 +757,7 @@ export default function NewContractWizard({
               </div>
             </div>
 
-            <div className="rounded-lg border border-line">
+            <div className="rounded-xl border border-line">
               <p className="border-b border-line px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-muted">
                 Cheque schedule
               </p>
@@ -784,7 +784,7 @@ export default function NewContractWizard({
               />
             </Field>
 
-            <div className="rounded-lg border border-inverse/15 bg-inverse/[0.03] p-4">
+            <div className="rounded-xl border border-inverse/15 bg-inverse/[0.03] p-4">
               <p className="mb-2 text-[13px] font-semibold text-fg">Final confirmation</p>
               <p className="mb-3 text-[12.5px] text-fg-soft">
                 Type the tenant&apos;s name exactly as it appears above to confirm you have checked

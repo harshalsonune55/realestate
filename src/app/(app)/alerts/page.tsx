@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, BellRing, ChevronRight, Info, ShieldCheck, TriangleAlert } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { loadData } from "@/lib/data";
 import { alerts, REMINDER_WINDOW_DAYS } from "@/lib/queries";
 import { cx } from "@/lib/utils";
 import { Card, CardHead, Empty, PageHead, Stat } from "@/components/ui";
@@ -116,7 +117,7 @@ function Section({
 
 export default async function AlertsPage() {
   await requireUser();
-  const list = alerts();
+  const list = alerts(await loadData());
 
   const critical = list.filter((a) => a.severity === "critical");
   const warning = list.filter((a) => a.severity === "warning");

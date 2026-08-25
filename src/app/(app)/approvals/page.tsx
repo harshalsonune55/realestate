@@ -1,7 +1,7 @@
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can, REQUIRES_APPROVAL } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { daysFromToday, fmtDateTime, titleCase } from "@/lib/utils";
 import { Badge, Card, CardHead, Empty, PageHead, Stat } from "@/components/ui";
 import ApprovalCard, { ApprovalView } from "./ApprovalCard";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ApprovalsPage() {
   const user = await requirePerm("approvals.view");
-  const d = db();
+  const d = await loadData();
   const decide = can(user.role, "approvals.decide");
 
   const name = (id: string) => d.users.find((u) => u.id === id)?.name ?? id;

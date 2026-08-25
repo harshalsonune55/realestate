@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { chequeFlag } from "@/lib/queries";
 import { AED, cx, daysFromToday, fmtDate, fmtDateTime, relative } from "@/lib/utils";
 import {
@@ -27,7 +27,7 @@ export default async function ContractPage({
   const { id } = await params;
   const sp = await searchParams;
 
-  const d = db();
+  const d = await loadData();
   const contract = d.contracts.find((c) => c.id === id);
   if (!contract) notFound();
 
@@ -164,7 +164,7 @@ export default async function ContractPage({
                     key={c.id}
                     href={`/cheques/${c.id}`}
                     className={cx(
-                      "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-3 py-2.5 text-[12.5px] transition hover:shadow-sm",
+                      "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border px-3 py-2.5 text-[12.5px] transition hover:shadow-sm",
                       flag === "overdue"
                         ? "border-red-200 bg-red-50/60"
                         : flag === "bounced"
@@ -199,7 +199,7 @@ export default async function ContractPage({
                 <div
                   key={doc.key}
                   className={cx(
-                    "flex items-start gap-2.5 rounded-lg border p-2.5",
+                    "flex items-start gap-2.5 rounded-xl border p-2.5",
                     doc.provided ? "border-brand-200 bg-brand-50/50" : "border-red-200 bg-red-50"
                   )}
                 >
@@ -298,7 +298,7 @@ export default async function ContractPage({
             <KV label="Approved by" value={userName(contract.approvedBy)} />
             <KV label="Approved on" value={contract.approvedAt ? fmtDateTime(contract.approvedAt) : "—"} />
             {contract.notes && (
-              <div className="mt-3 rounded-lg bg-subtle p-3 text-[12px] text-fg-soft">
+              <div className="mt-3 rounded-xl bg-subtle p-3 text-[12px] text-fg-soft">
                 <b className="text-fg">Note:</b> {contract.notes}
               </div>
             )}

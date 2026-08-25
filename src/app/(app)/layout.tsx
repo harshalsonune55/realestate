@@ -1,8 +1,11 @@
 import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { alerts, chequeFlag } from "@/lib/queries";
+import { Suspense } from "react";
+import Presence from "@/components/Presence";
 import Shell, { NavGroup, NavItem } from "@/components/Shell";
+import SuccessCelebration from "@/components/SuccessCelebration";
 
 /** Keeps literal types intact while allowing `false` for permission-gated entries. */
 const item = (i: NavItem) => i;
@@ -12,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
-  const d = db();
+  const d = await loadData();
 
   const myTasks = d.tasks.filter((t) => t.assignedTo === user.id && t.status !== "done");
   const myOverdue = myTasks.filter((t) => t.status === "overdue").length;
@@ -32,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const groups: NavGroup[] = [
     clean("Overview", [
-      item({ href: "/", label: "Dashboard", icon: "LayoutDashboard" }),
+      item({ href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" }),
       item({
         href: "/tasks",
         label: "My Tasks",
@@ -44,6 +47,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     clean("Leasing", [
       only(can(user.role, "properties.view"), { href: "/properties", label: "Properties", icon: "Building2" }),
       only(can(user.role, "properties.view"), { href: "/units", label: "Units", icon: "DoorOpen" }),
+      only(can(user.role, "visits.view"), { href: "/visits", label: "Viewings", icon: "CalendarClock" }),
       only(can(user.role, "tenants.view"), { href: "/tenants", label: "Tenants", icon: "Users" }),
       only(can(user.role, "contracts.view"), { href: "/contracts", label: "Contracts", icon: "FileSignature" }),
       only(can(user.role, "renewals.view"), {
@@ -81,15 +85,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       }),
     ]),
     clean("Insight", [
+      only(can(user.role, "assistant.use"), { href: "/assistant", label: "Assistant", icon: "Sparkles" }),
       only(can(user.role, "reports.view"), { href: "/reports", label: "Reports", icon: "BarChart3" }),
       only(can(user.role, "audit.view"), { href: "/audit", label: "Audit Log", icon: "ScrollText" }),
     ]),
     clean("Administration", [
       only(can(user.role, "admin.users"), { href: "/admin/users", label: "Users & Roles", icon: "UserCog" }),
+      only(can(user.role, "admin.users"), { href: "/admin/time", label: "Time in App", icon: "CalendarClock" }),
     ]),
   ].filter((g) => g.items.length > 0);
 
-  const alertCount = alerts().filter((a) => a.severity !== "info").length;
+  const alertCount = alerts(d).filter((a) => a.severity !== "info").length;
 
   return (
     <Shell
@@ -97,6 +103,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       groups={groups}
       alertCount={alertCount}
     >
+      <Suspense fallback={null}>
+        <SuccessCelebration />
+      </Suspense>
+      {/* Mounted once for the whole signed-in app, so the heartbeat does not
+          restart on every navigation. */}
+      <Presence />
       {children}
     </Shell>
   );

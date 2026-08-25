@@ -1,12 +1,12 @@
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import MaintenanceWizard, { UnitLite } from "./MaintenanceWizard";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewMaintenancePage() {
   await requirePerm("maintenance.manage");
-  const d = db();
+  const d = await loadData();
 
   const units: UnitLite[] = d.units
     .map((u) => {

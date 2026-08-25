@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { KeyRound, Lock } from "lucide-react";
 import { GATE_COOKIE, gateToken } from "@/lib/gate";
+import { BrandLockup } from "@/components/Brand";
 
 export const dynamic = "force-dynamic";
 
@@ -46,17 +47,7 @@ export default async function GatePage({
         }}
       />
       <div className="relative w-full max-w-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-solid text-lg font-bold text-white">
-            AM
-          </div>
-          <div>
-            <p className="text-sm font-semibold tracking-wide text-white">AL MANARA</p>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
-              Property Management
-            </p>
-          </div>
-        </div>
+        <BrandLockup size="md" muted="text-white/45" className="mb-10 text-white" />
 
         <div className="rounded-xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur">
           <div className="mb-4 flex items-center gap-2 text-white">

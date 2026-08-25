@@ -22,7 +22,7 @@ export default function ClearButton({ chequeId }: { chequeId: string }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900">
         Only confirm this after seeing the credit on the bank statement.
       </div>
       <div className="flex gap-2">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { chequeFlag } from "@/lib/queries";
 import { AED, AEDshort, cx, daysFromToday, fmtDate } from "@/lib/utils";
 import { Badge, Card, CardHead, PageHead, Stat, Table, TD, TH, Tone } from "@/components/ui";
@@ -21,7 +21,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   await requirePerm("properties.view");
   const { id } = await params;
 
-  const d = db();
+  const d = await loadData();
   const property = d.properties.find((p) => p.id === id);
   if (!property) notFound();
 
@@ -76,7 +76,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
         <Card padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="text-[15px] font-semibold text-fg">Units</h2>
+            <h2 className="text-[17px] font-bold text-fg">Units</h2>
           </div>
           <div className="px-5 pb-4 pt-2">
             <Table>
@@ -177,7 +177,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               <ul className="space-y-2">
                 {maint.slice(0, 8).map((m) => (
                   <li key={m.id}>
-                    <Link href={`/maintenance/${m.id}`} className="block rounded-lg border border-line p-2.5 hover:bg-subtle">
+                    <Link href={`/maintenance/${m.id}`} className="block rounded-xl border border-line p-2.5 hover:bg-subtle">
                       <p className="text-[12.5px] font-medium text-fg">
                         {m.ref} · {m.category}
                       </p>

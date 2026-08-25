@@ -91,7 +91,7 @@ export default function MaintenanceWizard({
             </Row>
 
             {unit && (
-              <div className="rounded-lg border border-line bg-subtle p-4">
+              <div className="rounded-xl border border-line bg-subtle p-4">
                 <KV label="Unit" value={`${unit.unitNo} · ${unit.type}`} strong />
                 <KV label="Occupancy" value={unit.tenantName ? "Occupied" : "Vacant"} />
                 <KV label="Tenant" value={unit.tenantName ?? "No active tenancy"} />
@@ -167,7 +167,7 @@ export default function MaintenanceWizard({
                   type="button"
                   onClick={() => set({ priority: pr })}
                   className={cx(
-                    "flex items-start gap-3 rounded-lg border p-3 text-left transition",
+                    "flex items-start gap-3 rounded-xl border p-3 text-left transition",
                     data.priority === pr
                       ? pr === "emergency"
                         ? "border-red-400 bg-red-50 ring-1 ring-red-400"

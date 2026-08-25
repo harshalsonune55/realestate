@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Receipt, Search } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, AEDshort, addDays, cx, fmtDate, titleCase, today } from "@/lib/utils";
 import { Badge, Card, Empty, PageHead, Stat, Table, TD, TH } from "@/components/ui";
 
@@ -20,7 +20,7 @@ export default async function PaymentsPage({
   const category = sp.category ?? "all";
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  const d = db();
+  const d = await loadData();
   const contracts = new Map(d.contracts.map((c) => [c.id, c]));
   const tenants = new Map(d.tenants.map((t) => [t.id, t]));
   const units = new Map(d.units.map((u) => [u.id, u]));
@@ -88,7 +88,7 @@ export default async function PaymentsPage({
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Receipt, tenant, unit or reference…"
-              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-xl border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
           <div className="flex flex-wrap gap-1.5">
@@ -97,7 +97,7 @@ export default async function PaymentsPage({
                 key={c}
                 href={link({ category: c, page: undefined })}
                 className={cx(
-                  "rounded-lg border px-2.5 py-1.5 text-[12px] capitalize",
+                  "rounded-xl border px-2.5 py-1.5 text-[12px] capitalize",
                   category === c ? "border-inverse bg-inverse text-white" : "border-line bg-surface text-fg-soft"
                 )}
               >
@@ -159,10 +159,10 @@ export default async function PaymentsPage({
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
             <span className="text-muted">Page {page} of {pages}</span>
             <div className="flex gap-2">
-              <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
+              <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-xl border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
                 Previous
               </Link>
-              <Link href={link({ page: String(Math.min(pages, page + 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}>
+              <Link href={link({ page: String(Math.min(pages, page + 1)) })} className={cx("rounded-xl border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}>
                 Next
               </Link>
             </div>

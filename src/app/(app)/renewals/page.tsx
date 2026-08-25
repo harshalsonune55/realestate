@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, CalendarClock, RefreshCw } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, cx, daysFromToday, fmtDate } from "@/lib/utils";
 import { Badge, Card, CardHead, Empty, PageHead, Stat, Table, TD, TH } from "@/components/ui";
 
@@ -17,7 +17,7 @@ const BANDS = [
 
 export default async function RenewalsPage() {
   const user = await requirePerm("renewals.view");
-  const d = db();
+  const d = await loadData();
 
   const units = new Map(d.units.map((u) => [u.id, u]));
   const props = new Map(d.properties.map((p) => [p.id, p]));
@@ -77,7 +77,7 @@ export default async function RenewalsPage() {
       <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
         <Card padded={false}>
           <div className="border-b border-line px-5 py-3">
-            <h2 className="text-[15px] font-semibold text-fg">Renewal pipeline</h2>
+            <h2 className="text-[17px] font-bold text-fg">Renewal pipeline</h2>
             <p className="mt-0.5 text-[12.5px] text-muted">
               Sorted by urgency. Payment history is shown so you know who to renew and on what terms.
             </p>
@@ -164,7 +164,7 @@ export default async function RenewalsPage() {
             <CardHead title="By urgency" icon={<AlertTriangle size={17} />} />
             <ul className="space-y-2">
               {counts.map((b) => (
-                <li key={b.key} className="flex items-center justify-between rounded-lg border border-line px-3 py-2">
+                <li key={b.key} className="flex items-center justify-between rounded-xl border border-line px-3 py-2">
                   <span className="text-[12.5px] text-fg-soft">{b.label}</span>
                   <Badge tone={b.tone}>{b.n}</Badge>
                 </li>

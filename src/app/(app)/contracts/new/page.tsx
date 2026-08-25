@@ -1,5 +1,5 @@
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import NewContractWizard, {
   PropertyOption,
   TenantOption,
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NewContractPage() {
   await requirePerm("contracts.create");
-  const d = db();
+  const d = await loadData();
 
   const vacant = d.units.filter((u) => u.status === "vacant");
 

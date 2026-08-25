@@ -6,16 +6,18 @@ import { useState } from "react";
 import {
   LayoutDashboard, ListChecks, Building2, DoorOpen, Users, FileSignature,
   RefreshCw, Landmark, Receipt, Wrench, ShieldCheck, BarChart3, ScrollText,
-  UserCog, LogOut, Menu, X, Search, BellRing, ChevronRight,
+  UserCog, LogOut, Menu, X, BellRing, ChevronRight, Sparkles, CalendarClock,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { ROLE_LABEL } from "@/lib/rbac";
 import type { Role } from "@/lib/types";
-import ThemeToggle from "./ThemeToggle";
+import CommandPalette from "./CommandPalette";
+import { Monogram } from "./Brand";
 
 const ICONS = {
   LayoutDashboard, ListChecks, Building2, DoorOpen, Users, FileSignature,
   RefreshCw, Landmark, Receipt, Wrench, ShieldCheck, BarChart3, ScrollText, UserCog,
+  Sparkles, CalendarClock,
 } as const;
 
 export interface NavItem {
@@ -50,21 +52,19 @@ export default function Shell({
     .map((p) => p[0])
     .join("");
 
-  /* The sidebar sits on fixed dark chrome in both themes, so it uses the
-     inverse-* tokens rather than the surface tokens the rest of the app uses. */
+  /* Light, minimal sidebar: rounded pills, a soft-shadow active state, and
+     dark count badges — clean and uncluttered. */
   const nav = (
-    <nav className="scroll-thin flex-1 overflow-y-auto px-3 py-4">
+    <nav className="scroll-thin flex-1 overflow-y-auto px-3.5 py-4">
       {groups.map((g) => (
-        <div key={g.title} className="mb-5">
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-inverse-muted">
+        <div key={g.title} className="mb-4">
+          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">
             {g.title}
           </p>
-          <ul className="space-y-0.5">
+          <ul className="space-y-1">
             {g.items.map((item) => {
               const active =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname === item.href || pathname.startsWith(item.href + "/");
+                pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = ICONS[item.icon];
               return (
                 <li key={item.href}>
@@ -73,36 +73,29 @@ export default function Shell({
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cx(
-                      "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors duration-150",
+                      "group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
                       active
-                        ? "bg-white/[0.07] font-medium text-white"
-                        : "text-white/60 hover:bg-white/[0.04] hover:text-white"
+                        ? "bg-surface font-semibold text-fg shadow-sm"
+                        : "text-fg-soft hover:bg-surface/70"
                     )}
                   >
-                    {/* accent rail marks the active route without shifting layout */}
-                    <span
-                      className={cx(
-                        "absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand-400 transition-opacity",
-                        active ? "opacity-100" : "opacity-0"
-                      )}
-                    />
                     <Icon
-                      size={16}
+                      size={19}
                       className={cx(
                         "shrink-0 transition-colors",
-                        active ? "text-brand-400" : "text-white/40 group-hover:text-white/70"
+                        active ? "text-fg" : "text-muted group-hover:text-fg-soft"
                       )}
                     />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.badge ? (
                       <span
                         className={cx(
-                          "tnum rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                          "tnum grid h-6 min-w-[24px] place-items-center rounded-full px-1.5 text-[11px] font-semibold",
                           item.badgeTone === "red"
                             ? "bg-red-500 text-white"
                             : item.badgeTone === "amber"
-                            ? "bg-amber-400 text-[#0b1220]"
-                            : "bg-white/10 text-white/70"
+                            ? "bg-amber-400 text-[#1c1c1c]"
+                            : "bg-inverse text-inverse-fg"
                         )}
                       >
                         {item.badge > 99 ? "99+" : item.badge}
@@ -119,36 +112,32 @@ export default function Shell({
   );
 
   const sidebar = (
-    <div className="flex h-full w-64 flex-col bg-inverse">
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-inverse-line px-5">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-solid font-bold text-white shadow-sm">
-          AM
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-[13px] font-semibold tracking-wide text-white">AL MANARA</p>
-          <p className="truncate text-[10px] uppercase tracking-[0.16em] text-inverse-muted">
-            Property Management
-          </p>
-        </div>
+    <div className="flex h-full w-64 flex-col border-r border-line bg-gradient-to-b from-[#f2f3f5] to-[#fbfbfc]">
+      {/* The drawn AG, not the roundel — that one is reserved for the way in. */}
+      <div className="flex shrink-0 flex-col items-center gap-2 px-5 pb-5 pt-7">
+        <Monogram size="md" />
+        <p className="font-serif text-[15px] font-semibold tracking-[0.14em] text-fg">
+          ABER GROUP
+        </p>
       </div>
 
       {nav}
 
-      <div className="shrink-0 border-t border-inverse-line p-3">
-        <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-[12px] font-semibold text-white">
+      <div className="shrink-0 p-3">
+        <div className="flex items-center gap-3 rounded-2xl bg-surface p-2.5 shadow-xs">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-subtle text-[12px] font-semibold text-fg-soft">
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-white">{user.name}</p>
-            <p className="truncate text-[11px] text-inverse-muted">{ROLE_LABEL[user.role]}</p>
+            <p className="truncate text-[13px] font-semibold text-fg">{user.name}</p>
+            <p className="truncate text-[11px] text-muted">{ROLE_LABEL[user.role]}</p>
           </div>
           <form action="/api/logout" method="post">
             <button
               type="submit"
               title="Sign out"
               aria-label="Sign out"
-              className="rounded-md p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white"
+              className="rounded-lg p-1.5 text-muted transition hover:bg-subtle hover:text-fg"
             >
               <LogOut size={15} />
             </button>
@@ -192,15 +181,12 @@ export default function Shell({
           <Breadcrumbs pathname={pathname} />
 
           <div className="ml-auto flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-lg border border-line bg-canvas px-3 py-2 text-[13px] text-faint transition hover:border-line-strong md:flex">
-              <Search size={14} />
-              <span>Search unit, tenant, cheque…</span>
-              <kbd className="ml-2 rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] text-faint">
-                ⌘K
-              </kbd>
-            </div>
+            <CommandPalette
+              pages={groups.flatMap((g) =>
+                g.items.map((i) => ({ href: i.href, label: i.label, group: g.title }))
+              )}
+            />
 
-            <ThemeToggle />
 
             <Link
               href="/alerts"
@@ -222,7 +208,7 @@ export default function Shell({
         </main>
 
         <footer className="border-t border-line px-4 py-4 text-[11px] text-faint lg:px-8">
-          Al Manara Property Management — internal system. Every action on this system is recorded
+          Aber Group Property Management — internal system. Every action on this system is recorded
           in the audit log.
         </footer>
       </div>
@@ -233,6 +219,7 @@ export default function Shell({
 const CRUMB_LABELS: Record<string, string> = {
   "": "Dashboard",
   tasks: "My Tasks",
+  time: "Time in App",
   properties: "Properties",
   units: "Units",
   tenants: "Tenants",
@@ -257,7 +244,7 @@ function Breadcrumbs({ pathname }: { pathname: string }) {
   const parts = pathname.split("/").filter(Boolean);
   return (
     <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-[13px]">
-      <Link href="/" className="shrink-0 text-muted transition hover:text-fg">
+      <Link href="/dashboard" className="shrink-0 text-muted transition hover:text-fg">
         Home
       </Link>
       {parts.map((p, i) => (
