@@ -7,7 +7,10 @@ const nextConfig: NextConfig = {
      not fit. Standalone output traces only the files the app actually loads
      and emits a self-contained folder with its own `server.js`, so the server
      needs no npm and a fraction of the space. */
-  output: "standalone",
+  // Netlify is the exception: its Next adapter builds and hosts the app
+  // itself, and a standalone bundle is this box's disk workaround rather
+  // than something it needs. NETLIFY is set in every Netlify build.
+  output: process.env.NETLIFY ? undefined : "standalone",
 
   /* Served under a path, not a port. On the AWS box nginx owns :80 and proxies
      everything to Odoo, and the security group has every other port shut — so

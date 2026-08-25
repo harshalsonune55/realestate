@@ -1,0 +1,36 @@
+# Al Manara PMS on Netlify — the web tier only.
+#
+# Same shape as render.yaml: the data tier does not move. Postgres and Odoo
+# stay on the AWS box (16.170.201.73), which also keeps serving the app at
+# /pms for the mobile client. Netlify becomes a second front end onto the
+# same database.
+#
+# The Next.js adapter (opennextjs-netlify) is applied automatically — do not
+# add it to [[plugins]] or install it, or you pin a version that will rot.
+# SSR/route handlers become Netlify Functions; src/middleware.ts becomes an
+# Edge Function.
+
+[build]
+  command = "npm ci && npm run build"
+  publish = ".next"
+
+[build.environment]
+  # .node-version already says 22.18.0 and Netlify honours it; this is here so
+  # the version is visible in one place with the rest of the build config.
+  NODE_VERSION = "22.18.0"
+
+  # Non-secret values, safe in git. Everything secret goes in the Netlify UI
+  # instead — see the table in deploy/NETLIFY.md.
+  DATABASE_SSL = "true"
+  ODOO_URL = "http://16.170.201.73"
+  ODOO_DB = "almanara"
+  ASSISTANT_PROVIDER = "groq"
+
+# Two variables are deliberately absent here, exactly as in render.yaml, and
+# setting either breaks this deploy:
+#
+#   PMS_BASE_PATH — Netlify serves this site at the root of its own hostname.
+#                   Set it and every asset 404s and the app renders unstyled.
+#
+#   PMS_DATA_DIR  — the JSON demo store's path. Netlify Functions have a
+#                   read-only filesystem, so there is nothing for it to do.
