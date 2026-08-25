@@ -15,19 +15,30 @@
   publish = ".next"
 
 [build.environment]
-  # .node-version already says 22.18.0 and Netlify honours it; this is here so
-  # the version is visible in one place with the rest of the build config.
+  # NODE_VERSION is the one variable that genuinely belongs here: it is
+  # consumed by the build image itself, before any of our code runs.
+  # .node-version already says 22.18.0 and Netlify honours it; this keeps the
+  # version visible alongside the rest of the build config.
   NODE_VERSION = "22.18.0"
 
-  # Non-secret values, safe in git. Everything secret goes in the Netlify UI
-  # instead — see the table in deploy/NETLIFY.md.
-  DATABASE_SSL = "true"
-  ODOO_URL = "http://16.170.201.73"
-  ODOO_DB = "almanara"
-  ASSISTANT_PROVIDER = "groq"
-
-# Two variables are deliberately absent here, exactly as in render.yaml, and
-# setting either breaks this deploy:
+# Everything the *running* app reads is deliberately NOT in this file.
+#
+# [build.environment] is build-scoped: Netlify exposes it to the build image
+# and nowhere else. Functions and Edge Functions read the site's environment
+# variables instead, so anything listed here is simply invisible to
+# process.env at request time. Putting ASSISTANT_PROVIDER here is what makes
+# src/lib/llm.ts report "The assistant is not configured" — it sees no pinned
+# provider at all, rather than a pinned provider with a missing key.
+#
+# So all of these go in Site configuration → Environment variables, scoped to
+# Functions (see deploy/NETLIFY.md for the full table):
+#
+#   DATABASE_URL   DATABASE_SSL   ODOO_URL       ODOO_DB
+#   ODOO_USERNAME  ODOO_API_KEY   GROQ_API_KEY   ASSISTANT_PROVIDER
+#   PMS_API_TOKEN  PMS_ACCESS_PASSWORD
+#
+# Two variables are deliberately absent everywhere, and setting either breaks
+# this deploy:
 #
 #   PMS_BASE_PATH — Netlify serves this site at the root of its own hostname.
 #                   Set it and every asset 404s and the app renders unstyled.

@@ -35,6 +35,15 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // healthz stays outside the gate so the host's health check never sees a redirect
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|healthz).*)"],
+  // healthz stays outside the gate so the host's health check never sees a redirect.
+  //
+  // `.netlify` and `brand` are here because the gate has no business
+  // redirecting an image request. Netlify's adapter serves next/image through
+  // its own Image CDN at /.netlify/images rather than /_next/image, so the
+  // exemption above misses it, and the source asset under /brand is fetched as
+  // a plain file. Either one gated returns the /gate HTML where the browser
+  // expects a PNG, which renders as a broken logo on this very page. Nothing
+  // under public/ is secret — the marketing page serves it to anonymous
+  // visitors — so exempting it costs nothing.
+  matcher: ["/((?!_next/static|_next/image|\\.netlify|brand|favicon.ico|healthz).*)"],
 };

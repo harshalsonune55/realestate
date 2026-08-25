@@ -50,19 +50,40 @@ Netlify → **Add new site → Import an existing project** → GitHub →
 
 ## 3. Environment variables
 
-Site configuration → Environment variables. `netlify.toml` already carries
-`NODE_VERSION`, `DATABASE_SSL`, `ODOO_URL`, `ODOO_DB` and
-`ASSISTANT_PROVIDER`, so only the secrets are left — the same list that is
-`sync: false` in `render.yaml`:
+Site configuration → **Environment variables**. Every one of these must be
+scoped to **Functions** (Netlify's default scope covers it) — `netlify.toml`
+cannot supply them.
+
+`[build.environment]` in `netlify.toml` is build-scoped only: Netlify exposes
+it to the build image and nowhere else, so a value put there is invisible to
+`process.env` at request time. That is not a style preference — it is why
+`ASSISTANT_PROVIDER` in the toml made `src/lib/llm.ts` report "The assistant
+is not configured", the branch that fires when nothing is pinned at all.
 
 | Key | Value |
 | --- | --- |
-| `DATABASE_URL` | `postgresql://pms:<APP_DB_PASSWORD>@16.170.201.73:5432/almanara_pms`, or whatever the option you picked above produces |
-| `ODOO_USERNAME` | `ODOO_USERNAME` from `deploy/server.env` |
-| `ODOO_API_KEY` | `ODOO_API_KEY` from `deploy/server.env` |
-| `GROQ_API_KEY` | `GROQ_API_KEY` from `deploy/server.env` |
+| `DATABASE_URL` | `postgresql://pms:<APP_DB_PASSWORD>@16.170.201.73:5432/almanara_pms`, or whatever the option in the section above produces. **Percent-encode the password**: `APP_DB_PASSWORD` contains `/` and `=`, and pasted raw the string is not a valid URL at all — `/`→`%2F`, `=`→`%3D`, `+`→`%2B` |
+| `DATABASE_SSL` | `true` — read at `src/lib/db.ts:22`; without it `pg` connects in the clear and the server rejects it |
+| `ODOO_URL` | `http://16.170.201.73` |
+| `ODOO_DB` | `almanara` (the Odoo database; `almanara_pms` is this app's own) |
+| `ODOO_USERNAME` | from `deploy/server.env` |
+| `ODOO_API_KEY` | from `deploy/server.env` |
+| `ASSISTANT_PROVIDER` | `groq` — pinned so a missing key fails loudly instead of silently using OpenAI |
+| `GROQ_API_KEY` | from `deploy/server.env` |
 | `PMS_API_TOKEN` | must equal `ApiConfig.token` in `mobile/lib/data/api_config.dart` |
 | `PMS_ACCESS_PASSWORD` | the same value the AWS instance uses, so staff have one password |
+
+Or with the CLI, from the site directory (`netlify env:set` defaults to all
+scopes, which includes Functions):
+
+    netlify env:set ASSISTANT_PROVIDER groq
+    netlify env:set ODOO_URL http://16.170.201.73
+    netlify env:set ODOO_DB almanara
+    netlify env:set DATABASE_SSL true
+    netlify env:set GROQ_API_KEY "<key from deploy/server.env>"
+
+Environment changes do not apply to the running site by themselves — **trigger
+a redeploy** (Deploys → Trigger deploy → Clear cache and deploy site).
 
 Do not set `PMS_BASE_PATH` or `PMS_DATA_DIR`. `netlify.toml` explains why each
 one breaks this deployment.
