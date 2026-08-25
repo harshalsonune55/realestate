@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ScrollText, Search, ShieldCheck } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { cx, fmtDateTime, titleCase } from "@/lib/utils";
 import { Badge, Card, CardHead, Empty, PageHead, Stat, Tone } from "@/components/ui";
 
@@ -28,7 +28,7 @@ export default async function AuditPage({
   const entity = sp.entity ?? "all";
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  const d = db();
+  const d = await loadData();
   let rows = [...d.audit].sort((a, b) => (a.at < b.at ? 1 : -1));
 
   if (actor !== "all") rows = rows.filter((a) => a.actorId === actor);
@@ -99,7 +99,7 @@ export default async function AuditPage({
                 name="q"
                 defaultValue={sp.q ?? ""}
                 placeholder="Action, employee or record id…"
-                className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                className="h-9 w-72 rounded-xl border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               />
             </form>
             <p className="tnum ml-auto text-[12.5px] text-muted">{rows.length.toLocaleString("en-US")} entries</p>
@@ -136,7 +136,7 @@ export default async function AuditPage({
                         )}
                       </div>
                       {a.changes && a.changes.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5 rounded-lg bg-subtle px-2.5 py-1.5">
+                        <ul className="mt-1.5 space-y-0.5 rounded-xl bg-subtle px-2.5 py-1.5">
                           {a.changes.map((c, i) => (
                             <li key={i} className="text-[11px] text-fg-soft">
                               <b className="font-medium text-fg">{c.field}</b>{" "}
@@ -158,10 +158,10 @@ export default async function AuditPage({
             <div className="flex items-center justify-between border-t border-line px-5 py-3 text-[12.5px]">
               <span className="text-muted">Page {page} of {pages}</span>
               <div className="flex gap-2">
-                <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
+                <Link href={link({ page: String(Math.max(1, page - 1)) })} className={cx("rounded-xl border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}>
                   Previous
                 </Link>
-                <Link href={link({ page: String(Math.min(pages, page + 1)) })} className={cx("rounded-lg border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}>
+                <Link href={link({ page: String(Math.min(pages, page + 1)) })} className={cx("rounded-xl border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}>
                   Next
                 </Link>
               </div>
@@ -205,7 +205,7 @@ export default async function AuditPage({
                   key={e}
                   href={link({ entity: e, page: undefined })}
                   className={cx(
-                    "rounded-lg border px-2.5 py-1 text-[12px]",
+                    "rounded-xl border px-2.5 py-1 text-[12px]",
                     entity === e ? "border-inverse bg-inverse text-white" : "border-line text-fg-soft hover:bg-subtle"
                   )}
                 >

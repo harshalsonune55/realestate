@@ -56,41 +56,13 @@ class _LoginScreenState extends State<LoginScreen> {
         body: ListView(
           padding: EdgeInsets.zero,
           children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                22,
-                MediaQuery.of(context).padding.top + 10,
-                22,
-                24,
-              ),
-              // Pure black to match the logo artwork's background exactly, so
-              // the bitmap sits on the panel with no visible seam.
-              color: const Color(0xFF010101),
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/brand/aber_logo.png',
-                    height: 168,
-                    filterQuality: FilterQuality.high,
-                    semanticLabel:
-                        'Aber Group — Investment · Property · Lifestyle',
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Every process, guided step by step.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFFB9BEC7),
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 26, 20, 30),
+              padding: EdgeInsets.fromLTRB(
+                24,
+                MediaQuery.of(context).padding.top + 72,
+                24,
+                30,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -208,34 +180,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  Container(
-                    padding: const EdgeInsets.all(13),
-                    decoration: BoxDecoration(
-                      color: c.subtle,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.lock_outline, size: 15, color: c.faint),
-                        const SizedBox(width: 9),
-                        Expanded(
-                          child: Text(
-                            'Prototype. Demo staff accounts (e.g. fatima@almanara.ae) all '
-                            'use the password ${Store.demoPassword}. Accounts created '
-                            'through “Request access” use their own password once approved.',
-                            style: TextStyle(
-                              color: c.fgSoft,
-                              fontSize: 12,
-                              height: 1.45,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],

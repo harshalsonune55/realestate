@@ -6,12 +6,14 @@ import {
 } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { chequeFlag } from "@/lib/queries";
 import { AED, cx, daysFromToday, fmtDate, fmtDateTime, relative, titleCase } from "@/lib/utils";
 import { Badge, Card, CardHead, ChequeStatusBadge, LinkButton, PageHead } from "@/components/ui";
-import { KV } from "@/components/form";
+import { KV, Note } from "@/components/form";
 import ClearButton from "./ClearButton";
+import RetrySyncButton from "@/components/RetrySyncButton";
+import { retryChequeSyncAction } from "@/lib/actions/cheques";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +28,7 @@ export default async function ChequePage({
   const { id } = await params;
   const sp = await searchParams;
 
-  const d = db();
+  const d = await loadData();
   const cheque = d.cheques.find((c) => c.id === id);
   if (!cheque) notFound();
 
@@ -35,6 +37,7 @@ export default async function ChequePage({
   const unit = d.units.find((u) => u.id === contract.unitId)!;
   const property = d.properties.find((p) => p.id === unit.propertyId)!;
   const flag = chequeFlag(cheque);
+  const odooSynced = Boolean(cheque.odooPaymentId) && !cheque.odooError;
   const siblings = d.cheques.filter((c) => c.contractId === cheque.contractId).sort((a, b) => a.seq - b.seq);
   const trail = d.audit.filter((a) => a.entityType === "cheque" && a.entityId === cheque.id).slice(0, 12);
   const tasks = d.tasks.filter((t) => t.entityType === "cheque" && t.entityId === cheque.id);
@@ -72,19 +75,19 @@ export default async function ChequePage({
       </Link>
 
       {sp.deposited && (
-        <div className="mb-5 flex items-center gap-2.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
+        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
           <CheckCircle2 size={16} />
           Cheque recorded as deposited. A follow-up task to confirm clearance has been added to your
           list for {fmtDate(cheque.depositedAt ? cheque.depositedAt : undefined)}.
         </div>
       )}
       {sp.cleared && (
-        <div className="mb-5 flex items-center gap-2.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
+        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
           <CheckCircle2 size={16} /> Clearance recorded and a receipt has been generated.
         </div>
       )}
       {sp.bounced && (
-        <div className="mb-5 flex items-center gap-2.5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800">
+        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800">
           <AlertTriangle size={16} /> Return recorded. A replacement task and an approval request
           have been raised.
         </div>
@@ -149,10 +152,37 @@ export default async function ChequePage({
               </div>
             </div>
             {cheque.bounceReason && (
-              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-[12.5px] text-red-800">
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-[12.5px] text-red-800">
                 <b>Returned {fmtDate(cheque.bouncedAt)}:</b> {cheque.bounceReason}
               </div>
             )}
+          </Card>
+
+          <Card>
+            <CardHead
+              title="Odoo payment"
+              icon={<Landmark size={17} />}
+              sub={
+                odooSynced
+                  ? "This cheque is mirrored to a draft account.payment in Odoo. Status changes move the same record."
+                  : "This cheque is not in Odoo yet."
+              }
+              action={<Badge tone={odooSynced ? "good" : "warn"}>{odooSynced ? "Synced" : "Not synced"}</Badge>}
+            />
+            <div className="grid gap-3 p-4 sm:grid-cols-2">
+              <KV label="Payment record" value={cheque.odooPaymentId ? `#${cheque.odooPaymentId}` : "—"} />
+              <KV label="Last synced" value={cheque.odooSyncedAt ? fmtDateTime(cheque.odooSyncedAt) : "—"} />
+            </div>
+            {cheque.odooError ? (
+              <div className="px-4 pb-4">
+                <Note tone="warn">{cheque.odooError}</Note>
+              </div>
+            ) : null}
+            {can(user.role, "cheques.deposit") && !odooSynced ? (
+              <div className="border-t border-line p-4">
+                <RetrySyncButton action={retryChequeSyncAction.bind(null, cheque.id)} />
+              </div>
+            ) : null}
           </Card>
 
           <Card>
@@ -191,7 +221,7 @@ export default async function ChequePage({
                   key={c.id}
                   href={`/cheques/${c.id}`}
                   className={cx(
-                    "flex items-center gap-3 rounded-lg border px-3 py-2 text-[12.5px] transition",
+                    "flex items-center gap-3 rounded-xl border px-3 py-2 text-[12.5px] transition",
                     c.id === cheque.id ? "border-brand-400 bg-brand-50/60" : "border-line hover:bg-subtle"
                   )}
                 >
@@ -235,7 +265,7 @@ export default async function ChequePage({
               <CardHead title="Linked tasks" icon={<ShieldCheck size={17} />} />
               <ul className="space-y-2">
                 {tasks.map((t) => (
-                  <li key={t.id} className="rounded-lg border border-line p-2.5">
+                  <li key={t.id} className="rounded-xl border border-line p-2.5">
                     <p className="text-[12.5px] font-medium text-fg">{t.title}</p>
                     <p className="mt-0.5 text-[11.5px] text-muted">
                       {d.users.find((u) => u.id === t.assignedTo)?.name} · due {fmtDate(t.dueDate)}

@@ -176,6 +176,25 @@ class Contract {
   final ContractStatus status;
 }
 
+/// Money actually received, as opposed to a cheque that may yet clear.
+///
+/// The app had no such record — it inferred collection from cleared cheques,
+/// while the website counted rent payments in the last twelve months. Same
+/// word, two different figures, which is why the two dashboards disagreed.
+class Payment {
+  const Payment({
+    required this.id,
+    required this.contractId,
+    required this.amount,
+    required this.category,
+    required this.receivedAt,
+  });
+
+  final String id, contractId, category;
+  final num amount;
+  final DateTime receivedAt;
+}
+
 enum ChequeStatus { pending, deposited, cleared, bounced, replaced, cancelled }
 
 const chequeStatusLabel = <ChequeStatus, String>{
@@ -324,4 +343,66 @@ class SessionEvent {
     ),
     at: DateTime.parse(j['at'] as String),
   );
+}
+
+enum MaintenanceStatus { newRequest, assigned, inProgress, awaitingApproval, completed, closed, rejected }
+
+const maintenanceStatusLabel = {
+  MaintenanceStatus.newRequest: 'New',
+  MaintenanceStatus.assigned: 'Assigned',
+  MaintenanceStatus.inProgress: 'In progress',
+  MaintenanceStatus.awaitingApproval: 'Awaiting approval',
+  MaintenanceStatus.completed: 'Completed',
+  MaintenanceStatus.closed: 'Closed',
+  MaintenanceStatus.rejected: 'Rejected',
+};
+
+class MaintenanceRequest {
+  const MaintenanceRequest({
+    required this.id,
+    required this.ref,
+    required this.unitId,
+    required this.category,
+    required this.priority,
+    required this.description,
+    required this.status,
+    required this.reportedAt,
+    required this.vendor,
+    required this.quoteAmount,
+    required this.slaDueAt,
+    this.assignedToName,
+  });
+  final String id, ref, unitId, category, priority, description, vendor;
+  final MaintenanceStatus status;
+  final DateTime reportedAt, slaDueAt;
+  final double quoteAmount;
+  final String? assignedToName;
+}
+
+enum VisitStatus { scheduled, completed, cancelled, noShow }
+
+const visitStatusLabel = {
+  VisitStatus.scheduled: 'Scheduled',
+  VisitStatus.completed: 'Completed',
+  VisitStatus.cancelled: 'Cancelled',
+  VisitStatus.noShow: 'No show',
+};
+
+class Visit {
+  Visit({
+    required this.id,
+    required this.ref,
+    required this.unitId,
+    required this.visitorName,
+    required this.visitorPhone,
+    required this.visitorEmail,
+    required this.startsAt,
+    required this.durationMins,
+    required this.status,
+    required this.notes,
+  });
+  final String id, ref, unitId, visitorName, visitorPhone, visitorEmail, notes;
+  final DateTime startsAt;
+  final int durationMins;
+  VisitStatus status;
 }

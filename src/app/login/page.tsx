@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, ChevronDown, ShieldCheck } from "lucide-react";
 import { currentUser, startSession } from "@/lib/auth";
 import { ROLE_LABEL } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { findUserById, listDemoUsers } from "@/lib/repos/accounts";
 import { userStatus } from "@/lib/types";
 import { AuthFooterLink, AuthHeading, AuthShell } from "@/components/AuthShell";
 import SignInForm from "./SignInForm";
@@ -19,10 +19,10 @@ export const metadata: Metadata = { title: "Sign in — Aber Group" };
 async function useDemoAccount(formData: FormData) {
   "use server";
   const id = String(formData.get("userId") ?? "");
-  const user = db().users.find((u) => u.id === id && u.active && !u.passwordHash);
-  if (!user) redirect("/login");
+  const user = await findUserById(id);
+  if (!user || !user.active || user.passwordHash) redirect("/login");
   await startSession(user.id);
-  redirect("/");
+  redirect("/dashboard");
 }
 
 const GUARANTEES = [
@@ -32,11 +32,11 @@ const GUARANTEES = [
 ];
 
 export default async function LoginPage() {
-  if (await currentUser()) redirect("/");
+  if (await currentUser()) redirect("/dashboard");
 
   // Only the seeded accounts belong in the quick-access list; accounts created
   // through signup must use their own password.
-  const demoUsers = db().users.filter(
+  const demoUsers = (await listDemoUsers()).filter(
     (u) => u.active && !u.passwordHash && userStatus(u) === "active"
   );
 

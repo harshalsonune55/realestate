@@ -1,6 +1,23 @@
 import Link from "next/link";
 import { cx } from "@/lib/utils";
 
+/* ============================================================================
+   The shared kit, in the dashboard's voice.
+
+   The dashboard set the house style — bold, tightly tracked headings, softly
+   rounded cards, pill-shaped controls and pastel stat tiles. Every other page
+   is built from the pieces below, so the style lives here rather than being
+   re-typed into twenty-five files: change a heading size once and the whole
+   app moves with it.
+
+   The scale, for anyone adding to it:
+     page title    26px / bold / -0.02em
+     section head  19px / bold
+     card head     17px / bold
+     body          13.5px
+     meta          12px, muted
+   ========================================================================== */
+
 /* ------------------------------------------------------------------ cards */
 
 export function Card({
@@ -15,7 +32,7 @@ export function Card({
   return (
     <div
       className={cx(
-        "rounded-xl border border-line bg-surface shadow-xs",
+        "rounded-2xl border border-line bg-surface shadow-xs",
         padded && "p-5",
         className
       )}
@@ -40,13 +57,13 @@ export function CardHead({
     <div className="mb-4 flex items-start justify-between gap-4">
       <div className="flex min-w-0 gap-3">
         {icon && (
-          <span className="mt-px grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
             {icon}
           </span>
         )}
         <div className="min-w-0">
-          <h2 className="text-[15px] font-semibold leading-snug text-fg">{title}</h2>
-          {sub && <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{sub}</p>}
+          <h2 className="text-[17px] font-bold leading-snug text-fg">{title}</h2>
+          {sub && <p className="mt-1 text-[13px] leading-relaxed text-muted">{sub}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}
@@ -66,8 +83,8 @@ export function PageHead({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-[26px] font-semibold leading-tight text-fg">{title}</h1>
-        {sub && <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-muted">{sub}</p>}
+        <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-fg">{title}</h1>
+        {sub && <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-muted">{sub}</p>}
       </div>
       {action}
     </div>
@@ -101,7 +118,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11.5px] font-semibold ring-1 ring-inset",
         TONES[tone],
         className
       )}
@@ -119,20 +136,21 @@ const VARIANTS = {
     "bg-brand-solid text-white shadow-xs hover:bg-brand-solid-hover active:bg-brand-solid-active disabled:bg-line-strong disabled:text-faint disabled:shadow-none",
   dark: "bg-inverse text-white shadow-xs hover:bg-inverse-2 disabled:bg-line-strong disabled:text-faint",
   outline:
-    "bg-surface text-fg ring-1 ring-inset ring-line hover:bg-subtle hover:ring-line-strong disabled:text-faint",
+    "bg-surface text-fg-soft ring-1 ring-inset ring-line hover:text-fg hover:ring-line-strong disabled:text-faint",
   ghost: "text-muted hover:bg-subtle hover:text-fg",
   danger:
     "bg-red-600 text-white shadow-xs hover:bg-red-700 disabled:bg-line-strong disabled:text-faint",
 } as const;
 
+/* Pills, like the dashboard's "View all" and "Book a viewing" controls. */
 const SIZES = {
-  sm: "h-8 gap-1.5 rounded-lg px-3 text-[13px]",
-  md: "h-10 gap-2 rounded-lg px-4 text-sm",
-  lg: "h-11 gap-2 rounded-lg px-5 text-sm",
+  sm: "h-8 gap-1.5 rounded-xl px-3.5 text-[12.5px]",
+  md: "h-10 gap-2 rounded-xl px-4 text-[13.5px]",
+  lg: "h-11 gap-2 rounded-2xl px-5 text-[14px]",
 } as const;
 
 const BTN_BASE =
-  "inline-flex select-none items-center justify-center font-medium transition-colors duration-150 disabled:cursor-not-allowed";
+  "inline-flex select-none items-center justify-center font-semibold transition duration-150 disabled:cursor-not-allowed";
 
 type BtnProps = {
   variant?: keyof typeof VARIANTS;
@@ -180,26 +198,30 @@ const STAT_ACCENT: Record<Tone, string> = {
   gold: "text-gold-600",
 };
 
-/* Tinted chip behind a stat's icon. Uses the 50/700 steps only — both flip
-   with the theme, so the chip stays legible in dark mode. */
+/* Tinted chip behind a stat's icon, matching the dashboard's round icon
+   wells. Uses the 100/700 steps so the glyph keeps its contrast on the tint. */
 const STAT_CHIP: Record<Tone, string> = {
   neutral: "bg-subtle text-muted",
-  good: "bg-brand-50 text-brand-600",
-  warn: "bg-amber-50 text-amber-700",
-  bad: "bg-red-50 text-red-700",
-  info: "bg-sky-50 text-sky-700",
-  gold: "bg-gold-50 text-gold-600",
+  good: "bg-brand-100 text-brand-700",
+  warn: "bg-amber-100 text-amber-800",
+  bad: "bg-red-100 text-red-700",
+  info: "bg-sky-100 text-sky-800",
+  gold: "bg-gold-100 text-gold-700",
 };
 
-/* Hairline down the left edge, carrying the tone. Reads as a quiet accent on
-   a light canvas where a full tinted card would shout. */
-const STAT_EDGE: Record<Tone, string> = {
-  neutral: "before:bg-line-strong",
-  good: "before:bg-brand-400",
-  warn: "before:bg-amber-200",
-  bad: "before:bg-red-300",
-  info: "before:bg-sky-200",
-  gold: "before:bg-gold-200",
+/* The tile itself, following the dashboard's pastel finance cards.
+
+   Only the tones that mean "look at this" get the wash: a row where every tile
+   is tinted says nothing, and a healthy figure tinted like an alarming one is
+   worse than saying nothing. Good and neutral keep the plain surface and carry
+   their tone in the figure alone. */
+const STAT_SURFACE: Record<Tone, string> = {
+  neutral: "border-line bg-surface",
+  good: "border-line bg-surface",
+  info: "border-line bg-surface",
+  warn: "border-amber-200 bg-amber-50",
+  bad: "border-red-200 bg-red-50",
+  gold: "border-gold-200 bg-gold-50",
 };
 
 export function Stat({
@@ -220,13 +242,11 @@ export function Stat({
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
-          {label}
-        </span>
+        <span className="text-[13px] font-semibold text-fg-soft">{label}</span>
         {icon && (
           <span
             className={cx(
-              "grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors",
+              "grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors",
               STAT_CHIP[tone]
             )}
           >
@@ -234,25 +254,26 @@ export function Stat({
           </span>
         )}
       </div>
-      <div className={cx("tnum mt-3 text-[27px] font-semibold leading-none", STAT_ACCENT[tone])}>
+      <div
+        className={cx(
+          "tnum mt-4 text-[30px] font-bold leading-none tracking-[-0.02em]",
+          STAT_ACCENT[tone]
+        )}
+      >
         {value}
       </div>
       {sub && <div className="mt-2 text-[12px] leading-snug text-muted">{sub}</div>}
     </>
   );
 
-  const shell = cx(
-    "relative overflow-hidden rounded-xl border border-line bg-surface p-4 shadow-xs",
-    "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:content-['']",
-    STAT_EDGE[tone]
-  );
+  const shell = cx("rounded-2xl border p-5 shadow-xs", STAT_SURFACE[tone]);
 
   return href ? (
     <Link
       href={href}
       className={cx(
         shell,
-        "group block transition duration-200 hover:-translate-y-px hover:border-brand-300 hover:shadow-md"
+        "group block transition duration-200 hover:-translate-y-px hover:border-line-strong hover:shadow-md"
       )}
     >
       {body}
@@ -284,7 +305,9 @@ export function TH({
   return (
     <th
       className={cx(
-        "border-b border-line pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted",
+        // pr-4 matches TD, so a right-aligned column's heading cannot run
+        // into the heading beside it.
+        "border-b border-line-soft pb-3 pr-4 pt-1 text-[12px] font-medium uppercase tracking-[0.06em] text-muted",
         align === "right" && "text-right",
         align === "center" && "text-center",
         align === "left" && "text-left",
@@ -308,7 +331,7 @@ export function TD({
   return (
     <td
       className={cx(
-        "border-b border-line-soft py-2.5 pr-4 align-middle text-[13px] text-fg-soft",
+        "border-b border-line-soft py-3.5 pr-4 align-middle text-[13px] text-fg-soft",
         align === "right" && "text-right",
         align === "center" && "text-center",
         className
@@ -321,13 +344,13 @@ export function TD({
 
 export function Empty({ title, sub, icon }: { title: string; sub?: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-surface-2 py-12 text-center">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-surface-2 py-14 text-center">
       {icon && (
-        <span className="mb-1 grid h-10 w-10 place-items-center rounded-full bg-subtle text-faint">
+        <span className="mb-1 grid h-12 w-12 place-items-center rounded-full bg-subtle text-faint">
           {icon}
         </span>
       )}
-      <p className="text-sm font-medium text-fg-soft">{title}</p>
+      <p className="text-[15px] font-bold text-fg">{title}</p>
       {sub && <p className="max-w-sm text-[13px] leading-relaxed text-muted">{sub}</p>}
     </div>
   );

@@ -4,13 +4,12 @@
    Al Manara design tokens
 
    Two layers:
-   1. Runtime vars (`--c-*`) defined per theme on :root / [data-theme="dark"].
+   1. Runtime vars (`--c-*`) defined on :root. The app is light-only.
    2. `@theme inline` maps Tailwind utility names onto those runtime vars, so
-      `bg-surface` emits `var(--c-surface)` rather than a baked hex. Flipping
-      the theme attribute on <html> re-points every utility at once.
+      `bg-surface` emits `var(--c-surface)` rather than a baked hex.
 
    Scale convention used throughout the app: low numbers are backgrounds,
-   high numbers are text. Dark mode inverts within that convention.
+   high numbers are text.
    ========================================================================== */
 
 :root {
@@ -19,53 +18,54 @@
   /* neutrals — warm cream ------------------------------------------------
      Canvas and subtle are the palette's two creams (#fff7eb / #f9f0e0);
      lines and text are warm-tinted so nothing reads as cold grey on them. */
-  --c-canvas: #fff7eb;
+  --c-canvas: #ffffff;
   --c-surface: #ffffff;
-  --c-surface-2: #fffcf6;
-  --c-subtle: #f9f0e0;
-  --c-subtle-hover: #f1e5cf;
+  --c-surface-2: #f8f9fa;
+  --c-subtle: #f1f3f4;
+  --c-subtle-hover: #e8eaed;
 
-  --c-line: #ece0cc;
-  --c-line-soft: #f4ebda;
-  --c-line-strong: #d8c8ac;
+  --c-line: #dadce0;
+  --c-line-soft: #e8eaed;
+  --c-line-strong: #bdc1c6;
 
-  --c-fg: #241d12;
-  --c-fg-soft: #4a4133;
-  --c-muted: #6f6553;
-  --c-faint: #857a63;
+  --c-fg: #202124;
+  --c-fg-soft: #3c4043;
+  --c-muted: #5f6368;
+  --c-faint: #80868b;
 
   /* fixed dark chrome — sidebar, gate, selected filter chips.
      Deliberately does NOT invert: it is dark in both themes. */
-  --c-inverse: #232819;
-  --c-inverse-2: #2f3524;
-  --c-inverse-line: #ffffff1a;
+  --c-inverse: #202124;
+  --c-inverse-2: #303134;
+  --c-inverse-line: #ffffff1f;
   --c-inverse-fg: #ffffff;
-  --c-inverse-muted: #b0b79a;
+  --c-inverse-muted: #9aa0a6;
 
-  /* brand — olive ---------------------------------------------------------
-     Built around the palette's #a2ab73, which sits at step 400. The ramp
-     continues past it because #a2ab73 itself is too light to carry white
-     text — the solid fills below are drawn from the darker end. */
-  --c-brand-50: #f4f6ec;
-  --c-brand-100: #e7ebd6;
-  --c-brand-200: #d2d9b4;
-  --c-brand-300: #bac490;
-  --c-brand-400: #a2ab73;
-  --c-brand-500: #8a9459;
-  /* A touch darker than the solid fill below: 600 is the text step, and it has
-     to clear 4.5:1 on brand-50 chips as well as on white. */
-  --c-brand-600: #6b7342;
-  --c-brand-700: #585f37;
-  --c-brand-800: #454a2c;
-  --c-brand-900: #363a24;
-  --c-brand-950: #1f2214;
+  /* brand — Google blue ---------------------------------------------------------
+     Google's product blue: #1a73e8 is the primary (step 600), used for buttons
+     and links. The ramp runs from a pale #e8f0fe tint up to a deep navy, so the
+     solid fills below carry white text and the 600 step still reads as a link
+     on white. */
+  --c-brand-50: #e8f0fe;
+  --c-brand-100: #d2e3fc;
+  --c-brand-200: #aecbfa;
+  --c-brand-300: #8ab4f8;
+  --c-brand-400: #669df6;
+  --c-brand-500: #4285f4;
+  /* 600 is the primary — Google's #1a73e8, the button and link colour. Clears
+     4.5:1 on white and on the brand-50 chip. */
+  --c-brand-600: #1a73e8;
+  --c-brand-700: #1967d2;
+  --c-brand-800: #185abc;
+  --c-brand-900: #174ea6;
+  --c-brand-950: #103264;
 
   /* Solid brand fills that always carry white text. Kept separate from the
      ramp because a fill dark enough for white text can never also be light
      enough to read *as* text on a dark surface — one token cannot do both. */
-  --c-brand-solid: #6f7845;
-  --c-brand-solid-hover: #585f37;
-  --c-brand-solid-active: #454a2c;
+  --c-brand-solid: #1a73e8;
+  --c-brand-solid-hover: #1765cc;
+  --c-brand-solid-active: #1257b3;
 
   /* accent — raspberry ----------------------------------------------------
      The palette's #cc3a63 at step 500. Reserved for accent and emphasis;
@@ -101,94 +101,34 @@
   --c-sky-800: #075985;
   --c-sky-900: #0c4a6e;
 
+  /* categorical series — for charts only, never for UI chrome.
+     Slot 1 is the brand blue; the rest are stepped to sit beside it. This
+     ORDER is the colourblind-safety mechanism, not a preference: every
+     adjacent pair clears the CVD and normal-vision floors, including the
+     wrap from the last slot back to the first, which is what a pie needs.
+     Re-order or substitute only after re-running the palette validator. */
+  --c-series-1: #1a73e8;
+  --c-series-2: #eb6834;
+  --c-series-3: #1baf7a;
+  --c-series-4: #eda100;
+
+  /* ordinal ramp — ordered stages (a funnel), one hue, light to dark.
+     Validated with the palette script's --ordinal mode: monotone lightness,
+     visible step gaps, and the light end still clears the surface. */
+  --c-stage-1: #86b6ef;
+  --c-stage-2: #5598e7;
+  --c-stage-3: #2a78d6;
+  --c-stage-4: #1c5cab;
+  /* Loss is a status, not a stage — it keeps the reserved critical red. */
+  --c-stage-lost: #d03b3b;
+
   /* elevation — tuned for a light canvas, warm-tinted to match the cream */
-  --c-shadow-xs: 0 1px 2px rgb(74 55 26 / 0.05);
-  --c-shadow-sm: 0 1px 3px rgb(74 55 26 / 0.07), 0 1px 2px rgb(74 55 26 / 0.05);
-  --c-shadow-md: 0 4px 12px -2px rgb(74 55 26 / 0.10), 0 2px 4px -2px rgb(74 55 26 / 0.05);
-  --c-shadow-lg: 0 12px 28px -6px rgb(74 55 26 / 0.15), 0 4px 8px -4px rgb(74 55 26 / 0.08);
+  --c-shadow-xs: 0 1px 2px rgb(60 64 67 / 0.10);
+  --c-shadow-sm: 0 1px 3px rgb(60 64 67 / 0.12), 0 1px 2px rgb(60 64 67 / 0.08);
+  --c-shadow-md: 0 4px 12px -2px rgb(60 64 67 / 0.14), 0 2px 4px -2px rgb(60 64 67 / 0.08);
+  --c-shadow-lg: 0 12px 28px -6px rgb(60 64 67 / 0.18), 0 4px 8px -4px rgb(60 64 67 / 0.10);
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  /* Dark mode keeps the warm cast rather than going blue-black, so the two
-     themes read as the same product with the lights turned down. */
-  --c-canvas: #14110c;
-  --c-surface: #1c1811;
-  --c-surface-2: #241f16;
-  --c-subtle: #2b2519;
-  --c-subtle-hover: #362f21;
-
-  --c-line: #322b1e;
-  --c-line-soft: #262015;
-  --c-line-strong: #4c4330;
-
-  --c-fg: #f7f1e4;
-  --c-fg-soft: #ded5c2;
-  --c-muted: #a89d87;
-  --c-faint: #8b8168;
-
-  --c-inverse: #1b1f14;
-  --c-inverse-2: #262b1c;
-  --c-inverse-line: #ffffff14;
-  --c-inverse-fg: #ffffff;
-  --c-inverse-muted: #b0b79a;
-
-  /* brand shifts lighter so it stays legible on dark surfaces */
-  --c-brand-50: #1b2013;
-  --c-brand-100: #262d19;
-  --c-brand-200: #363f23;
-  --c-brand-300: #4b552f;
-  --c-brand-400: #7d8a52;
-  --c-brand-500: #9aa76a;
-  --c-brand-600: #b3bf85;
-  --c-brand-700: #c9d2a4;
-  --c-brand-800: #dde3c4;
-  --c-brand-900: #ecf0dd;
-  --c-brand-950: #f7f9ef;
-
-  /* Stays dark in dark mode — these fills carry white text. Chosen so white
-     clears 4.5:1 on the fill while the fill itself still clears 3:1 against
-     the dark surface, so the button reads as a distinct shape. */
-  --c-brand-solid: #67743e;
-  --c-brand-solid-hover: #596535;
-  --c-brand-solid-active: #4b552d;
-
-  --c-gold-50: #2a1218;
-  --c-gold-100: #3a1821;
-  --c-gold-200: #55232f;
-  --c-gold-500: #e86b8c;
-  --c-gold-600: #ef88a3;
-  --c-gold-700: #f6b3c4;
-
-  --c-red-50: #2a1215;
-  --c-red-100: #3a171c;
-  --c-red-200: #55222a;
-  --c-red-300: #6d2b34;
-  --c-red-700: #fca5a5;
-  --c-red-800: #fecaca;
-  --c-red-900: #fee2e2;
-
-  --c-amber-50: #2a1e08;
-  --c-amber-100: #3a290b;
-  --c-amber-200: #543c11;
-  --c-amber-700: #fcd34d;
-  --c-amber-800: #fde68a;
-  --c-amber-900: #fef3c7;
-
-  --c-sky-50: #0a1e2c;
-  --c-sky-100: #0d2b3e;
-  --c-sky-200: #134058;
-  --c-sky-700: #7dd3fc;
-  --c-sky-800: #bae6fd;
-  --c-sky-900: #e0f2fe;
-
-  /* shadows read as depth-by-darkness on a dark canvas */
-  --c-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
-  --c-shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);
-  --c-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.35);
-  --c-shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.65), 0 4px 8px -4px rgb(0 0 0 / 0.4);
-}
 
 @theme inline {
   /* neutrals */
@@ -212,6 +152,19 @@
   --color-inverse-line: var(--c-inverse-line);
   --color-inverse-fg: var(--c-inverse-fg);
   --color-inverse-muted: var(--c-inverse-muted);
+
+  /* ordinal stages */
+  --color-stage-1: var(--c-stage-1);
+  --color-stage-2: var(--c-stage-2);
+  --color-stage-3: var(--c-stage-3);
+  --color-stage-4: var(--c-stage-4);
+  --color-stage-lost: var(--c-stage-lost);
+
+  /* categorical series */
+  --color-series-1: var(--c-series-1);
+  --color-series-2: var(--c-series-2);
+  --color-series-3: var(--c-series-3);
+  --color-series-4: var(--c-series-4);
 
   /* brand + accent */
   --color-brand-50: var(--c-brand-50);
@@ -287,6 +240,10 @@ body {
   background: var(--c-canvas);
   color: var(--c-fg-soft);
   font-family: var(--font-sans);
+  /* Inter, per the supplied spec: the variable font's optical-size axis is
+     driven automatically by the rendered size. Weight/style stay per-element. */
+  font-optical-sizing: auto;
+  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -306,17 +263,26 @@ body {
   border-radius: 4px;
 }
 
-/* Headings carry the tighter tracking; body text stays neutral. */
-h1,
-h2,
-h3,
-h4 {
-  color: var(--c-fg);
-  letter-spacing: -0.011em;
-}
+/* Headings carry the tighter tracking; body text stays neutral.
 
-h1 {
-  letter-spacing: -0.021em;
+   Wrapped in `@layer base` deliberately. Tailwind v4 puts its utilities in a
+   cascade layer, and an UNLAYERED rule beats any layered one whatever the
+   specificity — so as bare selectors these silently defeated `text-white` on
+   every heading, and a heading over a photograph came out near-black with no
+   way to override it short of `!important`. In the base layer they still set
+   the default, and a utility on the element still wins. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--c-fg);
+    letter-spacing: -0.011em;
+  }
+
+  h1 {
+    letter-spacing: -0.021em;
+  }
 }
 
 /* --------------------------------------------------------------- utilities */
@@ -400,4 +366,114 @@ h1 {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------------------------------------------------- success celebration */
+
+@keyframes success-pop {
+  0% { transform: scale(0); opacity: 0; }
+  55% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes success-ring {
+  0% { transform: scale(0.5); opacity: 0.55; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+@keyframes success-check {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes success-particle {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+}
+@keyframes success-backdrop {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.success-backdrop { animation: success-backdrop 1.5s ease both; }
+.success-pop { animation: success-pop 0.5s var(--ease-out-soft) both; }
+.success-ring { animation: success-ring 0.9s ease-out both; }
+.success-check {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  animation: success-check 0.45s 0.18s var(--ease-out-soft) forwards;
+}
+.success-particle { animation: success-particle 0.9s 0.08s var(--ease-out-soft) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .success-backdrop, .success-pop, .success-ring, .success-check, .success-particle {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------- app loading screen
+
+   A white title card shown while a route's data is in flight: the wordmark
+   reveals letter by letter, a status line rotates underneath it, and a hairline
+   sweeps so a slow request still looks alive rather than frozen. All of it is
+   CSS — the loading screen must not itself wait on JavaScript. */
+
+@keyframes load-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* One phrase's slice of the rotation. Each line is visible for roughly a third
+   of the cycle, and the three are delayed a third apart, so exactly one is on
+   screen at any moment. */
+@keyframes load-phrase {
+  0% { opacity: 0; transform: translateY(100%); filter: blur(4px); }
+  5% { opacity: 1; transform: none; filter: blur(0); }
+  28% { opacity: 1; transform: none; filter: blur(0); }
+  33% { opacity: 0; transform: translateY(-100%); filter: blur(4px); }
+  100% { opacity: 0; transform: translateY(-100%); filter: blur(4px); }
+}
+
+@keyframes load-bar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(360%); }
+}
+
+.loading-letter {
+  display: inline-block;
+  animation: load-letter 0.62s var(--ease-out-soft) both;
+}
+
+.loading-phrases {
+  position: relative;
+  height: 1.25rem;
+  overflow: hidden;
+}
+.loading-phrase {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  opacity: 0;
+  animation: load-phrase 6.6s linear infinite both;
+}
+
+.loading-bar > span {
+  animation: load-bar 1.7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Reduced motion keeps the screen, drops the movement: the letters and the
+   first phrase simply sit there, legible and still. */
+@media (prefers-reduced-motion: reduce) {
+  .loading-letter { animation: none; opacity: 1; filter: none; }
+  .loading-phrase { animation: none; opacity: 0; }
+  .loading-phrase:first-child { opacity: 1; }
+  .loading-bar > span { animation: none; }
 }

@@ -64,6 +64,14 @@ flutter:
 
   assets:
     - assets/brand/aber_logo.png
+    - assets/brand/aber_tower.jpg
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans.ttf
+        - asset: assets/fonts/PlusJakartaSans-Italic.ttf
+          style: italic
 
   # To add assets to your application, add an assets section, like this:
   # assets:

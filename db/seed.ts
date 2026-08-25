@@ -244,6 +244,17 @@ async function main() {
     ORDER BY 1`);
 
   for (const r of counts.rows) console.log(`  ${r.t.padEnd(12)} ${r.n}`);
+
+  // Push the reference counters past everything just imported, or the first
+  // contract created in the UI would try to reuse a ref that already exists.
+  // Requires 002_alignment.sql; skipped with a warning if it has not been run.
+  try {
+    await pool.query("SELECT sync_counters()");
+    console.log("\nreference counters synced");
+  } catch {
+    console.warn("\nsync_counters() missing — apply db/002_alignment.sql");
+  }
+
   console.log(`\nEvery demo account signs in with: ${DEMO_PASSWORD}`);
   await pool.end();
 }

@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
+import 'portfolio_sync.dart';
 import 'signup_rules.dart';
 
 /// In-memory store seeded deterministically, mirroring `src/lib/seed.ts`.
@@ -14,12 +15,96 @@ import 'signup_rules.dart';
 /// portfolio and the two can be demonstrated side by side.
 class Store extends ChangeNotifier {
   Store._() {
+    // Seeded first so the app has something to draw before the network answers
+    // — and so it still works with no backend at all. The server's copy
+    // replaces it as soon as it arrives.
     _seed();
     // Accounts first: a restored session may point at an account created on a
     // previous launch, which only exists once the accounts are back.
     _restoreAccounts().whenComplete(_restoreCurrentUser);
     _restoreSessions();
     _restoreAvatars();
+    firstSync = syncFromServer();
+  }
+
+  /// The first sync attempt, so the splash can hold for it rather than letting
+  /// the dashboard paint seeded figures and then visibly swap them.
+  late final Future<void> firstSync;
+
+  /// True once the server's portfolio has replaced the generated one.
+  bool syncedFromServer = false;
+
+  /// When that happened, for the "last updated" line.
+  DateTime? lastSyncedAt;
+
+  /// Replaces the generated demo portfolio with the backend's.
+  ///
+  /// This is what stops the phone and the website disagreeing. Both used to
+  /// run the same generator from the same seed, which matched only until
+  /// either side changed anything; now the server holds the record and the
+  /// phone reads it.
+  ///
+  /// A failed or empty fetch is a no-op: the app keeps the data it already has
+  /// rather than blanking every screen because the Wi-Fi dropped.
+  Future<void> syncFromServer() async {
+    final snap = await PortfolioSync.fetch();
+    if (snap == null || !snap.usable) return;
+
+    // The signed-in identity is held by id, so it survives the swap as long as
+    // the server still lists that account.
+    final currentId = currentUser?.id;
+
+    properties
+      ..clear()
+      ..addAll(snap.properties);
+    units
+      ..clear()
+      ..addAll(snap.units);
+    tenants
+      ..clear()
+      ..addAll(snap.tenants);
+    contracts
+      ..clear()
+      ..addAll(snap.contracts);
+    cheques
+      ..clear()
+      ..addAll(snap.cheques);
+    payments
+      ..clear()
+      ..addAll(snap.payments);
+    tasks
+      ..clear()
+      ..addAll(snap.tasks);
+    approvals
+      ..clear()
+      ..addAll(snap.approvals);
+    maintenance
+      ..clear()
+      ..addAll(snap.maintenance);
+    if (snap.visits.isNotEmpty) {
+      visits
+        ..clear()
+        ..addAll(snap.visits);
+    }
+
+    // Accounts created on this device are kept: they exist only here until
+    // somebody approves them, and dropping them would lose a pending signup.
+    final serverIds = snap.users.map((u) => u.id).toSet();
+    final localOnly = users.where((u) => !serverIds.contains(u.id)).toList();
+    users
+      ..clear()
+      ..addAll(snap.users)
+      ..addAll(localOnly);
+
+    if (currentId != null && !users.any((u) => u.id == currentId)) {
+      // The account no longer exists on the server — sign out rather than
+      // leave the app running as somebody the record does not know.
+      currentUser = null;
+    }
+
+    syncedFromServer = true;
+    lastSyncedAt = DateTime.now();
+    notifyListeners();
   }
   static final Store instance = Store._();
 
@@ -29,8 +114,13 @@ class Store extends ChangeNotifier {
   final List<Tenant> tenants = [];
   final List<Contract> contracts = [];
   final List<Cheque> cheques = [];
+  /// Money received. Empty until the first sync — the generated demo data has
+  /// no payment records, only cheques.
+  final List<Payment> payments = [];
   final List<Task> tasks = [];
   final List<Approval> approvals = [];
+  final List<MaintenanceRequest> maintenance = [];
+  final List<Visit> visits = [];
   final List<AuditEntry> audit = [];
 
   User? currentUser;
@@ -240,6 +330,116 @@ class Store extends ChangeNotifier {
 
   /// Registers a pending account and raises a review task for the
   /// administrator. Validation happens in [signUpProblems] before this runs.
+
+  /// Books a viewing after re-checking the rules the form enforces. Returns an
+  /// error message, or null on success. Local only — the mobile app has no
+  /// backend, so this does not reach the Odoo calendar (that is the web path).
+  static const visitEarliestHour = 8;
+  static const visitLatestHour = 21;
+  static const visitDurations = [15, 30, 45, 60, 90];
+
+  /// Validates a booking against the same rules the web enforces. Returns an
+  /// error message, or null when the booking is acceptable. Does not add it.
+  String? validateVisit({
+    required String unitId,
+    required String visitorName,
+    required String visitorPhone,
+    required String visitorEmail,
+    required DateTime startsAt,
+    required int durationMins,
+  }) {
+    if (unitId.isEmpty) return 'Choose the unit for the viewing.';
+    if (visitorName.trim().length < 3) return 'Enter the visitor\'s full name.';
+    final phone = visitorPhone.replaceAll(RegExp(r'[\s()-]'), '');
+    if (!RegExp(r'^\+9715\d{8}$').hasMatch(phone)) {
+      return 'Mobile must be a UAE number, e.g. +971501234567.';
+    }
+    if (visitorEmail.trim().isNotEmpty &&
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[a-z]{2,}$', caseSensitive: false)
+            .hasMatch(visitorEmail.trim())) {
+      return 'Enter a valid email address, or leave it blank.';
+    }
+    final now = DateTime.now();
+    if (startsAt.isBefore(now)) return 'The viewing time has already passed.';
+    if (startsAt.isAfter(now.add(const Duration(days: 120)))) {
+      return 'Bookings can be at most 120 days ahead.';
+    }
+    if (startsAt.hour < visitEarliestHour ||
+        startsAt.hour >= visitLatestHour) {
+      return 'Choose a time within office hours ($visitEarliestHour:00–$visitLatestHour:00).';
+    }
+    if (!visitDurations.contains(durationMins)) return 'Choose a valid duration.';
+
+    // No double-booking the same unit.
+    final end = startsAt.add(Duration(minutes: durationMins));
+    final clash = visits.any((v) {
+      if (v.unitId != unitId || v.status == VisitStatus.cancelled) return false;
+      final vEnd = v.startsAt.add(Duration(minutes: v.durationMins));
+      return startsAt.isBefore(vEnd) && v.startsAt.isBefore(end);
+    });
+    if (clash) return 'That unit already has a viewing overlapping this time.';
+    return null;
+  }
+
+  /// Local-only booking: validates, then adds to the on-device list. Used when
+  /// the PMS backend is unreachable so the booking is not lost.
+  String? bookVisit({
+    required String unitId,
+    required String visitorName,
+    required String visitorPhone,
+    required String visitorEmail,
+    required DateTime startsAt,
+    required int durationMins,
+    String notes = '',
+  }) {
+    final err = validateVisit(
+      unitId: unitId, visitorName: visitorName, visitorPhone: visitorPhone,
+      visitorEmail: visitorEmail, startsAt: startsAt, durationMins: durationMins,
+    );
+    if (err != null) return err;
+    recordBookedVisit(
+      ref: 'VW-${3000 + visits.length + 1}',
+      unitId: unitId,
+      visitorName: visitorName,
+      visitorPhone: visitorPhone.replaceAll(RegExp(r'[\s()-]'), ''),
+      visitorEmail: visitorEmail,
+      startsAt: startsAt,
+      durationMins: durationMins,
+      notes: notes,
+    );
+    return null;
+  }
+
+
+  /// Appends a visit already booked and confirmed by the backend, so the mobile
+  /// list reflects it. No validation — the server is the source of truth here.
+  void recordBookedVisit({
+    required String ref,
+    required String unitId,
+    required String visitorName,
+    required String visitorPhone,
+    required String visitorEmail,
+    required DateTime startsAt,
+    required int durationMins,
+    String notes = '',
+  }) {
+    visits.add(
+      Visit(
+        id: 'VW${visits.length + 1}',
+        ref: ref,
+        unitId: unitId,
+        visitorName: visitorName.trim(),
+        visitorPhone: visitorPhone.trim(),
+        visitorEmail: visitorEmail.trim(),
+        startsAt: startsAt,
+        durationMins: durationMins,
+        status: VisitStatus.scheduled,
+        notes: notes.trim(),
+      ),
+    );
+    notifyListeners();
+  }
+
   User signUp({
     required String name,
     required String email,
@@ -413,19 +613,58 @@ class Store extends ChangeNotifier {
       )
       .fold<num>(0, (sum, c) => sum + c.annualRent);
 
-  num get collected => cheques
-      .where((c) => c.status == ChequeStatus.cleared)
-      .fold<num>(0, (sum, c) => sum + c.amount);
+  /// Rent banked over the last twelve months.
+  ///
+  /// Deliberately the same definition the website's KPI uses — payments by the
+  /// date they were received — rather than a sum of cleared cheques. The two
+  /// are close but never equal, and having each side define "collected" its own
+  /// way is precisely what made the same label show two different numbers.
+  ///
+  /// Falls back to cleared cheques only when there are no payment records at
+  /// all, which is the case for the generated data before the first sync.
+  num get collected {
+    if (payments.isEmpty) {
+      return cheques
+          .where((c) => c.status == ChequeStatus.cleared)
+          .fold<num>(0, (sum, c) => sum + c.amount);
+    }
+    final yearAgo = DateTime.now().subtract(const Duration(days: 365));
+    return payments
+        .where((p) => p.category == 'rent' && p.receivedAt.isAfter(yearAgo))
+        .fold<num>(0, (sum, p) => sum + p.amount);
+  }
 
-  num get outstanding => cheques
+  /// Cheques on tenancies that are actually running.
+  ///
+  /// The money figures all scope to these. Paper attached to a cancelled or
+  /// finished contract is not money anybody is still waiting for, and counting
+  /// it inflated every total the app showed against the website's.
+  Iterable<Cheque> get _liveCheques {
+    final live = contracts
+        .where((c) =>
+            c.status == ContractStatus.active ||
+            c.status == ContractStatus.expiring)
+        .map((c) => c.id)
+        .toSet();
+    return cheques.where((c) => live.contains(c.contractId));
+  }
+
+  /// Rent owed and not yet in the bank.
+  ///
+  /// Matches the website's KPI exactly: pending or bounced, on a live tenancy.
+  /// The app previously counted `deposited` as outstanding and ignored
+  /// `bounced`, which is a different question with a different answer.
+  num get outstanding => _liveCheques
       .where(
         (c) =>
             c.status == ChequeStatus.pending ||
-            c.status == ChequeStatus.deposited,
+            c.status == ChequeStatus.bounced,
       )
       .fold<num>(0, (sum, c) => sum + c.amount);
 
-  num get atRisk => cheques
+  /// Money that has already gone wrong: past its date, or bounced.
+  /// Same definition and same scope as the website's.
+  num get atRisk => _liveCheques
       .where((c) => c.isOverdue || c.status == ChequeStatus.bounced)
       .fold<num>(0, (sum, c) => sum + c.amount);
 
@@ -853,6 +1092,70 @@ class Store extends ChangeNotifier {
           actorName: users[rnd.nextInt(users.length)].name,
           summary: 'Recorded deposit for cheque ${c.chequeNo}',
           entityId: c.id,
+        ),
+      );
+    }
+
+    // maintenance work orders — a spread of statuses so the list is realistic.
+    const cats = ['Plumbing', 'Electrical', 'HVAC', 'Carpentry', 'Appliance', 'General'];
+    const vendors = ['CoolAir Tech LLC', 'FixIt Maintenance', 'Emirates Facilities', 'BluePlumb Services'];
+    const prios = ['emergency', 'high', 'medium', 'low'];
+    const mStatuses = [
+      MaintenanceStatus.newRequest,
+      MaintenanceStatus.assigned,
+      MaintenanceStatus.inProgress,
+      MaintenanceStatus.awaitingApproval,
+      MaintenanceStatus.completed,
+      MaintenanceStatus.closed,
+    ];
+    final supervisor = users.firstWhere((u) => u.role == Role.maintenance,
+        orElse: () => users.first);
+    for (var i = 0; i < 16; i++) {
+      final u = units[rnd.nextInt(units.length)];
+      final st = mStatuses[i % mStatuses.length];
+      final prio = prios[rnd.nextInt(prios.length)];
+      final quote = st == MaintenanceStatus.awaitingApproval
+          ? (5000 + rnd.nextInt(20) * 1000).toDouble()
+          : (150 + rnd.nextInt(40) * 25).toDouble();
+      maintenance.add(
+        MaintenanceRequest(
+          id: 'M${i + 1}',
+          ref: 'WO-${1200 + i + 1}',
+          unitId: u.id,
+          category: cats[rnd.nextInt(cats.length)],
+          priority: prio,
+          description: 'Reported issue in unit ${u.unitNo}. Access arranged with the tenant.',
+          status: st,
+          reportedAt: today.subtract(Duration(days: i, hours: i * 2)),
+          vendor: vendors[rnd.nextInt(vendors.length)],
+          quoteAmount: quote,
+          slaDueAt: today.add(Duration(days: prio == 'emergency' ? 1 : prio == 'high' ? 2 : 5)),
+          assignedToName: st == MaintenanceStatus.newRequest ? null : supervisor.name,
+        ),
+      );
+    }
+
+    // viewings — a few upcoming and past, on vacant units.
+    final vacant = units.where((u) => u.status == UnitStatus.vacant).toList();
+    const visitorNames = [
+      'Khalid Rahman', 'Aisha Noor', 'Daniel Cruz', 'Fatima Sayed', 'Omar Yusuf'
+    ];
+    for (var i = 0; i < 5 && i < vacant.length; i++) {
+      final u = vacant[i];
+      final day = today.add(Duration(days: i - 1)); // one in the past, rest upcoming
+      final startsAt = DateTime(day.year, day.month, day.day, 10 + i, 0);
+      visits.add(
+        Visit(
+          id: 'VW${i + 1}',
+          ref: 'VW-${3000 + i + 1}',
+          unitId: u.id,
+          visitorName: visitorNames[i % visitorNames.length],
+          visitorPhone: '+9715${(20000000 + i * 111111)}',
+          visitorEmail: '',
+          startsAt: startsAt,
+          durationMins: 30,
+          status: i == 0 ? VisitStatus.completed : VisitStatus.scheduled,
+          notes: '',
         ),
       );
     }

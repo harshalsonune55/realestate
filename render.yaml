@@ -1,32 +1,118 @@
+# Al Manara PMS on Render — the web tier only.
+#
+# The data tier does not move. Postgres and Odoo stay on the AWS box
+# (16.170.201.73), which also keeps serving the app at /pms for the mobile
+# client. Render becomes a second front end onto the same database, so the two
+# never diverge: there is one rent roll, in one Postgres.
+#
+#   browser ──► Render (this service) ──┐
+#                                       ├──► 16.170.201.73  Postgres :5432
+#   mobile  ──► 16.170.201.73/pms ──────┘                    Odoo     :80 → :8069
+#
+# Everything below assumes deploy/80-render-backend.sh has been run, which is
+# what lets this service reach Postgres at all. See deploy/RENDER.md.
 services:
   - type: web
     name: al-manara-pms
     runtime: node
+
+    # Frankfurt, not Singapore. Every server-rendered page here makes several
+    # round trips to Postgres in Stockholm (eu-north-1); Frankfurt is ~25 ms
+    # away and Singapore is ~250 ms. On a page that issues ten queries that is
+    # the difference between a quarter of a second and two and a half.
+    #
+    # Changing this later is not an edit — Render pins a service to its region
+    # for life, so a move means a new service and a new set of outbound IPs to
+    # authorise in the security group.
+    region: frankfurt
+
+    # Free instances sleep after ~15 minutes idle and take roughly a minute to
+    # answer the request that wakes them. Staff-facing app, so consider
+    # "starter" once it is in daily use — no other line in this file changes.
     plan: free
-    region: singapore
+
     buildCommand: npm ci && npm run build
     startCommand: npm start
+
+    # Answers 200 while the process lives and touches neither Postgres nor the
+    # password gate — src/middleware.ts exempts it from the matcher on purpose.
+    # A health check that needed the database would take the site down with it
+    # every time the AWS box hiccupped.
     healthCheckPath: /healthz
+
     envVars:
       - key: NODE_VERSION
         value: 22.18.0
-      # Front-door password for the whole site. Render generates one on first
-      # deploy — read it in Dashboard → Environment, then share it with staff.
-      - key: PMS_ACCESS_PASSWORD
-        generateValue: true
 
-      # ----------------------------------------------------------------------
-      # Free instances have no persistent disk, so anything an employee changes
-      # is lost when the service sleeps (~15 min idle) or redeploys. The seeded
-      # demo data regenerates identically, which is fine for a demo.
+      # ---------------------------------------------------------- database --
+      # The whole point of this deployment. Without DATABASE_URL the app falls
+      # back to the JSON demo store in src/lib/store.ts and quietly fills the
+      # screens with a fabricated 450-unit estate instead of the real one.
       #
-      # To keep changes permanently, upgrade the plan above to "starter", then
-      # uncomment this env var and the disk block below.
-      # ----------------------------------------------------------------------
-      # - key: PMS_DATA_DIR
-      #   value: /var/data
+      #   postgresql://pms:<APP_DB_PASSWORD>@16.170.201.73:5432/almanara_pms
+      #
+      # Take the password from APP_DB_PASSWORD in deploy/server.env. Marked
+      # sync:false so the credential lives in Render's dashboard, not in git.
+      - key: DATABASE_URL
+        sync: false
 
-    # disk:
-    #   name: pms-data
-    #   mountPath: /var/data
-    #   sizeGB: 1
+      # Required, not optional, now that the connection crosses the internet.
+      # Postgres on that box presents Debian's self-signed snakeoil
+      # certificate, so src/lib/db.ts connects with rejectUnauthorized:false —
+      # encrypted, but not authenticated. The security group is what restricts
+      # who may open the socket in the first place.
+      - key: DATABASE_SSL
+        value: "true"
+
+      # -------------------------------------------------------------- odoo --
+      # Plain HTTP on the shared IP: nginx owns :80 there and proxies / to
+      # Odoo, so http://16.170.201.73/jsonrpc reaches it. That is the same
+      # address the app and Odoo have always shared.
+      #
+      # Caveat worth knowing: this carries ODOO_API_KEY over the public
+      # internet in clear text. It was loopback traffic when the app ran on the
+      # same box. Opening :443 and issuing a certificate closes that hole —
+      # deploy/RENDER.md, "Odoo over TLS".
+      - key: ODOO_URL
+        value: http://16.170.201.73
+      # `almanara` is the Odoo database; `almanara_pms` above is this app's own
+      # and a different thing on the same server.
+      - key: ODOO_DB
+        value: almanara
+      - key: ODOO_USERNAME
+        sync: false
+      - key: ODOO_API_KEY
+        sync: false
+
+      # --------------------------------------------------------- assistant --
+      # Pinned to groq: the OpenAI key is valid but the account has no credit,
+      # and a pinned provider whose key is missing fails loudly rather than
+      # silently using the other one.
+      - key: ASSISTANT_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+
+      # ------------------------------------------------------------ mobile --
+      # Must equal ApiConfig.token in mobile/lib/data/api_config.dart. Unset,
+      # the booking route refuses every request, which reads in the phone app
+      # as "the API is broken" rather than as missing configuration.
+      - key: PMS_API_TOKEN
+        sync: false
+
+      # Site-wide front gate (src/middleware.ts). Paste the same value the AWS
+      # instance uses so staff have one password for both front doors, not two.
+      - key: PMS_ACCESS_PASSWORD
+        sync: false
+
+# Two variables are deliberately absent, and setting either breaks this deploy:
+#
+#   PMS_BASE_PATH  — the AWS instance sets /pms because nginx gives :80 to Odoo
+#                    and mounts the app under a prefix. Render serves this
+#                    service at the root of its own hostname. Set it here and
+#                    every asset 404s and the app renders unstyled.
+#
+#   PMS_DATA_DIR   — points the JSON demo store at a writable path. With
+#                    DATABASE_URL set, src/lib/store.ts throws on any access
+#                    rather than write a business record to a file nobody
+#                    reads. There is nothing for it to do and no disk to mount.

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Landmark, Receipt, User, Wrench } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { chequeFlag } from "@/lib/queries";
 import { AED, fmtDate, titleCase } from "@/lib/utils";
 import {
@@ -16,7 +16,7 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
   await requirePerm("tenants.view");
   const { id } = await params;
 
-  const d = db();
+  const d = await loadData();
   const tenant = d.tenants.find((t) => t.id === id);
   if (!tenant) notFound();
 
@@ -80,7 +80,7 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                   <Link
                     key={c.id}
                     href={`/contracts/${c.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                   >
                     <span className="font-medium text-fg">{c.ref}</span>
                     <span className="min-w-0 flex-1 truncate text-fg-soft">{unitOf(c.unitId)}</span>
@@ -102,7 +102,7 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                 <Link
                   key={c.id}
                   href={`/cheques/${c.id}`}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
                 >
                   <span className="tnum w-16 font-medium text-fg">{c.chequeNo}</span>
                   <span className="w-28 truncate text-muted">{c.bank}</span>
@@ -122,7 +122,7 @@ export default async function TenantPage({ params }: { params: Promise<{ id: str
                   <Link
                     key={m.id}
                     href={`/maintenance/${m.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line px-3 py-2 text-[12.5px] hover:bg-subtle"
                   >
                     <span className="font-medium text-fg">{m.ref}</span>
                     <span className="min-w-0 flex-1 truncate text-fg-soft">{m.category}</span>

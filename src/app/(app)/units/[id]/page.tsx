@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, DoorOpen, FilePlus2, History, Wrench } from "lucide-react";
+import { ArrowLeft, CalendarClock, DoorOpen, FilePlus2, History, Wrench } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, fmtDate, titleCase } from "@/lib/utils";
 import { Badge, Card, CardHead, ContractStatusBadge, Empty, LinkButton, PageHead } from "@/components/ui";
 import { KV } from "@/components/form";
@@ -14,7 +14,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
   const user = await requirePerm("properties.view");
   const { id } = await params;
 
-  const d = db();
+  const d = await loadData();
   const unit = d.units.find((u) => u.id === id);
   if (!unit) notFound();
 
@@ -38,7 +38,20 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
         title={`Unit ${unit.unitNo}`}
         sub={`${property.name} · ${property.area} · floor ${unit.floor}`}
         action={
-          unit.status === "vacant" && can(user.role, "contracts.create") ? (
+          // Booking a viewing comes first: a unit is shown before it is let,
+          // and the vacant-unit case is exactly when both apply.
+          unit.status === "vacant" && can(user.role, "visits.manage") ? (
+            <div className="flex gap-2">
+              <LinkButton href={`/visits/new?unit=${unit.id}`} variant="outline">
+                <CalendarClock size={15} /> Book viewing
+              </LinkButton>
+              {can(user.role, "contracts.create") ? (
+                <LinkButton href="/contracts/new">
+                  <FilePlus2 size={15} /> Let this unit
+                </LinkButton>
+              ) : null}
+            </div>
+          ) : unit.status === "vacant" && can(user.role, "contracts.create") ? (
             <LinkButton href="/contracts/new">
               <FilePlus2 size={15} /> Let this unit
             </LinkButton>
@@ -106,7 +119,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
                     <Link
                       key={c.id}
                       href={`/contracts/${c.id}`}
-                      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                     >
                       <span className="font-medium text-fg">{c.ref}</span>
                       <span className="min-w-0 flex-1 truncate text-fg-soft">{t?.name}</span>
@@ -132,7 +145,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
                   <Link
                     key={m.id}
                     href={`/maintenance/${m.id}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line px-3 py-2.5 text-[12.5px] hover:bg-subtle"
                   >
                     <span className="font-medium text-fg">{m.ref}</span>
                     <span className="min-w-0 flex-1 truncate text-fg-soft">{m.category}</span>

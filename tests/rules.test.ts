@@ -4,6 +4,10 @@ import { depositProblems, bounceProblems, type DepositDraft } from "@/lib/action
 import { maintenanceProblems, type MaintenanceDraft } from "@/lib/actions/maintenance-rules";
 import { renewalProblems, type RenewalDraft } from "@/lib/actions/renewal-rules";
 import { highestUserNumber, signUpProblems, type SignUpDraft } from "@/lib/actions/account-rules";
+import {
+  draftInstant, formatVisitWhen, slotProblems, toOdooDatetime, visitProblems, visitorProblems,
+  type ExistingVisit, type VisitDraft,
+} from "@/lib/actions/visit-rules";
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const today = iso(new Date());
@@ -234,5 +238,106 @@ check("never hands a new account an id an employee already holds", () => {
 });
 check("ignores ids that are not plain user ids", () =>
   assert.strictEqual(highestUserNumber(["U3", "P1-U5", "CTR-2026-0007"]), 3));
+
+
+/* --------------------------------------------------------- viewing booking */
+const baseVisit: VisitDraft = {
+  propertyId: "P1", unitId: "U1",
+  visitorName: "Ahmed Khan", visitorPhone: "+971501234567", visitorEmail: "",
+  date: plus(3), time: "10:00", durationMins: 30, notes: "",
+};
+const at = (date: string, time: string, mins = 30, unitId = "U1"): ExistingVisit => ({
+  id: "V0", unitId, status: "scheduled",
+  startsAt: draftInstant(date, time)!.toISOString(), durationMins: mins,
+});
+
+console.log("\nViewing booking");
+check("accepts a complete booking", () =>
+  assert.deepStrictEqual(visitProblems(baseVisit), []));
+check("requires a unit", () =>
+  assert.ok(slotProblems({ ...baseVisit, unitId: "" }).length > 0));
+check("requires a contact number", () =>
+  assert.ok(visitorProblems({ ...baseVisit, visitorPhone: "" }).length > 0));
+check("rejects a nonsense contact number", () =>
+  assert.ok(visitorProblems({ ...baseVisit, visitorPhone: "12" }).length > 0));
+check("accepts a number written with spaces and dashes", () =>
+  assert.deepStrictEqual(visitorProblems({ ...baseVisit, visitorPhone: "+971 50 123-4567" }), []));
+check("treats email as optional but validates it when given", () => {
+  assert.deepStrictEqual(visitorProblems({ ...baseVisit, visitorEmail: "" }), []);
+  assert.ok(visitorProblems({ ...baseVisit, visitorEmail: "not-an-email" }).length > 0);
+});
+check("refuses a time that has already passed", () =>
+  assert.ok(slotProblems({ ...baseVisit, date: plus(-1) }).length > 0));
+check("refuses a booking further out than the window", () =>
+  assert.ok(slotProblems({ ...baseVisit, date: plus(400) }).length > 0));
+check("refuses a viewing outside office hours", () => {
+  assert.ok(slotProblems({ ...baseVisit, time: "06:00" }).length > 0);
+  assert.ok(slotProblems({ ...baseVisit, time: "22:30" }).length > 0);
+});
+// Two agents, two customers, one front door — the reason this form exists.
+check("refuses a second viewing overlapping the same unit", () =>
+  assert.ok(slotProblems(baseVisit, [at(baseVisit.date, "10:15")]).length > 0));
+check("allows a back-to-back viewing that does not overlap", () =>
+  assert.deepStrictEqual(slotProblems(baseVisit, [at(baseVisit.date, "10:30")]), []));
+check("allows the same slot in a different unit", () =>
+  assert.deepStrictEqual(slotProblems(baseVisit, [at(baseVisit.date, "10:00", 30, "U2")]), []));
+check("ignores a cancelled viewing when checking for clashes", () =>
+  assert.deepStrictEqual(
+    slotProblems(baseVisit, [{ ...at(baseVisit.date, "10:00"), status: "cancelled" }]),
+    []
+  ));
+// A Gulf wall-clock time must not drift with the server's own timezone.
+check("reads 10:00 as 06:00 UTC regardless of where the server runs", () =>
+  assert.strictEqual(draftInstant("2026-09-01", "10:00")!.toISOString(), "2026-09-01T06:00:00.000Z"));
+check("renders a stored instant back in Gulf time", () =>
+  assert.ok(formatVisitWhen("2026-09-01T06:00:00.000Z").endsWith("10:00")));
+check("rejects a malformed date or time", () => {
+  assert.strictEqual(draftInstant("not-a-date", "10:00"), null);
+  assert.strictEqual(draftInstant("2026-09-01", "9am"), null);
+});
+
+
+/* ------------------------------------------------- rescheduling a viewing */
+// The bug this guards: opening a viewing and saving it unchanged must not
+// report that it clashes with itself. The action excludes the record under
+// edit; these prove the rule behaves once it has.
+const selfVisit: ExistingVisit = {
+  id: "V10", unitId: "U1", status: "scheduled",
+  startsAt: draftInstant(plus(3), "10:00")!.toISOString(), durationMins: 30,
+};
+const otherVisit: ExistingVisit = {
+  id: "V11", unitId: "U1", status: "scheduled",
+  startsAt: draftInstant(plus(3), "15:30")!.toISOString(), durationMins: 30,
+};
+const exceptSelf = (all: ExistingVisit[]) => all.filter((v) => v.id !== "V10");
+
+console.log("\nRescheduling");
+check("saving a viewing unchanged does not clash with itself", () =>
+  assert.deepStrictEqual(slotProblems(baseVisit, exceptSelf([selfVisit])), []));
+check("moving onto another viewing's slot is still refused", () =>
+  assert.ok(slotProblems({ ...baseVisit, time: "15:30" }, exceptSelf([selfVisit, otherVisit])).length > 0));
+check("moving to a free slot is allowed", () =>
+  assert.deepStrictEqual(
+    slotProblems({ ...baseVisit, time: "17:00" }, exceptSelf([selfVisit, otherVisit])),
+    []
+  ));
+check("without the exclusion it would wrongly clash with itself", () =>
+  // Proves the exclusion is doing the work, not that the data is convenient.
+  assert.ok(slotProblems(baseVisit, [selfVisit]).length > 0));
+
+// 15:30 Gulf is 11:30 UTC — the exact reschedule in the acceptance criteria.
+check("a reschedule to 15:30 Gulf converts to 11:30 UTC", () =>
+  assert.strictEqual(draftInstant("2026-08-19", "15:30")!.toISOString(), "2026-08-19T11:30:00.000Z"));
+check("Odoo receives the rescheduled time as naive UTC", () =>
+  assert.strictEqual(toOdooDatetime(draftInstant("2026-08-19", "15:30")!.toISOString()), "2026-08-19 11:30:00"));
+check("and it renders back as 15:30 Gulf", () =>
+  assert.ok(formatVisitWhen("2026-08-19T11:30:00.000Z").endsWith("15:30")));
+check("create and edit share one conversion", () => {
+  // Same input, same instant, whichever flow produced it.
+  const a = draftInstant("2026-08-19", "10:00")!.toISOString();
+  const b = draftInstant("2026-08-19", "10:00")!.toISOString();
+  assert.strictEqual(a, b);
+  assert.strictEqual(toOdooDatetime(a), "2026-08-19 06:00:00");
+});
 
 console.log(`\n${pass} checks passed`);

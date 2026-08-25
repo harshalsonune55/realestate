@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { cx } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
 import { BrandLockup, BrandRow } from "./Brand";
 
 /**
@@ -53,7 +52,6 @@ export function AuthShell({
           <div className="text-fg lg:invisible">
             <BrandRow />
           </div>
-          <ThemeToggle />
         </div>
 
         <div className="flex flex-1 items-center justify-center px-6 pb-16 lg:px-14">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, ChevronLeft, ChevronRight, Landmark, Search } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { ChequeFlag, chequeFlag, enrichCheques } from "@/lib/queries";
 import { AED, cx, daysFromToday, fmtDate, relative } from "@/lib/utils";
 import { Badge, Card, ChequeStatusBadge, Empty, PageHead, Table, TD, TH } from "@/components/ui";
@@ -32,12 +32,12 @@ export default async function ChequesPage({
   const q = (sp.q ?? "").trim().toLowerCase();
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  const d = db();
+  const d = await loadData();
   const liveContractIds = new Set(
     d.contracts.filter((c) => c.status !== "rejected" && c.status !== "draft").map((c) => c.id)
   );
 
-  let rows = enrichCheques(d.cheques.filter((c) => liveContractIds.has(c.contractId)));
+  let rows = enrichCheques(d, d.cheques.filter((c) => liveContractIds.has(c.contractId)));
 
   rows = rows.filter((r) => {
     switch (flag) {
@@ -81,7 +81,7 @@ export default async function ChequesPage({
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const counts = {
-    all: enrichCheques(d.cheques.filter((c) => liveContractIds.has(c.contractId))).length,
+    all: enrichCheques(d, d.cheques.filter((c) => liveContractIds.has(c.contractId))).length,
     overdue: d.cheques.filter((c) => liveContractIds.has(c.contractId) && chequeFlag(c) === "overdue").length,
     bounced: d.cheques.filter((c) => liveContractIds.has(c.contractId) && c.status === "bounced").length,
     due_soon: d.cheques.filter((c) => liveContractIds.has(c.contractId) && chequeFlag(c) === "due_soon").length,
@@ -115,7 +115,7 @@ export default async function ChequesPage({
             href={link({ flag: t.key, page: undefined })}
             title={t.hint}
             className={cx(
-              "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
+              "inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 text-[12.5px] font-semibold transition",
               flag === t.key
                 ? "border-inverse bg-inverse text-white"
                 : t.key === "overdue" && counts.overdue > 0
@@ -147,7 +147,7 @@ export default async function ChequesPage({
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Cheque number, tenant, unit or bank…"
-              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-xl border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
           <p className="text-[12.5px] text-muted">
@@ -264,7 +264,7 @@ export default async function ChequesPage({
               <Link
                 href={link({ page: String(Math.max(1, page - 1)) })}
                 className={cx(
-                  "inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12.5px]",
+                  "inline-flex h-8 items-center gap-1 rounded-xl border border-line px-3 text-[12.5px]",
                   page === 1 ? "pointer-events-none opacity-40" : "hover:bg-subtle"
                 )}
               >
@@ -273,7 +273,7 @@ export default async function ChequesPage({
               <Link
                 href={link({ page: String(Math.min(pages, page + 1)) })}
                 className={cx(
-                  "inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12.5px]",
+                  "inline-flex h-8 items-center gap-1 rounded-xl border border-line px-3 text-[12.5px]",
                   page === pages ? "pointer-events-none opacity-40" : "hover:bg-subtle"
                 )}
               >

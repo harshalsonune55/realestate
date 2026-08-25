@@ -95,14 +95,14 @@ export default function Wizard<T>({
         </div>
         <Link
           href={exitHref}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-fg-soft transition hover:text-fg"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3.5 py-2 text-[13px] font-semibold text-fg-soft transition hover:text-fg"
         >
           <X size={14} />
           Cancel
         </Link>
       </div>
 
-      <div className="mb-5 rounded-xl border border-line bg-surface p-3">
+      <div className="mb-5 rounded-2xl border border-line bg-surface p-3.5">
         <div className="mb-2 flex items-center justify-between text-[12px]">
           <span className="font-medium text-fg">
             Step {index + 1} of {steps.length} — {step.title}
@@ -130,7 +130,7 @@ export default function Wizard<T>({
 
       <div className="grid gap-5 lg:grid-cols-[264px_1fr]">
         {/* --------------------------------------------------------- step rail */}
-        <ol className="hidden h-fit rounded-xl border border-line bg-surface p-2 lg:sticky lg:top-24 lg:block">
+        <ol className="hidden h-fit rounded-2xl border border-line bg-surface p-2 lg:sticky lg:top-24 lg:block">
           {steps.map((s, i) => {
             const done = allProblems[i].length === 0;
             const current = i === index;
@@ -142,7 +142,7 @@ export default function Wizard<T>({
                   disabled={locked}
                   onClick={() => !locked && setIndex(i)}
                   className={cx(
-                    "flex w-full items-start gap-3 rounded-lg p-2.5 text-left transition",
+                    "flex w-full items-start gap-3 rounded-xl p-2.5 text-left transition",
                     current
                       ? "bg-brand-50 ring-1 ring-inset ring-brand-200"
                       : locked
@@ -189,7 +189,7 @@ export default function Wizard<T>({
 
         {/* ------------------------------------------------------ step content */}
         <div>
-          <div className="rounded-xl border border-line bg-surface">
+          <div className="rounded-2xl border border-line bg-surface">
             <div className="border-b border-line px-5 py-4 lg:px-6">
               <div className="flex items-center gap-2">
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-inverse text-[11px] font-semibold text-white lg:hidden">
@@ -207,14 +207,14 @@ export default function Wizard<T>({
             {/* live requirement panel */}
             <div className="border-t border-line px-5 py-4 lg:px-6">
               {clean ? (
-                <div className="flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2.5 text-[12.5px] font-medium text-brand-700">
+                <div className="flex items-center gap-2 rounded-xl bg-brand-50 px-3.5 py-2.5 text-[12.5px] font-medium text-brand-700">
                   <ShieldCheck size={15} />
                   This step is complete. You can continue.
                 </div>
               ) : (
                 <div
                   className={cx(
-                    "rounded-lg border px-3 py-2.5",
+                    "rounded-xl border px-3.5 py-2.5",
                     attempted[index] ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"
                   )}
                 >
@@ -248,7 +248,7 @@ export default function Wizard<T>({
           </div>
 
           {error && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[12.5px] text-red-800">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[12.5px] text-red-800">
               {error}
             </div>
           )}
@@ -259,7 +259,7 @@ export default function Wizard<T>({
               type="button"
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
               disabled={index === 0 || pending}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-sm font-medium text-fg transition hover:bg-subtle disabled:opacity-40"
+              className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-[13.5px] font-semibold text-fg transition hover:bg-subtle disabled:opacity-40"
             >
               <ArrowLeft size={15} />
               Back
@@ -270,7 +270,7 @@ export default function Wizard<T>({
               onClick={next}
               disabled={pending || (!clean && attempted[index])}
               className={cx(
-                "inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-medium transition",
+                "inline-flex h-11 items-center gap-2 rounded-2xl px-5 text-[13.5px] font-semibold transition",
                 clean
                   ? isLast
                     ? "bg-inverse text-white shadow-xs hover:bg-inverse-2"

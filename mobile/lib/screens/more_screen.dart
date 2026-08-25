@@ -7,6 +7,12 @@ import '../models/models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
 import 'access_log_screen.dart';
+import 'maintenance_screen.dart';
+import 'messages_screen.dart';
+import 'todo_screen.dart';
+import 'properties_screen.dart';
+import 'units_screen.dart';
+import 'visits_screen.dart';
 import 'ai_chat_screen.dart';
 import 'alerts_screen.dart';
 import 'contracts_screen.dart';
@@ -160,23 +166,41 @@ class MoreScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _Row(
+                      icon: Icons.checklist_rounded,
+                      label: 'To-Do',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const TodoScreen()),
+                      ),
+                    ),
+                    _Row(
+                      icon: Icons.forum_outlined,
+                      label: 'Messages',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const MessagesScreen()),
+                      ),
+                    ),
+                    _Row(
                       icon: Icons.notifications_none,
                       label: 'Alerts',
                       trailing:
                           '${Notifications.instance.pending(store).length}',
+                      // Becomes the last row — and so loses its divider — when
+                      // the assistant below it is hidden for this role.
+                      last: !can(user.role, Perm.assistantUse),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const AlertsScreen()),
                       ),
                     ),
-                    _Row(
-                      icon: Icons.auto_awesome,
-                      label: 'Assistant',
-                      trailing: 'Ask',
-                      last: true,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const AiChatScreen()),
+                    if (can(user.role, Perm.assistantUse))
+                      _Row(
+                        icon: Icons.auto_awesome,
+                        label: 'Assistant',
+                        trailing: 'Ask',
+                        last: true,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const AiChatScreen()),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -187,6 +211,50 @@ class MoreScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
+                    if (can(user.role, Perm.contractsView))
+                      _Row(
+                        icon: Icons.location_city_outlined,
+                        label: 'Properties',
+                        trailing: '${store.properties.length}',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PropertiesScreen(),
+                          ),
+                        ),
+                      ),
+                    if (can(user.role, Perm.contractsView))
+                      _Row(
+                        icon: Icons.apartment_outlined,
+                        label: 'My Units',
+                        trailing: '${store.units.length}',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const UnitsScreen(),
+                          ),
+                        ),
+                      ),
+                    if (can(user.role, Perm.contractsView))
+                      _Row(
+                        icon: Icons.event_available_outlined,
+                        label: 'Viewings',
+                        trailing: '${store.visits.length}',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const VisitsScreen(),
+                          ),
+                        ),
+                      ),
+                    if (can(user.role, Perm.maintenanceView))
+                      _Row(
+                        icon: Icons.build_outlined,
+                        label: 'Maintenance',
+                        trailing: '${store.maintenance.length}',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MaintenanceScreen(),
+                          ),
+                        ),
+                      ),
                     if (can(user.role, Perm.contractsView))
                       _Row(
                         icon: Icons.description_outlined,
@@ -224,33 +292,6 @@ class MoreScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              SectionHeader(title: 'Appearance'),
-              AppCard(
-                child: Row(
-                  children: [
-                    Icon(Icons.dark_mode_outlined, size: 19, color: c.muted),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Dark theme',
-                        style: TextStyle(
-                          color: c.fg,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Switch(
-                      value: ThemeController.instance.mode == ThemeMode.dark,
-                      onChanged: (v) => ThemeController.instance.set(
-                        v ? ThemeMode.dark : ThemeMode.light,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -408,7 +449,7 @@ class ThemeController extends ChangeNotifier {
   ThemeController._();
   static final ThemeController instance = ThemeController._();
 
-  static const _pref = 'theme_mode_v1';
+  static const _pref = 'theme_mode_v2'; // v2: default light/white
 
   // Light by default — the company runs the app light; dark stays available
   // behind the toggle rather than following the OS setting.

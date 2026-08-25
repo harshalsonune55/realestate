@@ -11,6 +11,15 @@ import 'store.dart';
 /// [key] identifies the *state*, not the moment — it folds in the count, so a
 /// second overdue cheque produces a new key and a fresh notification while the
 /// unchanged situation stays quiet.
+
+/// Where an alert leads when tapped.
+///
+/// Alerts are aggregates — "three cheques are overdue" — so they point at the
+/// screen that lists the things, not at a single record. Naming the
+/// destination here keeps the routing beside the rule that raised the alert,
+/// rather than leaving the UI to re-derive it from the title text.
+enum AlertTarget { cheques, approvals, tasks, maintenance, renewals }
+
 @immutable
 class AlertNotice {
   const AlertNotice({
@@ -18,11 +27,13 @@ class AlertNotice {
     required this.key,
     required this.title,
     required this.body,
+    required this.target,
     this.critical = false,
   });
 
   final int id;
   final String key, title, body;
+  final AlertTarget target;
   final bool critical;
 }
 
@@ -127,6 +138,7 @@ class Notifications {
         notices.add(
           AlertNotice(
             id: 101,
+          target: AlertTarget.cheques,
             key: 'overdue:${overdue.length}',
             title: overdue.length == 1
                 ? 'A cheque is overdue'
@@ -146,6 +158,7 @@ class Notifications {
         notices.add(
           AlertNotice(
             id: 102,
+          target: AlertTarget.cheques,
             key: 'bounced:$bounced',
             title: bounced == 1
                 ? 'A cheque has bounced'
@@ -163,6 +176,7 @@ class Notifications {
         notices.add(
           AlertNotice(
             id: 103,
+          target: AlertTarget.cheques,
             key: 'duesoon:$dueSoon',
             title: '$dueSoon cheque${dueSoon > 1 ? 's' : ''} due soon',
             body: 'Falling due within the next 14 days.',
@@ -179,6 +193,7 @@ class Notifications {
         notices.add(
           AlertNotice(
             id: 104,
+          target: AlertTarget.approvals,
             key: 'approvals:$waiting',
             title: '$waiting approval${waiting > 1 ? 's' : ''} waiting on you',
             body: 'Nothing moves until these are decided.',
@@ -195,6 +210,7 @@ class Notifications {
       notices.add(
         AlertNotice(
           id: 105,
+          target: AlertTarget.tasks,
           key: 'tasks:${user.id}:$overdueTasks',
           title: '$overdueTasks of your tasks ${overdueTasks > 1 ? 'are' : 'is'} overdue',
           body: 'Open My Tasks to clear them.',

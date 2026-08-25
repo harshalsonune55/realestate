@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FilePlus2, FileSignature, Search } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, cx, daysFromToday, fmtDate } from "@/lib/utils";
 import { Card, ContractStatusBadge, Empty, LinkButton, PageHead, Table, TD, TH } from "@/components/ui";
 
@@ -31,7 +31,7 @@ export default async function ContractsPage({
   const q = (sp.q ?? "").trim().toLowerCase();
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  const d = db();
+  const d = await loadData();
   const units = new Map(d.units.map((u) => [u.id, u]));
   const props = new Map(d.properties.map((p) => [p.id, p]));
   const tenants = new Map(d.tenants.map((t) => [t.id, t]));
@@ -96,7 +96,7 @@ export default async function ContractsPage({
             key={t.key}
             href={link({ status: t.key, page: undefined })}
             className={cx(
-              "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition",
+              "inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 text-[12.5px] font-semibold transition",
               status === t.key
                 ? "border-inverse bg-inverse text-white"
                 : "border-line bg-surface text-fg-soft hover:border-line-strong"
@@ -124,7 +124,7 @@ export default async function ContractsPage({
               name="q"
               defaultValue={sp.q ?? ""}
               placeholder="Contract ref, tenant, unit or Ejari…"
-              className="h-9 w-72 rounded-lg border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="h-9 w-72 rounded-xl border border-line bg-surface pl-9 pr-3 text-[13px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </form>
           <p className="tnum text-[12.5px] text-muted">{rows.length.toLocaleString("en-US")} contracts</p>
@@ -208,13 +208,13 @@ export default async function ContractsPage({
             <div className="flex gap-2">
               <Link
                 href={link({ page: String(Math.max(1, page - 1)) })}
-                className={cx("rounded-lg border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}
+                className={cx("rounded-xl border border-line px-3 py-1.5", page === 1 && "pointer-events-none opacity-40")}
               >
                 Previous
               </Link>
               <Link
                 href={link({ page: String(Math.min(pages, page + 1)) })}
-                className={cx("rounded-lg border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}
+                className={cx("rounded-xl border border-line px-3 py-1.5", page === pages && "pointer-events-none opacity-40")}
               >
                 Next
               </Link>

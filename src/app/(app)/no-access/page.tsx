@@ -35,7 +35,7 @@ export default async function NoAccessPage({
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex h-10 items-center rounded-lg bg-brand-solid px-5 text-sm font-medium text-white transition hover:bg-brand-solid-hover"
+          className="mt-6 inline-flex h-10 items-center rounded-xl bg-brand-solid px-5 text-sm font-medium text-white transition hover:bg-brand-solid-hover"
         >
           Back to the dashboard
         </Link>

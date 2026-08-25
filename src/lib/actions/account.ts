@@ -1,16 +1,21 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { requirePerm, startSession } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { SIGNUP_ROLES } from "@/lib/rbac";
-import { db, nextId, write } from "@/lib/store";
-import { addDays, today } from "@/lib/utils";
-import type { Role, User } from "@/lib/types";
+import {
+  approveSignup, createSignup, declineSignup, findUserByEmail, findUserById,
+  listUserEmails, recordLogin,
+} from "@/lib/repos/accounts";
+import type { Role } from "@/lib/types";
 import { userStatus } from "@/lib/types";
-import { highestUserNumber, signUpProblems, type SignUpErrors } from "./account-rules";
+import { startWorkSession } from "@/lib/repos/work-sessions";
+import { signUpProblems, type SignUpErrors } from "./account-rules";
+import { syncPendingTasks } from "@/lib/actions/task-sync";
 
 /* ------------------------------------------------------------------ shapes */
 
@@ -80,7 +85,7 @@ export async function signUpAction(
 
   const errors = signUpProblems(
     { ...values, password, confirm, terms: formData.get("terms") === "on" },
-    db().users.map((u) => u.email)
+    await listUserEmails()
   );
 
   if (Object.keys(errors).length) return { errors, values };
@@ -88,48 +93,19 @@ export async function signUpAction(
   const passwordHash = await hashPassword(password);
   const now = new Date().toISOString();
 
-  const admin =
-    db().users.find((u) => u.role === "admin" && u.active) ??
-    db().users.find((u) => u.role === "manager" && u.active);
-
-  const user = write((d) => {
-    d.counters.user ??= highestUserNumber(d.users.map((u) => u.id));
-
-    const created: User = {
-      id: nextId("user", "U"),
-      name: values.name,
-      email: values.email,
-      role: "viewer", // effective role stays the lowest until an admin decides
-      requestedRole: values.role as Role,
-      title: values.title,
-      phone: values.phone || undefined,
-      active: false,
-      status: "pending",
-      passwordHash,
-      createdAt: now,
-    };
-    d.users.push(created);
-
-    if (admin) {
-      d.tasks.unshift({
-        id: nextId("task", "T"),
-        title: `Review access request — ${created.name}`,
-        detail: `${created.name} (${created.title}) requested ${values.role} access. Approve or decline in Users & roles.`,
-        assignedTo: admin.id,
-        dueDate: addDays(today(), 1),
-        status: "open",
-        priority: "high",
-        entityType: "user",
-        entityId: created.id,
-        createdAt: now,
-        source: "system",
-      });
-    }
-
-    return created;
+  // The effective role stays the lowest until an administrator decides; the
+  // requested one is recorded alongside as a note for whoever reviews it.
+  const user = await createSignup({
+    name: values.name,
+    email: values.email,
+    phone: values.phone,
+    title: values.title,
+    requestedRole: values.role as Role,
+    passwordHash,
+    now,
   });
 
-  logAudit(
+  await logAudit(
     user,
     "user.signup_requested",
     "user",
@@ -137,6 +113,7 @@ export async function signUpAction(
     `Requested ${values.role} access as ${user.title}`
   );
 
+  await syncPendingTasks();
   revalidatePath("/", "layout");
   redirect(`/signup/submitted?email=${encodeURIComponent(user.email)}`);
 }
@@ -159,7 +136,7 @@ export async function signInAction(
       email,
     };
 
-  const user = db().users.find((u) => u.email.toLowerCase() === email);
+  const user = await findUserByEmail(email);
 
   // Verifying against a throwaway hash when the account does not exist keeps the
   // response time the same either way, so the form cannot be used to discover
@@ -187,13 +164,13 @@ export async function signInAction(
     return { error: "This account has been disabled. Contact your administrator.", email };
 
   g.__pmsAttempts!.delete(email);
-  write((d) => {
-    const u = d.users.find((x) => x.id === user.id)!;
-    u.lastLoginAt = new Date().toISOString();
-  });
+  const at = new Date().toISOString();
+  await recordLogin(user.id, at);
+  // Opens the work span. Sign-in is the one moment we know for certain.
+  await startWorkSession(user.id, at, (await headers()).get("user-agent") ?? undefined);
 
   await startSession(user.id);
-  redirect("/");
+  redirect("/dashboard");
 }
 
 /* ---------------------------------------------------------------- approval */
@@ -203,29 +180,18 @@ export async function approveSignupAction(formData: FormData) {
   const id = str(formData, "userId");
   const role = str(formData, "role") as Role;
 
-  const target = db().users.find((u) => u.id === id);
+  const target = await findUserById(id);
   if (!target || userStatus(target) !== "pending") return;
   if (!SIGNUP_ROLES.includes(role)) return;
 
-  write((d) => {
-    const u = d.users.find((x) => x.id === id)!;
-    u.role = role;
-    u.active = true;
-    u.status = "active";
-    u.approvedBy = actor.id;
-    u.approvedAt = new Date().toISOString();
-    const t = d.tasks.find((x) => x.entityType === "user" && x.entityId === id && x.status !== "done");
-    if (t) {
-      t.status = "done";
-      t.completedAt = new Date().toISOString();
-    }
-  });
+  await approveSignup(id, role, actor.id, new Date().toISOString());
 
-  logAudit(actor, "user.approved", "user", id, `Approved ${target.name} as ${role}`, [
+  await logAudit(actor, "user.approved", "user", id, `Approved ${target.name} as ${role}`, [
     { field: "status", from: "pending", to: "active" },
     { field: "role", from: target.requestedRole ?? "—", to: role },
   ]);
 
+  await syncPendingTasks();
   revalidatePath("/", "layout");
 }
 
@@ -234,24 +200,12 @@ export async function declineSignupAction(formData: FormData) {
   const id = str(formData, "userId");
   const reason = str(formData, "reason");
 
-  const target = db().users.find((u) => u.id === id);
+  const target = await findUserById(id);
   if (!target || userStatus(target) !== "pending") return;
 
-  write((d) => {
-    const u = d.users.find((x) => x.id === id)!;
-    u.status = "suspended";
-    u.active = false;
-    u.declinedBy = actor.id;
-    u.declinedAt = new Date().toISOString();
-    u.declineReason = reason || undefined;
-    const t = d.tasks.find((x) => x.entityType === "user" && x.entityId === id && x.status !== "done");
-    if (t) {
-      t.status = "done";
-      t.completedAt = new Date().toISOString();
-    }
-  });
+  await declineSignup(id, actor.id, reason, new Date().toISOString());
 
-  logAudit(
+  await logAudit(
     actor,
     "user.declined",
     "user",
@@ -259,5 +213,6 @@ export async function declineSignupAction(formData: FormData) {
     `Declined access for ${target.name}${reason ? ` — ${reason}` : ""}`
   );
 
+  await syncPendingTasks();
   revalidatePath("/", "layout");
 }

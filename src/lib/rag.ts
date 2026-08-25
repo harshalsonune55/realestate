@@ -1,8 +1,7 @@
 import "server-only";
-import { db } from "./store";
 import { can } from "./rbac";
 import { AED, fmtDate } from "./utils";
-import type { User } from "./types";
+import type { DB, User } from "./types";
 
 /**
  * Retrieval over the operational records, feeding the assistant.
@@ -51,8 +50,7 @@ function tokenise(s: string): string[] {
  * only reach the model when the question already named that tenant, and the
  * asker holds `tenants.view`.
  */
-export function corpus(user: User): Doc[] {
-  const d = db();
+export function corpus(d: DB, user: User): Doc[] {
   const docs: Doc[] = [];
 
   const unitOf = (id: string) => d.units.find((u) => u.id === id);
@@ -220,8 +218,8 @@ export function retrieve(docs: Doc[], query: string, topK = 12): Retrieved[] {
 }
 
 /** Formats retrieved records for the prompt, or empty string if nothing hit. */
-export function retrievedBlock(user: User, query: string, topK = 12): string {
-  const hits = retrieve(corpus(user), query, topK);
+export function retrievedBlock(d: DB, user: User, query: string, topK = 12): string {
+  const hits = retrieve(corpus(d, user), query, topK);
   if (hits.length === 0) return "";
   return (
     `\n## Records matching this question\n` +

@@ -151,6 +151,10 @@ export interface Cheque {
   bounceReason?: string;
   replacedByChequeId?: string;
   heldReason?: string;
+  /** Draft `account.payment` id in Odoo, once the mirror has landed. */
+  odooPaymentId?: number;
+  odooSyncedAt?: string;
+  odooError?: string;
 }
 
 export type PaymentMethod = "cheque" | "cash" | "bank_transfer" | "card";
@@ -166,6 +170,10 @@ export interface Payment {
   receivedAt: string;
   receivedBy: string;
   reference: string;
+  /** Draft `account.payment` id in Odoo, once the mirror has landed. */
+  odooPaymentId?: number;
+  odooSyncedAt?: string;
+  odooError?: string;
 }
 
 export type MaintenanceStatus =
@@ -240,6 +248,11 @@ export interface Task {
   createdAt: string;
   completedAt?: string;
   source: "system" | "manual";
+  /** `mail.activity` id in Odoo, once the follow-up mirror has landed. */
+  odooTaskId?: number;
+  odooSyncedAt?: string;
+  /** Why the last push failed. Present means Odoo is behind, not the task. */
+  odooError?: string;
 }
 
 export interface AuditEntry {
@@ -255,6 +268,56 @@ export interface AuditEntry {
   ip: string;
 }
 
+
+export type VisitStatus = "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show";
+export type VisitOutcome = "" | "interested" | "not_interested" | "offer_made";
+
+/** A property viewing: a person, a unit, and a slot in the diary. */
+export interface Visit {
+  id: string;
+  ref: string;
+  propertyId: string;
+  unitId: string;
+  /** Set when the visitor is already a tenant on file. */
+  tenantId?: string;
+  visitorName: string;
+  visitorPhone: string;
+  visitorEmail?: string;
+  /** UTC instant. The form collects Gulf wall-clock time and converts. */
+  startsAt: string;
+  durationMins: number;
+  status: VisitStatus;
+  outcome: VisitOutcome;
+  notes: string;
+  bookedBy: string;
+  createdAt: string;
+  /** `calendar.event` id in Odoo, once the mirror has landed. */
+  odooEventId?: number;
+  odooSyncedAt?: string;
+  /** Why the last push failed. Present means the calendar is behind. */
+  odooError?: string;
+}
+
+/**
+ * A span of time an employee had the app open.
+ *
+ * `lastSeenAt` is what makes the figure honest. Closing a tab never signs
+ * anybody out, so a span measured to its sign-out would run until the cookie
+ * expired; measured to its last heartbeat, it stops when the person actually
+ * stopped. `endedReason` keeps the two apart, because only a deliberate sign
+ * out is a real end time — an idle span merely ran out of evidence.
+ */
+export interface WorkSession {
+  id: string;
+  userId: string;
+  startedAt: string;
+  lastSeenAt: string;
+  /** Absent while the span is still open. */
+  endedAt?: string;
+  endedReason?: "signed_out" | "idle";
+  userAgent?: string;
+}
+
 export interface DB {
   users: User[];
   properties: Property[];
@@ -267,5 +330,9 @@ export interface DB {
   approvals: Approval[];
   tasks: Task[];
   audit: AuditEntry[];
+  /** Optional: files written before viewings existed have no such key. */
+  visits?: Visit[];
+  /** Optional: files written before time tracking existed have no such key. */
+  workSessions?: WorkSession[];
   counters: Record<string, number>;
 }

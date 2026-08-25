@@ -56,9 +56,15 @@ class _AlManaraAppState extends State<AlManaraApp> with WidgetsBindingObserver {
           title: 'Aber Group PMS',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: ThemeController.instance.mode,
+          themeMode: ThemeMode.light, // light only — dark mode removed
           initialRoute: '/',
+          // Force 24-hour time across the app (time pickers and TimeOfDay
+          // formatting), so it matches the web and Odoo.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(alwaysUse24HourFormat: true),
+            child: child ?? const SizedBox.shrink(),
+          ),
           routes: {
             '/': (_) => const SplashScreen(next: '/login'),
             '/login': (_) => const LoginScreen(),

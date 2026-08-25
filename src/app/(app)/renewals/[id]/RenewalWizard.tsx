@@ -111,7 +111,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
           )}
 
           {ctx.openMaintenance.length > 0 ? (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
               <p className="mb-1.5 text-[12.5px] font-semibold text-amber-900">
                 {ctx.openMaintenance.length} open maintenance job(s) on this unit
               </p>
@@ -213,17 +213,17 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
         return (
           <>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-line bg-subtle p-3">
+              <div className="rounded-xl border border-line bg-subtle p-3">
                 <p className="text-[11px] uppercase tracking-wide text-muted">Current rent</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(ctx.currentRent)}</p>
+                <p className="tnum mt-1 text-[19px] font-bold text-fg">{AED(ctx.currentRent)}</p>
               </div>
-              <div className="rounded-lg border border-line bg-subtle p-3">
+              <div className="rounded-xl border border-line bg-subtle p-3">
                 <p className="text-[11px] uppercase tracking-wide text-muted">Policy ceiling (+5%)</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(maxRent)}</p>
+                <p className="tnum mt-1 text-[19px] font-bold text-fg">{AED(maxRent)}</p>
               </div>
-              <div className="rounded-lg border border-line bg-subtle p-3">
+              <div className="rounded-xl border border-line bg-subtle p-3">
                 <p className="text-[11px] uppercase tracking-wide text-muted">Market rent</p>
-                <p className="tnum mt-1 text-[18px] font-semibold text-fg">{AED(ctx.marketRent)}</p>
+                <p className="tnum mt-1 text-[19px] font-bold text-fg">{AED(ctx.marketRent)}</p>
               </div>
             </div>
 
@@ -328,7 +328,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
                 <button
                   type="button"
                   onClick={() => set({ cheques: buildSchedule(data.chequeCount, data.newRent, data.startDate, data.cheques) })}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-[13px] font-medium hover:bg-subtle"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-[13px] font-medium hover:bg-subtle"
                 >
                   <Wand2 size={15} className="text-brand-600" /> Recalculate
                 </button>
@@ -408,7 +408,7 @@ export default function RenewalWizard({ ctx }: { ctx: RenewalContext }) {
 
             <div
               className={cx(
-                "flex items-center justify-between rounded-lg border px-4 py-3",
+                "flex items-center justify-between rounded-xl border px-4 py-3",
                 diff === 0 && data.cheques.length ? "border-brand-200 bg-brand-50" : "border-amber-200 bg-amber-50"
               )}
             >

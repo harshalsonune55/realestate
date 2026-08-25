@@ -2,7 +2,7 @@
 
 import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { AED, fmtDate } from "@/lib/utils";
 
 export type SearchKind = "property" | "unit" | "tenant" | "contract" | "cheque";
@@ -51,7 +51,7 @@ export async function searchAction(query: string): Promise<SearchHit[]> {
   const needle = query.trim().toLowerCase();
   if (needle.length < MIN_QUERY) return [];
 
-  const d = db();
+  const d = await loadData();
   const hits: SearchHit[] = [];
 
   const propertyName = (id: string) => d.properties.find((p) => p.id === id)?.name ?? "";

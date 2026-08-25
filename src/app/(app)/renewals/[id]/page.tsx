@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { addDays, daysFromToday } from "@/lib/utils";
 import RenewalWizard, { RenewalContext } from "./RenewalWizard";
 
@@ -10,7 +10,7 @@ export default async function RenewalPage({ params }: { params: Promise<{ id: st
   await requirePerm("renewals.process");
   const { id } = await params;
 
-  const d = db();
+  const d = await loadData();
   const contract = d.contracts.find((c) => c.id === id);
   if (!contract) notFound();
   if (contract.status !== "active" && contract.status !== "expiring") redirect(`/contracts/${id}`);

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cx } from "@/lib/utils";
 
 /**
@@ -7,12 +8,30 @@ import { cx } from "@/lib/utils";
  * tracking so the letters interlock the way they do in the printed mark.
  */
 
+/* The drawn AG. Back at its original steps — this is the mark the app chrome
+   has always carried, and it is sized to sit under a wordmark, not to lead. */
 const MONOGRAM_SIZE = {
   sm: "h-7",
   md: "h-10",
   lg: "h-16",
 } as const;
 
+/* The photographed roundel. Its own scale: it carries a black field of its own,
+   so it needs more room than the drawn glyphs to read as a mark. */
+const LOGO_SIZE = {
+  sm: "h-8",
+  md: "h-12",
+  lg: "h-28",
+} as const;
+
+/**
+ * The drawn AG, for the app's own chrome.
+ *
+ * Letters rather than artwork, so it inherits `currentColor` and sits on any
+ * background the sidebar happens to have. Kept alongside [LogoMark] rather
+ * than replaced by it: the roundel is the front-door mark, this is the one
+ * that lives inside the product.
+ */
 export function Monogram({
   size = "md",
   className,
@@ -39,6 +58,33 @@ export function Monogram({
         AG
       </text>
     </svg>
+  );
+}
+
+/**
+ * The Aber Group roundel — the real artwork.
+ *
+ * Used on the way in (sign-in, sign-up, the access gate) and nowhere else. It
+ * carries its own black field, so unlike [Monogram] it is not tinted by the
+ * surrounding text colour.
+ */
+export function LogoMark({
+  size = "md",
+  className,
+}: {
+  size?: keyof typeof LOGO_SIZE;
+  className?: string;
+}) {
+  return (
+    <Image
+      src="/brand/aber-logo.png"
+      alt="Aber Group"
+      width={368}
+      height={362}
+      // Above the fold on every sign-in, so it is not deferred.
+      priority
+      className={cx("w-auto rounded-full object-contain", LOGO_SIZE[size], className)}
+    />
   );
 }
 
@@ -81,7 +127,7 @@ export function BrandLockup({
 }) {
   return (
     <div className={cx("flex flex-col items-center", className)}>
-      <Monogram size={size} />
+      <LogoMark size={size} />
       <Wordmark size={size} muted={muted} className={size === "lg" ? "mt-6" : "mt-3.5"} />
     </div>
   );
@@ -91,7 +137,7 @@ export function BrandLockup({
 export function BrandRow({ className }: { className?: string }) {
   return (
     <div className={cx("flex items-center gap-3", className)}>
-      <Monogram size="sm" />
+      <LogoMark size="sm" />
       <span className="h-7 w-px bg-current opacity-20" />
       <div>
         <p className="font-serif text-[12.5px] font-medium tracking-[0.3em]">ABER GROUP</p>

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { requirePerm } from "@/lib/auth";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import BounceWizard from "./BounceWizard";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export default async function BouncePage({ params }: { params: Promise<{ id: str
   await requirePerm("cheques.bounce");
   const { id } = await params;
 
-  const d = db();
+  const d = await loadData();
   const cheque = d.cheques.find((c) => c.id === id);
   if (!cheque) notFound();
   if (cheque.status !== "deposited") redirect(`/cheques/${id}`);

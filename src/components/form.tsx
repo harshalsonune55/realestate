@@ -20,7 +20,7 @@ export function Field({
 }) {
   return (
     <label className={cx("block", className)}>
-      <span className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-fg">
+      <span className="mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-fg">
         {label}
         {required && <span className="text-red-500">*</span>}
       </span>
@@ -34,8 +34,11 @@ export function Field({
   );
 }
 
+/* Softer corners and a touch more room, so a form sits in the same family as
+   the dashboard's cards and pill controls rather than looking like a sharper,
+   older screen bolted onto it. */
 const baseInput =
-  "w-full rounded-lg border bg-surface px-3 py-2 text-[13.5px] text-fg shadow-xs transition " +
+  "w-full rounded-xl border bg-surface px-3.5 py-2.5 text-[13.5px] text-fg shadow-xs transition " +
   "placeholder:text-faint focus:outline-none focus-visible:outline-none " +
   "focus:ring-[3px] focus:ring-brand-500/20";
 
@@ -125,7 +128,7 @@ export function CheckItem({
       disabled={disabled || !!locked}
       onClick={() => onChange(!checked)}
       className={cx(
-        "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition",
+        "flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition",
         locked
           ? "cursor-not-allowed border-line bg-subtle"
           : checked
@@ -170,7 +173,7 @@ export function RadioCards<T extends string>({
           type="button"
           onClick={() => onChange(o.value)}
           className={cx(
-            "flex items-start gap-3 rounded-xl border p-3.5 text-left transition",
+            "flex items-start gap-3 rounded-2xl border p-4 text-left transition",
             value === o.value
               ? "border-brand-500 bg-brand-50/70 ring-1 ring-brand-500"
               : "border-line bg-surface hover:border-brand-300"
@@ -179,7 +182,7 @@ export function RadioCards<T extends string>({
           {o.icon && (
             <span
               className={cx(
-                "grid h-9 w-9 shrink-0 place-items-center rounded-lg",
+                "grid h-9 w-9 shrink-0 place-items-center rounded-full",
                 value === o.value ? "bg-brand-solid text-white" : "bg-subtle text-muted"
               )}
             >
@@ -214,7 +217,7 @@ export function Note({
     good: "border-brand-200 bg-brand-50 text-brand-900",
   }[tone];
   return (
-    <div className={cx("flex gap-2.5 rounded-lg border p-3 text-[12.5px] leading-relaxed", styles)}>
+    <div className={cx("flex gap-2.5 rounded-xl border p-3.5 text-[12.5px] leading-relaxed", styles)}>
       <Info size={15} className="mt-0.5 shrink-0 opacity-70" />
       <div>
         {title && <p className="mb-0.5 font-semibold">{title}</p>}

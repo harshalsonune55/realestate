@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../data/ai.dart';
+import '../data/conversations.dart';
 import '../data/store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
+import '../widgets/markdown_text.dart';
 
 /// Chat with Grok about the company, briefed from the store and scoped to the
 /// signed-in employee's role.
@@ -21,6 +23,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   bool _sending = false;
   String? _error;
 
+  /// Saved chats, newest first, and which one is open.
+  List<Conversation> _chats = [];
+  String? _activeId;
+
   static const _starters = [
     'What needs my attention today?',
     'How is occupancy across the portfolio?',
@@ -37,17 +43,260 @@ class _AiChatScreenState extends State<AiChatScreen> {
   Future<void> _restore() async {
     await Ai.instance.load();
     final user = Store.instance.currentUser;
-    final saved = user == null
-        ? <ChatMessage>[]
-        : await Ai.instance.loadHistory(user.id);
+    if (user == null) return;
+
+    final chats = await Conversations.load(user.id);
+
+    // A build before this one kept a single unnamed thread. Carry it in as the
+    // first conversation rather than dropping it on upgrade.
+    final legacy = await Ai.instance.loadHistory(user.id);
+    if (chats.isEmpty && legacy.isNotEmpty) {
+      chats.add(Conversation(
+        id: Conversations.newId(),
+        title: Conversations.titleFrom(legacy.first.text),
+        messages: legacy,
+        updatedAt: DateTime.now(),
+      ));
+      await Conversations.save(user.id, chats);
+      await Ai.instance.clearHistory(user.id);
+    }
+
     if (!mounted) return;
-    setState(() => _history.addAll(saved));
-    if (saved.isNotEmpty) _toBottom();
+    setState(() {
+      _chats = chats;
+      _activeId = chats.isEmpty ? null : chats.first.id;
+      _history
+        ..clear()
+        ..addAll(chats.isEmpty ? const <ChatMessage>[] : chats.first.messages);
+    });
+    if (_history.isNotEmpty) _toBottom();
   }
 
+  /// Writes the open thread back into its conversation, creating one on the
+  /// first message so a chat is never lost for want of a name.
   void _persist() {
     final user = Store.instance.currentUser;
-    if (user != null) Ai.instance.saveHistory(user.id, _history);
+    if (user == null || _history.isEmpty) return;
+
+    final id = _activeId ?? Conversations.newId();
+    final existing = _chats.indexWhere((c) => c.id == id);
+    final title = existing >= 0
+        ? _chats[existing].title
+        : Conversations.titleFrom(_history.first.text);
+
+    final chat = Conversation(
+      id: id,
+      title: title,
+      messages: List.of(_history),
+      updatedAt: DateTime.now(),
+    );
+
+    _activeId = id;
+    if (existing >= 0) {
+      _chats[existing] = chat;
+    } else {
+      _chats.insert(0, chat);
+    }
+    _chats.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    Conversations.save(user.id, _chats);
+  }
+
+  void _openChat(Conversation chat) {
+    setState(() {
+      _activeId = chat.id;
+      _history
+        ..clear()
+        ..addAll(chat.messages);
+      _error = null;
+    });
+    _toBottom();
+  }
+
+  void _newChat() {
+    setState(() {
+      _activeId = null;
+      _history.clear();
+      _error = null;
+    });
+  }
+
+  Future<void> _deleteChat(Conversation chat) async {
+    final user = Store.instance.currentUser;
+    setState(() {
+      _chats.removeWhere((c) => c.id == chat.id);
+      if (chat.id == _activeId) {
+        // Land on the next most recent rather than on nothing.
+        _activeId = _chats.isEmpty ? null : _chats.first.id;
+        _history
+          ..clear()
+          ..addAll(_chats.isEmpty ? const <ChatMessage>[] : _chats.first.messages);
+      }
+    });
+    if (user != null) await Conversations.save(user.id, _chats);
+  }
+
+  Future<void> _renameChat(Conversation chat) async {
+    final controller = TextEditingController(text: chat.title);
+    final c = context.c;
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        backgroundColor: c.surface,
+        title: Text('Rename chat', style: TextStyle(color: c.fg, fontSize: 17)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: TextStyle(color: c.fg),
+          decoration: const InputDecoration(hintText: 'Chat name'),
+          onSubmitted: (v) => Navigator.of(dialog).pop(v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    final clean = name?.trim() ?? '';
+    // An empty box means "leave it alone", not "call this chat nothing".
+    if (clean.isEmpty) return;
+
+    final user = Store.instance.currentUser;
+    setState(() {
+      final i = _chats.indexWhere((x) => x.id == chat.id);
+      if (i >= 0) _chats[i].title = clean.length > 60 ? clean.substring(0, 60) : clean;
+    });
+    if (user != null) await Conversations.save(user.id, _chats);
+  }
+
+  /// The saved-chat list, as a sheet — a phone has no room for a rail.
+  Future<void> _showHistory() async {
+    final c = context.c;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: c.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheet) => StatefulBuilder(
+        builder: (sheet2, setSheet) => SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: c.line,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Text('Saved chats',
+                          style: TextStyle(
+                              color: c.fg,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700)),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheet).pop();
+                          _newChat();
+                        },
+                        icon: const Icon(Icons.add, size: 17),
+                        label: const Text('New'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (_chats.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 26),
+                    child: Text(
+                      'Chats you have are saved here. They stay on this phone.',
+                      style: TextStyle(color: c.faint, fontSize: 13),
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _chats.length,
+                      itemBuilder: (_, i) {
+                        final chat = _chats[i];
+                        return ListTile(
+                          selected: chat.id == _activeId,
+                          selectedTileColor: c.subtle,
+                          title: Text(
+                            chat.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: c.fg,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${chat.messages.length} messages · '
+                            '${Conversations.when(chat.updatedAt)}',
+                            style: TextStyle(color: c.faint, fontSize: 11.5),
+                          ),
+                          onTap: () {
+                            Navigator.of(sheet).pop();
+                            _openChat(chat);
+                          },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: 'Rename',
+                                icon: Icon(Icons.edit_outlined,
+                                    size: 18, color: c.muted),
+                                onPressed: () async {
+                                  Navigator.of(sheet).pop();
+                                  await _renameChat(chat);
+                                },
+                              ),
+                              IconButton(
+                                tooltip: 'Delete',
+                                icon: Icon(Icons.delete_outline,
+                                    size: 18, color: c.muted),
+                                onPressed: () async {
+                                  await _deleteChat(chat);
+                                  setSheet(() {});
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -111,18 +360,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
         title: const Text('Assistant'),
         backgroundColor: c.surface,
         actions: [
+          IconButton(
+            tooltip: 'Saved chats',
+            icon: const Icon(Icons.history, size: 20),
+            onPressed: _showHistory,
+          ),
           if (_history.isNotEmpty)
             IconButton(
-              tooltip: 'Clear conversation',
-              icon: const Icon(Icons.delete_outline, size: 20),
-              onPressed: () {
-                final user = Store.instance.currentUser;
-                if (user != null) Ai.instance.clearHistory(user.id);
-                setState(() {
-                  _history.clear();
-                  _error = null;
-                });
-              },
+              tooltip: 'New chat',
+              icon: const Icon(Icons.add_comment_outlined, size: 19),
+              onPressed: _newChat,
             ),
           IconButton(
             tooltip: 'Assistant settings',
@@ -371,14 +618,22 @@ class _Bubble extends StatelessWidget {
           ),
           border: mine ? null : Border.all(color: c.line),
         ),
-        child: SelectableText(
-          message.text,
-          style: TextStyle(
-            color: mine ? Colors.white : c.fgSoft,
-            fontSize: 13.5,
-            height: 1.5,
-          ),
-        ),
+        // The reply is rendered; what the person typed is not — their own
+        // asterisks are theirs and should come back as they wrote them.
+        child: mine
+            ? SelectableText(
+                message.text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.5,
+                  height: 1.5,
+                ),
+              )
+            : MarkdownText(
+                text: message.text,
+                color: c.fgSoft,
+                strongColor: c.fg,
+              ),
       ),
     );
   }

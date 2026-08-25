@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Clock, Mail } from "lucide-react";
 import { AuthHeading, AuthShell } from "@/components/AuthShell";
-import { db } from "@/lib/store";
+import { primaryAdmin } from "@/lib/repos/accounts";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ export default async function SubmittedPage({
   searchParams: Promise<{ email?: string }>;
 }) {
   const { email } = await searchParams;
-  const admin = db().users.find((u) => u.role === "admin" && u.active);
+  const admin = await primaryAdmin();
 
   return (
     <AuthShell>

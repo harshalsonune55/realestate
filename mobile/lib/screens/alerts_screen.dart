@@ -4,6 +4,11 @@ import '../data/notifications.dart';
 import '../data/store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
+import 'contracts_screen.dart';
+import 'maintenance_screen.dart';
+import 'tasks_screen.dart';
+import 'approvals_screen.dart';
+import 'cheques_screen.dart';
 
 /// In-app view of the same conditions that raise notifications.
 ///
@@ -96,13 +101,34 @@ class _AlertCard extends StatelessWidget {
   const _AlertCard({required this.notice});
   final AlertNotice notice;
 
+  /// The screen this alert is about. An alert that names a problem and then
+  /// cannot take you to it is a dead end.
+  void _open(BuildContext context) {
+    final route = switch (notice.target) {
+      AlertTarget.cheques => MaterialPageRoute<void>(
+          builder: (_) => const ChequesScreen()),
+      AlertTarget.approvals => MaterialPageRoute<void>(
+          builder: (_) => const ApprovalsScreen()),
+      AlertTarget.tasks => MaterialPageRoute<void>(
+          builder: (_) => const TasksScreen()),
+      AlertTarget.maintenance => MaterialPageRoute<void>(
+          builder: (_) => const MaintenanceScreen()),
+      AlertTarget.renewals => MaterialPageRoute<void>(
+          builder: (_) => const ContractsScreen()),
+    };
+    Navigator.of(context).push(route);
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final tone = notice.critical ? Tone.bad : Tone.warn;
     final t = toneColors(context, tone);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _open(context),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: t.bg,
@@ -145,7 +171,10 @@ class _AlertCard extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 6),
+          Icon(Icons.chevron_right, size: 18, color: t.fg.withValues(alpha: 0.6)),
         ],
+      ),
       ),
     );
   }

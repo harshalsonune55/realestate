@@ -88,7 +88,7 @@ function Request({ user }: { user: User }) {
           <input
             name="reason"
             placeholder="Reason (recorded in the audit log)"
-            className="h-9 min-w-[240px] flex-1 rounded-lg border border-line bg-surface px-3 text-[13px] text-fg placeholder:text-faint focus:border-red-300 focus:outline-none"
+            className="h-9 min-w-[240px] flex-1 rounded-xl border border-line bg-surface px-3 text-[13px] text-fg placeholder:text-faint focus:border-red-300 focus:outline-none"
           />
           <Button type="submit" variant="danger" size="sm">
             Decline request

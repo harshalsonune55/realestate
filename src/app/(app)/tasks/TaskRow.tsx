@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Check, Loader2, Lock, UserPlus } from "lucide-react";
-import { completeTaskAction, reassignTaskAction } from "@/lib/actions/tasks";
+import { completeTaskAction, reassignTaskAction, retryTaskSyncAction } from "@/lib/actions/tasks";
 import { Badge } from "@/components/ui";
+import { celebrate } from "@/components/SuccessCelebration";
+import RetrySyncButton from "@/components/RetrySyncButton";
 import { Input, Select } from "@/components/form";
 import { cx, fmtDate, relative } from "@/lib/utils";
 
@@ -22,6 +24,9 @@ export interface TaskView {
   mine: boolean;
   guided: boolean;
   href: string | null;
+  odooSynced: boolean;
+  odooError?: string;
+  canRetrySync: boolean;
 }
 
 export default function TaskRow({
@@ -70,14 +75,22 @@ export default function TaskRow({
               Due {fmtDate(task.dueDate)} · {relative(task.dueDate)}
             </span>
             <span className="text-[11.5px] text-faint">· {task.assignedToName}</span>
+            <Badge tone={task.odooSynced ? "good" : "warn"} dot>
+              {task.odooSynced ? "Odoo: synced" : "Odoo: not synced"}
+            </Badge>
           </div>
+          {!task.odooSynced && task.canRetrySync ? (
+            <div className="mt-2">
+              <RetrySyncButton action={retryTaskSyncAction.bind(null, task.id)} label="Retry Odoo sync" />
+            </div>
+          ) : null}
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {task.href && (
             <Link
               href={task.href}
-              className="inline-flex h-8 items-center gap-1 rounded-lg bg-brand-solid px-3 text-[12px] font-medium text-white transition hover:bg-brand-solid-hover"
+              className="inline-flex h-8 items-center gap-1 rounded-xl bg-brand-solid px-3 text-[12px] font-medium text-white transition hover:bg-brand-solid-hover"
             >
               {task.guided ? "Open procedure" : "Open"}
               <ArrowRight size={13} />
@@ -86,7 +99,7 @@ export default function TaskRow({
           {!done && task.mine && !task.guided && (
             <button
               onClick={() => setOpen((o) => !o)}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-3 text-[12px] font-medium text-fg-soft hover:text-fg"
+              className="inline-flex h-8 items-center gap-1 rounded-xl border border-line px-3 text-[12px] font-medium text-fg-soft hover:text-fg"
             >
               <Check size={13} /> Close
             </button>
@@ -94,7 +107,7 @@ export default function TaskRow({
           {!done && task.guided && (
             <span
               title="This task closes itself when you finish the guided procedure"
-              className="inline-flex h-8 items-center gap-1 rounded-lg bg-subtle px-3 text-[11.5px] text-muted"
+              className="inline-flex h-8 items-center gap-1 rounded-xl bg-subtle px-3 text-[11.5px] text-muted"
             >
               <Lock size={12} /> Auto-closes
             </span>
@@ -102,7 +115,7 @@ export default function TaskRow({
           {canReassign && !done && (
             <button
               onClick={() => setReassigning((r) => !r)}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-2.5 text-[12px] text-muted hover:text-fg"
+              className="inline-flex h-8 items-center gap-1 rounded-xl border border-line px-2.5 text-[12px] text-muted hover:text-fg"
             >
               <UserPlus size={13} />
             </button>
@@ -111,7 +124,7 @@ export default function TaskRow({
       </div>
 
       {open && (
-        <div className="mt-3 space-y-2 rounded-lg bg-subtle p-3">
+        <div className="mt-3 space-y-2 rounded-xl bg-subtle p-3">
           <p className="text-[12px] font-medium text-fg">
             What did you do? This note is stored with your name.
           </p>
@@ -128,12 +141,13 @@ export default function TaskRow({
                   const res = await completeTaskAction(task.id, note);
                   setMsg(res.message);
                   if (res.ok) {
+        celebrate();
                     setOpen(false);
                     router.refresh();
                   }
                 })
               }
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand-solid px-3 text-[12.5px] font-medium text-white disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-brand-solid px-3 text-[12.5px] font-medium text-white disabled:opacity-60"
             >
               {pending && <Loader2 size={13} className="animate-spin" />} Close task
             </button>
@@ -145,7 +159,7 @@ export default function TaskRow({
       )}
 
       {reassigning && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-subtle p-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-subtle p-3">
           <span className="text-[12px] font-medium text-fg">Reassign to</span>
           <div className="w-56">
             <Select
@@ -156,6 +170,7 @@ export default function TaskRow({
                   const res = await reassignTaskAction(task.id, e.target.value);
                   setMsg(res.message);
                   if (res.ok) {
+        celebrate();
                     setReassigning(false);
                     router.refresh();
                   }

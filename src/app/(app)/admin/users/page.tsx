@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { Check, Minus, ShieldCheck, UserCog, UserPlus } from "lucide-react";
 import { requirePerm } from "@/lib/auth";
 import { ROLE_LABEL, ROLE_PERMS, can } from "@/lib/rbac";
-import { db } from "@/lib/store";
+import { loadData } from "@/lib/data";
 import { cx, titleCase } from "@/lib/utils";
 import { Badge, Card, PageHead, Table, TD, TH } from "@/components/ui";
 import { userStatus, type Role } from "@/lib/types";
@@ -52,7 +52,7 @@ const PERM_GROUPS: { title: string; perms: { key: Parameters<typeof can>[1]; lab
 
 export default async function UsersPage() {
   await requirePerm("admin.users");
-  const d = db();
+  const d = await loadData();
   const pending = d.users.filter((u) => userStatus(u) === "pending");
 
   return (
@@ -66,7 +66,7 @@ export default async function UsersPage() {
         <Card className="mb-5 border-amber-200" padded={false}>
           <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
             <div>
-              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+              <h2 className="flex items-center gap-2 text-[17px] font-bold text-fg">
                 <UserPlus size={17} className="text-amber-700" /> Access requests
               </h2>
               <p className="mt-0.5 text-[12.5px] text-muted">
@@ -84,7 +84,7 @@ export default async function UsersPage() {
 
       <Card className="mb-5" padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+          <h2 className="flex items-center gap-2 text-[17px] font-bold text-fg">
             <UserCog size={17} className="text-brand-600" /> Employees
           </h2>
         </div>
@@ -135,7 +135,7 @@ export default async function UsersPage() {
 
       <Card padded={false}>
         <div className="border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+          <h2 className="flex items-center gap-2 text-[17px] font-bold text-fg">
             <ShieldCheck size={17} className="text-brand-600" /> Permission matrix
           </h2>
           <p className="mt-0.5 text-[12.5px] text-muted">

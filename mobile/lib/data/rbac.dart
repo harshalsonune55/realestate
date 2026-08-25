@@ -21,6 +21,10 @@ enum Perm {
   tasksView,
   reportsView,
   auditView,
+  /// Manager and above. The assistant answers across the whole portfolio, and
+  /// for admins across the staff too — wider than any single screen a junior
+  /// role can open, so it carries its own permission.
+  assistantUse,
   adminUsers,
 }
 

@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/models.dart';
+import 'api_config.dart';
+import 'pms_api.dart';
 import 'ai_key.dart';
 import 'rbac.dart';
 import 'store.dart';
@@ -46,14 +48,29 @@ class Ai {
   static const _defined = String.fromEnvironment('AI_API_KEY');
 
   static const _modelPref = 'ai_model_v1';
-  static const defaultModel = 'llama-3.3-70b-versatile';
+
+  /// Groq retired `llama-3.3-70b-versatile`, and every request against it now
+  /// comes back 404 — which reads in the app as "the assistant is broken"
+  /// rather than as a model that no longer exists.
+  static const defaultModel = 'openai/gpt-oss-120b';
+
+  /// Ids that used to be the default and no longer resolve. A phone that has
+  /// already stored one in preferences would otherwise keep using it forever,
+  /// because the stored value wins over the default.
+  static const _retired = {'llama-3.3-70b-versatile', 'llama-3.1-70b-versatile'};
 
   String? _model;
 
   Future<void> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _model = prefs.getString(_modelPref);
+      final stored = prefs.getString(_modelPref);
+      // Drop a stored id that has since been retired, so the upgrade heals
+      // itself instead of needing the app's data cleared.
+      _model = (stored != null && _retired.contains(stored)) ? null : stored;
+      if (_model == null && stored != null) {
+        await prefs.remove(_modelPref);
+      }
     } catch (_) {
       // No prefs plugin (widget tests) — the default model still applies.
     }
@@ -288,6 +305,30 @@ class Ai {
     required Store store,
     required List<ChatMessage> history,
   }) async {
+    /* The PMS backend answers first when there is one. Its briefing is built
+       from the real repository — the whole database, gated by the caller's
+       role — whereas the fallback below can only describe the demo store this
+       device generated for itself. Same assistant as the web, same answers. */
+    final user = store.currentUser;
+    if (ApiConfig.configured && user != null) {
+      try {
+        final reply = await PmsApi.ask(
+          userId: user.id,
+          messages: [
+            for (final m in history) {'role': m.role, 'content': m.text},
+          ],
+        );
+        if (reply != null && reply.text.isNotEmpty) return reply.text;
+      } on AssistantApiException catch (e) {
+        // A deliberate refusal is the answer. Only a transport failure earns
+        // the on-device fallback; retrying a 403 locally would hand the user
+        // an assistant their role is not allowed.
+        if (e.refused) throw AiException(e.message);
+      } catch (_) {
+        // Unreachable backend — fall through and answer from the device.
+      }
+    }
+
     if (!configured) {
       throw const AiException(
         'This build shipped without an API key. Fill in '
@@ -339,9 +380,18 @@ class Ai {
     if (choices == null || choices.isEmpty) {
       throw const AiException('The assistant returned an empty reply.');
     }
-    final message = (choices.first as Map<String, dynamic>)['message'];
-    return ((message as Map<String, dynamic>)['content'] as String?)?.trim() ??
+    final message = choices.first as Map<String, dynamic>;
+    final content =
+        ((message['message'] as Map<String, dynamic>?)?['content'] as String?)
+            ?.trim() ??
         '';
+    // Reasoning models put their working-out in a separate field and can come
+    // back with empty content. Returning '' here painted a blank bubble that
+    // looked like the app had silently failed; say so instead.
+    if (content.isEmpty) {
+      throw const AiException('The assistant returned an empty reply.');
+    }
+    return content;
   }
 }
 
