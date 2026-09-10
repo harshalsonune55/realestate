@@ -56,6 +56,9 @@ PMS_DATA_DIR=/opt/pms-app/data
 PMS_ACCESS_PASSWORD=$PMS_ACCESS_PASSWORD
 
 # Server-side only; proxied by /api/assistant, never sent to the browser.
+# ASSISTANT_PROVIDER pins "openai" or "groq" (src/lib/llm.ts).
+ASSISTANT_PROVIDER=$ASSISTANT_PROVIDER
+OPENAI_API_KEY=$OPENAI_API_KEY
 GROQ_API_KEY=$GROQ_API_KEY
 GROQ_MODEL=$GROQ_MODEL
 CONF

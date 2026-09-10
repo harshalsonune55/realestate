@@ -68,15 +68,17 @@ is not configured", the branch that fires when nothing is pinned at all.
 | `ODOO_DB` | `almanara` (the Odoo database; `almanara_pms` is this app's own) |
 | `ODOO_USERNAME` | from `deploy/server.env` |
 | `ODOO_API_KEY` | from `deploy/server.env` |
-| `ASSISTANT_PROVIDER` | `groq` — pinned so a missing key fails loudly instead of silently using OpenAI |
-| `GROQ_API_KEY` | from `deploy/server.env` |
+| `ASSISTANT_PROVIDER` | `openai` — pinned so a missing key fails loudly instead of silently using the other provider |
+| `OPENAI_API_KEY` | from `deploy/server.env` |
+| `GROQ_API_KEY` | from `deploy/server.env` — the fallback if `ASSISTANT_PROVIDER` is switched back to `groq` |
 | `PMS_API_TOKEN` | must equal `ApiConfig.token` in `mobile/lib/data/api_config.dart` |
 | `PMS_ACCESS_PASSWORD` | the same value the AWS instance uses, so staff have one password |
 
 Or with the CLI, from the site directory (`netlify env:set` defaults to all
 scopes, which includes Functions):
 
-    netlify env:set ASSISTANT_PROVIDER groq
+    netlify env:set ASSISTANT_PROVIDER openai
+    netlify env:set OPENAI_API_KEY "<key from deploy/server.env>"
     netlify env:set ODOO_URL http://16.170.201.73
     netlify env:set ODOO_DB almanara
     netlify env:set DATABASE_SSL true

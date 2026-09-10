@@ -85,11 +85,13 @@ services:
         sync: false
 
       # --------------------------------------------------------- assistant --
-      # Pinned to groq: the OpenAI key is valid but the account has no credit,
-      # and a pinned provider whose key is missing fails loudly rather than
-      # silently using the other one.
+      # Pinned to openai (funded key added 2026-09-10); GROQ_API_KEY stays as
+      # the one-word fallback. A pinned provider whose key is missing fails
+      # loudly rather than silently using the other one.
       - key: ASSISTANT_PROVIDER
-        value: groq
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
       - key: GROQ_API_KEY
         sync: false
 
